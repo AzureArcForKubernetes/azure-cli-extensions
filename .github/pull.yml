@@ -1,8 +1,8 @@
-version: 1
+version: "1"
 rules:
   - base: master
-    upstream: Azure:master
+    upstream: "Azure:master"
     mergeMethod: hardreset
   - base: release
-    upstream: Azure:master
+    upstream: "Azure:master"
     mergeMethod: hardreset
