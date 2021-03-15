@@ -58,7 +58,7 @@ class ContainerInsights(PartnerExtensionModel):
         _get_container_insights_settings(cmd, resource_group_name, cluster_name, configuration_settings,
                                          configuration_protected_settings, is_ci_extension_type)
 
-        # NOTE-2: Return a valid ExtensionInstanceForCreate object, Instance name and flag for Identity
+        # NOTE-2: Return a valid ExtensionInstance object, Instance name and flag for Identity
         create_identity = True
         extension_instance = ExtensionInstance(
             extension_type=extension_type,
