@@ -3,24 +3,6 @@
 Release History
 ===============
 
-0.1.0
-++++++++++++++++++
-* Initial release.
-
-0.1.1
-++++++++++++++++++
-* Add support for microsoft-azure-defender extension type
-
-0.1.2
-++++++++++++++++++
-
-* Add support for Arc Appliance cluster type
-
-0.1.3
-++++++++++++++++++
-
-* Customization for microsoft.openservicemesh
-
 0.2.0
 ++++++++++++++++++
 
@@ -33,3 +15,21 @@ Release History
 * Rename azuremonitor-containers extension type to microsoft.azuremonitor.containers
 * Move CLI errors to non-deprecated error types
 * Remove support for update
+
+0.1.3
+++++++++++++++++++
+
+* Customization for microsoft.openservicemesh
+
+0.1.2
+++++++++++++++++++
+
+* Add support for Arc Appliance cluster type
+
+0.1.1
+++++++++++++++++++
+* Add support for microsoft-azure-defender extension type
+
+0.1.0
+++++++++++++++++++
+* Initial release.
