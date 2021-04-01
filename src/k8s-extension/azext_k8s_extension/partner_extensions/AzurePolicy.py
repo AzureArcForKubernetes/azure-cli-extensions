@@ -24,7 +24,7 @@ class AzurePolicy(PartnerExtensionModel):
                configuration_settings_file, configuration_protected_settings_file):
 
         """ExtensionType 'Microsoft.PolicyInsights' specific validations & defaults for Create
-           Must create and return a valid 'ExtensionInstanceForCreate' object.
+           Must create and return a valid 'ExtensionInstance' object.
 
         """
 
