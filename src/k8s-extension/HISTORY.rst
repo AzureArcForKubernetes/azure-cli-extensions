@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
+++++++++++++++++++
+* Add support for microsoft.policyinsights extension type
+
 0.2.0
 ++++++++++++++++++
 

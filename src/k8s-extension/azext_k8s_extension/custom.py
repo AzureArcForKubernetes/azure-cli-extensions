@@ -22,6 +22,7 @@ from azext_k8s_extension.partner_extensions.AzureDefender import AzureDefender
 from azext_k8s_extension.partner_extensions.Cassandra import Cassandra
 from azext_k8s_extension.partner_extensions.OpenServiceMesh import OpenServiceMesh
 from azext_k8s_extension.partner_extensions.AzureMLKubernetes import AzureMLKubernetes
+from azext_k8s_extension.partner_extensions.AzurePolicy import AzurePolicy
 from azext_k8s_extension.partner_extensions.DefaultExtension import DefaultExtension
 import azext_k8s_extension._consts as consts
 
@@ -37,7 +38,8 @@ def ExtensionFactory(extension_name):
         'microsoft.azuredefender.kubernetes': AzureDefender,
         'microsoft.openservicemesh': OpenServiceMesh,
         'microsoft.azureml.kubernetes': AzureMLKubernetes,
-        'cassandradatacentersoperator': Cassandra
+        'cassandradatacentersoperator': Cassandra,
+        'microsoft.policyinsights': AzurePolicy
     }
 
     # Return the extension if we find it in the map, else return the default
