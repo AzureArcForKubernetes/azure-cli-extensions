@@ -55,8 +55,6 @@ class AzurePolicy(PartnerExtensionModel):
             scope=ext_scope,
             configuration_settings=configuration_settings,
             configuration_protected_settings=configuration_protected_settings,
-            identity=None,
-            location=""
         )
         return extension_instance, name, create_identity
 
