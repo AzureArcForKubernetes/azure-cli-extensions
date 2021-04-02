@@ -38,6 +38,7 @@ stages:
     steps:
       - checkout: self
       - checkout: K8sPartnerExtensionTest
+        persistCredentials: true
       - bash: |
           echo "Installing helm3"
           curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
