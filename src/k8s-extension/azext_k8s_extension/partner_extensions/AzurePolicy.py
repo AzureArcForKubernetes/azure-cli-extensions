@@ -17,6 +17,7 @@ from azext_k8s_extension.partner_extensions.PartnerExtensionModel import Partner
 
 logger = get_logger(__name__)
 
+
 class AzurePolicy(PartnerExtensionModel):
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, extension_type,
                scope, auto_upgrade_minor_version, release_train, version, target_namespace,
@@ -34,7 +35,7 @@ class AzurePolicy(PartnerExtensionModel):
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
         logger.warning('Ignoring scope parameters since %s '
                        'only supports cluster scope', extension_type)
-        
+
         # If release-train is not provided, set it to 'preview'
         valid_release_trains = ['preview', 'dev']
         if release_train is None:
