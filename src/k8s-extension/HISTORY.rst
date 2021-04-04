@@ -7,6 +7,12 @@ Release History
 ++++++++++++++++++
 * Add support for microsoft.policyinsights extension type
 
+0.2.1
+++++++++++++++++++
+
+* Remove `k8s-extension update` until PATCH is supported
+* Improved logging for overwriting extension name with default 
+
 0.2.0
 ++++++++++++++++++
 
