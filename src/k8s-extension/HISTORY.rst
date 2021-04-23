@@ -2,10 +2,11 @@
 
 Release History
 ===============
-0.2.2
+
+0.3.0
 ++++++++++++++++++
 
-* Customization for microsoft.azureml.kubernetes
+* Release customization for microsoft.azureml.kubernetes
 
 0.2.1
 ++++++++++++++++++
