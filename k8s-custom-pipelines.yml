@@ -14,7 +14,7 @@ stages:
 - stage: BuildTestPublishExtension
   displayName: "Build, Test, and Publish Extension"
   variables:
-    TEST_PATH: $(Agent.BuildDirectory)/s/tests
+    TEST_PATH: $(Agent.BuildDirectory)/s/testing
     CLI_REPO_PATH: $(Agent.BuildDirectory)/s
     SUBSCRIPTION_ID: "15c06b1b-01d6-407b-bb21-740b8617dea3"
     RESOURCE_GROUP: "K8sPartnerExtensionTest"
