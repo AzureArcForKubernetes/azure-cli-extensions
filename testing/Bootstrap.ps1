@@ -24,7 +24,7 @@ if (!$SkipInstall) {
         Exit 1
     }
     Write-Host "Installing connectedk8s version $connectedk8sVersion..."
-    az extension add --source ./bin/connectedk8s-$connectedk8sVersion-py3-none-any.whl --debug
+    az extension add --source ./bin/connectedk8s-$connectedk8sVersion-py3-none-any.whl
     if (!$?) {
         Write-Host "Unable to find connectedk8s version $connectedk8sVersion, exiting..."
         exit 1
