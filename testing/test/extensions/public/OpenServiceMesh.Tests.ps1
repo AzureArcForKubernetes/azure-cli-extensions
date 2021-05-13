@@ -3,13 +3,14 @@ Describe 'Azure OpenServiceMesh Testing' {
         $extensionType = "microsoft.openservicemesh"
         $extensionName = "openservicemesh"
         $extensionAgentNamespace = "azuredefender"
+        $releaseTrain = "pilot"
         
         . $PSScriptRoot/../../helper/Constants.ps1
         . $PSScriptRoot/../../helper/Helper.ps1
     }
 
     It 'Creates the extension and checks that it onboards correctly' {
-        $output = az $Env:K8sExtensionName create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName
+        $output = az $Env:K8sExtensionName create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName --release-train $releaseTrain
         $? | Should -BeTrue
 
         $output = az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
