@@ -27,7 +27,7 @@ Describe 'AzureML Kubernetes Testing' {
             if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
                 break
             }
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 20
             $n += 1
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
@@ -64,7 +64,7 @@ Describe 'AzureML Kubernetes Testing' {
                     break
                 }
             }
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 20
             $n += 1
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
@@ -118,7 +118,7 @@ Describe 'AzureML Kubernetes Testing' {
             if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
                 break
             }
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 20
             $n += 1
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
