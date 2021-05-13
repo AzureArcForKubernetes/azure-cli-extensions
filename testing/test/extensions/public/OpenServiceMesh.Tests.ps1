@@ -2,7 +2,9 @@ Describe 'Azure OpenServiceMesh Testing' {
     BeforeAll {
         $extensionType = "microsoft.openservicemesh"
         $extensionName = "openservicemesh"
-        $extensionAgentNamespace = "azuredefender"
+        $extensionVersion = "0.8.3"
+        $extensionAgentName = "osm-controller"
+        $extensionAgentNamespace = "arc-osm-system"
         $releaseTrain = "pilot"
         
         . $PSScriptRoot/../../helper/Constants.ps1
@@ -10,22 +12,23 @@ Describe 'Azure OpenServiceMesh Testing' {
     }
 
     It 'Creates the extension and checks that it onboards correctly' {
-        $output = az $Env:K8sExtensionName create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName --release-train $releaseTrain
+        $output = az $Env:K8sExtensionName create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName --release-train $releaseTrain --version $extensionVersion
         $? | Should -BeTrue
 
         $output = az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         $? | Should -BeTrue
 
         $isAutoUpgradeMinorVersion = ($output | ConvertFrom-Json).autoUpgradeMinorVersion 
-        $isAutoUpgradeMinorVersion.ToString() -eq "True" | Should -BeTrue
+        $isAutoUpgradeMinorVersion.ToString() -eq "False" | Should -BeTrue
 
         # Loop and retry until the extension installs
         $n = 0
         do 
         {
-            # Only check the extension config, not the pod since this doesn't bring up pods
             if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
-                break
+                if (Get-PodStatus $extensionAgentName -Namespace $extensionAgentNamespace -eq $POD_RUNNING) {
+                    break
+                }
             }
             Start-Sleep -Seconds 10
             $n += 1
