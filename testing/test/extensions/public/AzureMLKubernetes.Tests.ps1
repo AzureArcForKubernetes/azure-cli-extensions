@@ -102,7 +102,7 @@ Describe 'AzureML Kubernetes Testing' {
     }
 
     It 'Creates the extension and checks that it onboards correctly with inference enabled' {
-        $output = az k8s-extension create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType --name $extensionName --release-train staging --config enableInference=true
+        $output = az k8s-extension create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType --name $extensionName --release-train staging --config enableInference=true identity.proxy.remoteEnabled=True identity.proxy.remoteHost=https://master.experiments.azureml-test.net allowInsecureConnections=True clusterPurpose=test
         $? | Should -BeTrue
 
         $output = az k8s-extension show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --name $extensionName
