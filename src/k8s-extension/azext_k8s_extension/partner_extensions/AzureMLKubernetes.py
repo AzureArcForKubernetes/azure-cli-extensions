@@ -79,7 +79,8 @@ class AzureMLKubernetes(PartnerExtensionModel):
         self.sslCertPemFile = 'sslCertPemFile'
         self.allowInsecureConnections = 'allowInsecureConnections'
         self.privateEndpointILB = 'privateEndpointILB'
-        self.privateEndpointNodeport  = 'privateEndpointNodeport'
+        self.privateEndpointNodeport = 'privateEndpointNodeport'
+        self.inferenceLoadBalancerHA = 'inferenceLoadBalancerHA'
 
         # reference mapping
         self.reference_mapping = {
@@ -198,12 +199,12 @@ class AzureMLKubernetes(PartnerExtensionModel):
 
     def __validate_scoring_fe_settings(self, configuration_settings, configuration_protected_settings):
         experimentalCluster = _get_value_from_config_protected_config(
-            'inferenceLoadBalancerHA', configuration_settings, configuration_protected_settings)
-        experimentalCluster = str(experimentalCluster).lower() == 'true'
-        if experimentalCluster:
-            configuration_settings['clusterPurpose'] = 'DevTest'
-        else:
+            self.inferenceLoadBalancerHA, configuration_settings, configuration_protected_settings)
+        notExperimentalCluster = str(experimentalCluster).lower() == 'true'
+        if notExperimentalCluster:
             configuration_settings['clusterPurpose'] = 'FastProd'
+        else:
+            configuration_settings['clusterPurpose'] = 'DevTest'
         feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
         feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
         allowInsecureConnections = _get_value_from_config_protected_config(
@@ -231,7 +232,6 @@ class AzureMLKubernetes(PartnerExtensionModel):
             configuration_settings['scoringFe.serviceType.internalLoadBalancer'] = feIsInternalLoadBalancer
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
-            
 
     def __set_up_inference_ssl(self, configuration_settings, configuration_protected_settings):
         allowInsecureConnections = _get_value_from_config_protected_config(
