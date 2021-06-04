@@ -232,7 +232,7 @@ class AzureMLKubernetes(PartnerExtensionModel):
         if feIsNodePort and feIsInternalLoadBalancer:
             raise MutuallyExclusiveArgumentError(
                 "Specify either privateEndpointNodeport=true or privateEndpointILB=true, but not both.")
-        if feIsNodePort:
+        elif feIsNodePort:
             configuration_settings['scoringFe.serviceType.nodePort'] = feIsNodePort
         elif feIsInternalLoadBalancer:
             configuration_settings['scoringFe.serviceType.internalLoadBalancer'] = feIsInternalLoadBalancer
