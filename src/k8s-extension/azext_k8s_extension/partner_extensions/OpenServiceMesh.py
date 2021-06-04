@@ -8,18 +8,10 @@
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.log import get_logger
 
-from ..vendored_sdks.models import ExtensionInstance
-from ..vendored_sdks.models import ExtensionInstanceUpdate
-from ..vendored_sdks.models import ScopeCluster
-from ..vendored_sdks.models import Scope
-
 from .PartnerExtensionModel import PartnerExtensionModel
 
 from msrestazure.azure_exceptions import CloudError
-from azext_k8s_extension.vendored_sdks.models import ExtensionInstance
-from azext_k8s_extension.vendored_sdks.models import ExtensionInstanceUpdate
-from azext_k8s_extension.vendored_sdks.models import ScopeCluster
-from azext_k8s_extension.vendored_sdks.models import Scope
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from pyhelm.chartbuilder import ChartBuilder
@@ -30,6 +22,11 @@ from azext_k8s_extension.partner_extensions.PartnerExtensionModel import Partner
 from azext_k8s_extension.partner_extensions.ContainerInsights import _get_container_insights_settings
 
 from .._client_factory import cf_resources
+
+from ..vendored_sdks.models import ExtensionInstance
+from ..vendored_sdks.models import ExtensionInstanceUpdate
+from ..vendored_sdks.models import ScopeCluster
+from ..vendored_sdks.models import Scope
 
 logger = get_logger(__name__)
 
@@ -112,6 +109,7 @@ class OpenServiceMesh(PartnerExtensionModel):
             release_train=release_train,
             version=version
         )
+
 
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
 
