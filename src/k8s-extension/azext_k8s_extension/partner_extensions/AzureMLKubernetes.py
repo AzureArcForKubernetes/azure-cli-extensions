@@ -20,7 +20,7 @@ import azure.mgmt.storage
 import azure.mgmt.storage.models
 import azure.mgmt.loganalytics
 import azure.mgmt.loganalytics.models
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.mgmt.resource.locks.models import ManagementLockObject
 from knack.log import get_logger
@@ -224,7 +224,7 @@ class AzureMLKubernetes(PartnerExtensionModel):
         feIsInternalLoadBalancer = str(feIsInternalLoadBalancer).lower() == 'true'
 
         if feIsNodePort and feIsInternalLoadBalancer:
-            raise InvalidArgumentValueError(
+            raise MutuallyExclusiveArgumentError(
                 "Specify either privateEndpointNodeport=true or privateEndpointILB=true, but not both.")
         elif feIsNodePort:
             configuration_settings['scoringFe.serviceType.nodePort'] = feIsNodePort
