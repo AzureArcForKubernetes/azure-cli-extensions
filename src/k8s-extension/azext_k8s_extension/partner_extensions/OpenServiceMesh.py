@@ -8,8 +8,6 @@
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.log import get_logger
 
-from .PartnerExtensionModel import PartnerExtensionModel
-
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -19,14 +17,12 @@ from packaging import version
 import yaml
 
 from azext_k8s_extension.partner_extensions.PartnerExtensionModel import PartnerExtensionModel
-from azext_k8s_extension.partner_extensions.ContainerInsights import _get_container_insights_settings
+
+from .PartnerExtensionModel import PartnerExtensionModel
+
+from ..vendored_sdks.models import ExtensionInstance, ExtensionInstanceUpdate, ScopeCluster, Scope
 
 from .._client_factory import cf_resources
-
-from ..vendored_sdks.models import ExtensionInstance
-from ..vendored_sdks.models import ExtensionInstanceUpdate
-from ..vendored_sdks.models import ScopeCluster
-from ..vendored_sdks.models import Scope
 
 logger = get_logger(__name__)
 
@@ -114,8 +110,9 @@ class OpenServiceMesh(PartnerExtensionModel):
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
 
     if version.parse(str(extension_version)) <= version.parse("0.8.3"):
-        logger.warning(f'\"testedDistros\" field unavailable for version {extension_version} of osm-arc, '
-            'cannot determine if this kubernetes distribution has been tested for osm-arc')
+        logger.warning('\"testedDistros\" field unavailable for version %s of osm-arc, '
+                       'cannot determine if this kubernetes distribution has been tested '
+                       'for osm-arc', extension_version)
         return
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -131,25 +128,26 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
 
     if cluster_distro == "general":
         logger.warning('kubernetes distribution is \"general\", cannot determine if this kubernetes '
-            'distribution has been tested for osm-arc')
+                       'distribution has been tested for osm-arc')
         return
 
     tested_distros = _get_tested_distros(extension_version)
 
     if tested_distros is None:
-        logger.warning(f'\"testedDistros\" field unavailable for version {extension_version} of osm-arc, '
-            'cannot determine if this kubernetes distribution has been tested for osm-arc')
+        logger.warning('\"testedDistros\" field unavailable for version %s of osm-arc, '
+                       'cannot determine if this kubernetes distribution has been tested '
+                       'for osm-arc', extension_version)
     elif cluster_distro in tested_distros.split():
-        logger.warning(f'{cluster_distro} is a tested kubernetes distribution for osm-arc')
+        logger.warning('%s is a tested kubernetes distribution for osm-arc', cluster_distro)
     else:
-        logger.warning(f'{cluster_distro} is not a tested kubernetes distribution for osm-arc')
+        logger.warning('%s is not a tested kubernetes distribution for osm-arc', cluster_distro)
 
 
-def _get_tested_distros(version):
+def _get_tested_distros(chart_version):
 
     chart_arc = ChartBuilder({
         "name": "osm-arc",
-        "version": str(version),
+        "version": str(chart_version),
         "source": {
             "type": "repo",
             "location": "https://azure.github.io/osm-azure"
