@@ -198,10 +198,10 @@ class AzureMLKubernetes(PartnerExtensionModel):
         configuration_protected_settings.pop(self.ENABLE_INFERENCE, None)
 
     def __validate_scoring_fe_settings(self, configuration_settings, configuration_protected_settings):
-        experimentalCluster = _get_value_from_config_protected_config(
+        isProdCluster = _get_value_from_config_protected_config(
             self.inferenceLoadBalancerHA, configuration_settings, configuration_protected_settings)
-        notExperimentalCluster = str(experimentalCluster).lower() == 'true'
-        if notExperimentalCluster:
+        isProdCluster = str(isProdCluster).lower() == 'true'
+        if isProdCluster:
             configuration_settings['clusterPurpose'] = 'FastProd'
         else:
             configuration_settings['clusterPurpose'] = 'DevTest'
