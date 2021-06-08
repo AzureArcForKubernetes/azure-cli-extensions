@@ -198,13 +198,13 @@ class AzureMLKubernetes(PartnerExtensionModel):
         configuration_protected_settings.pop(self.ENABLE_INFERENCE, None)
 
     def __validate_scoring_fe_settings(self, configuration_settings, configuration_protected_settings):
-        isProdCluster = _get_value_from_config_protected_config(
+        isTestCluster = _get_value_from_config_protected_config(
             self.inferenceLoadBalancerHA, configuration_settings, configuration_protected_settings)
-        isProdCluster = str(isProdCluster).lower() == 'true'
-        if isProdCluster:
-            configuration_settings['clusterPurpose'] = 'FastProd'
-        else:
+        isTestCluster = str(isTestCluster).lower() == 'false'
+        if isTestCluster:
             configuration_settings['clusterPurpose'] = 'DevTest'
+        else:
+            configuration_settings['clusterPurpose'] = 'FastProd'
         feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
         feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
         allowInsecureConnections = _get_value_from_config_protected_config(
