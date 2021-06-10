@@ -5,12 +5,13 @@
 
 # pylint: disable=unused-argument
 
-from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from knack.log import get_logger
 
+from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_subscription_id
 
 from pyhelm.chartbuilder import ChartBuilder
+from pyhelm.repo import VersionError
 from packaging import version
 import yaml
 
@@ -115,7 +116,7 @@ class OpenServiceMesh(PartnerExtensionModel):
 
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
 
-    field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of Microsoft.openservicemesh, ' \
+    field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
         'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
 
     if version.parse(str(extension_version)) <= version.parse("0.8.3"):
@@ -132,7 +133,7 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
     cluster_distro = resource.properties['distribution'].lower()
 
     if cluster_distro == "general":
-        logger.warning('Unable to determine if distro has been tested for Microsoft.openservicemesh, '
+        logger.warning('Unable to determine if distro has been tested for microsoft.openservicemesh, '
                        'kubernetes distro: \"general\"')
         return
 
@@ -140,23 +141,27 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
 
     if tested_distros is None:
         logger.warning(field_unavailable_error)
-    elif cluster_distro in tested_distros.split():
-        logger.warning('%s is a tested kubernetes distribution for Microsoft.openservicemesh', cluster_distro)
-    else:
-        logger.warning('Untested kubernetes distro for Microsoft.openservicemesh, Kubernetes distro is %s',
+    elif cluster_distro not in tested_distros.split():
+        logger.warning('Untested kubernetes distro for microsoft.openservicemesh, Kubernetes distro is %s',
                        cluster_distro)
 
 
 def _get_tested_distros(chart_version):
 
-    chart_arc = ChartBuilder({
-        "name": OpenServiceMesh.CHART_NAME,
-        "version": str(chart_version),
-        "source": {
-            "type": "repo",
-            "location": OpenServiceMesh.CHART_LOCATION
-        }
-    })
+    try: 
+        chart_arc = ChartBuilder({
+            "name": OpenServiceMesh.CHART_NAME,
+            "version": str(chart_version),
+            "source": {
+                "type": "repo",
+                "location": OpenServiceMesh.CHART_LOCATION
+            }
+        })
+    except VersionError:
+        raise InvalidArgumentValueError(
+            "Invalid version '{}' for microsoft.openservicemesh".format(chart_version)
+        )
+
     values = chart_arc.get_values()
     values_yaml = yaml.load(values.raw, Loader=yaml.FullLoader)
 
