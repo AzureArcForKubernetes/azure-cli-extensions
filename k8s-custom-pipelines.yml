@@ -221,6 +221,8 @@ stages:
 - stage: AzureCLIOfficial
   displayName: "Azure Official CLI Code Checks"
   dependsOn: []
+  variables:
+    EXTENSION_NAME: "k8s-extension"
   jobs:
   - job: CheckLicenseHeader
     displayName: "Check License"
@@ -266,6 +268,34 @@ stages:
         displayName: 'Install wheel, pylint, flake8, requests'
       - bash: python scripts/ci/source_code_static_analysis.py
         displayName: "Static Analysis"
+
+  - job: Pylinting
+    displayName: "Running linting on extension"
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.9'
+      inputs:
+        versionSpec: 3.9
+    - bash: |
+        set -ev
+
+        # prepare and activate virtualenv
+        python -m venv env/
+
+        chmod +x ./env/bin/activate
+        source ./env/bin/activate
+
+        pip install --upgrade pip
+        pip install -q azdev
+
+        azdev setup -r ./ -e $(EXTENSION_NAME)
+
+        azdev --version
+        az --version
+
+        azdev style $(EXTENSION_NAME)
 
   - job: IndexVerify
     displayName: "Verify Extensions Index"
