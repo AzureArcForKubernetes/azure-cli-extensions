@@ -24,7 +24,7 @@ Describe 'AzureML Kubernetes Testing' {
         $n = 0
         do 
         {
-            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+            if (Has-ExtensionData $extensionName) {
                 break
             }
             Start-Sleep -Seconds 20
@@ -120,7 +120,7 @@ Describe 'AzureML Kubernetes Testing' {
         $n = 0
         do 
         {
-            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+            if (Has-ExtensionData $extensionName) {
                 break
             }
             Start-Sleep -Seconds 20
@@ -167,7 +167,7 @@ Describe 'AzureML Kubernetes Testing' {
         $n = 0
         do 
         {
-            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+            if (Has-ExtensionData $extensionName) {
                 break
             }
             Start-Sleep -Seconds 20
