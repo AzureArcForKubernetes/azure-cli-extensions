@@ -31,7 +31,6 @@ from ..vendored_sdks.models import (
 
 from .._client_factory import cf_resources
 
-
 logger = get_logger(__name__)
 
 
