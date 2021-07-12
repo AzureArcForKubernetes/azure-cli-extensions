@@ -16,6 +16,7 @@ from pyhelm.chartbuilder import ChartBuilder
 from pyhelm.repo import VersionError
 from packaging import version
 import yaml
+import requests
 
 from ..partner_extensions import PartnerExtensionModel
 
@@ -30,7 +31,6 @@ from ..vendored_sdks.models import (
 
 from .._client_factory import cf_resources
 
-import requests
 
 logger = get_logger(__name__)
 
@@ -136,8 +136,9 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
 
 def _get_tested_distros(chart_version):
 
-    chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/v{0}/charts/osm-arc/values.yaml'.format(chart_version)
-    chart_request = requests.get(url = chart_url)
+    chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/' \
+        'v{0}/charts/osm-arc/values.yaml'.format(chart_version)
+    chart_request = requests.get(url=chart_url)
 
     values_yaml = yaml.load(chart_request.text, Loader=yaml.FullLoader)
 
