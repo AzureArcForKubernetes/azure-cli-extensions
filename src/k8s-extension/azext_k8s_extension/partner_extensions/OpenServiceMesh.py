@@ -30,12 +30,12 @@ from ..vendored_sdks.models import (
 
 from .._client_factory import cf_resources
 
+import requests
+
 logger = get_logger(__name__)
 
 
 class OpenServiceMesh(PartnerExtensionModel):
-    CHART_NAME = "osm-arc"
-    CHART_LOCATION = "https://azure.github.io/osm-azure"
 
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, extension_type,
                scope, auto_upgrade_minor_version, release_train, version, target_namespace,
@@ -103,7 +103,6 @@ class OpenServiceMesh(PartnerExtensionModel):
             version=version
         )
 
-
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
 
     field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
@@ -135,25 +134,12 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
         logger.warning('Untested kubernetes distro for microsoft.openservicemesh, Kubernetes distro is %s',
                        cluster_distro)
 
-
 def _get_tested_distros(chart_version):
 
-    try:
-        chart_arc = ChartBuilder({
-            "name": OpenServiceMesh.CHART_NAME,
-            "version": str(chart_version),
-            "source": {
-                "type": "repo",
-                "location": OpenServiceMesh.CHART_LOCATION
-            }
-        })
-    except VersionError:
-        raise InvalidArgumentValueError(
-            "Invalid version '{}' for microsoft.openservicemesh".format(chart_version)
-        )
+    chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/v{0}/charts/osm-arc/values.yaml'.format(chart_version)
+    chart_request = requests.get(url = chart_url)
 
-    values = chart_arc.get_values()
-    values_yaml = yaml.load(values.raw, Loader=yaml.FullLoader)
+    values_yaml = yaml.load(chart_request.text, Loader=yaml.FullLoader)
 
     try:
         return values_yaml['OpenServiceMesh']['testedDistros']
