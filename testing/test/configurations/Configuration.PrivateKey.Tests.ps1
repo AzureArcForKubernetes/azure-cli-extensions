@@ -27,6 +27,7 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
 
     It 'Creates a configuration with each type of ssh private key' {
         foreach($configData in $CONFIG_ARR) {
+            Write-Host "Creating a configuration of type $($configData.Item1)"
             az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --operator-namespace $configData.Item1 --ssh-private-key-file $configData.Item2
             $? | Should -BeTrue
         }
