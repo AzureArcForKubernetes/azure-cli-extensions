@@ -139,6 +139,11 @@ def _get_tested_distros(chart_version):
         'v{0}/charts/osm-arc/values.yaml'.format(chart_version)
     chart_request = requests.get(url=chart_url)
 
+    if chart_request.status_code == 404:
+        raise InvalidArgumentValueError(
+            "Invalid version '{}' for microsoft.openservicemesh".format(chart_version)
+        )
+
     values_yaml = yaml.load(chart_request.text, Loader=yaml.FullLoader)
 
     try:
