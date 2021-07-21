@@ -12,8 +12,6 @@ from knack.log import get_logger
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError
 from azure.cli.core.commands.client_factory import get_subscription_id
 
-from pyhelm.chartbuilder import ChartBuilder
-from pyhelm.repo import VersionError
 from packaging import version
 import yaml
 import requests
@@ -102,6 +100,7 @@ class OpenServiceMesh(PartnerExtensionModel):
             version=version
         )
 
+
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
 
     field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
@@ -132,6 +131,7 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
     elif cluster_distro not in tested_distros.split():
         logger.warning('Untested kubernetes distro for microsoft.openservicemesh, Kubernetes distro is %s',
                        cluster_distro)
+
 
 def _get_tested_distros(chart_version):
 
