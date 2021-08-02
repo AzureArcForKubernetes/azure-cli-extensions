@@ -219,7 +219,7 @@ class AzureMLKubernetes(PartnerExtensionModel):
         isAKSMigration = str(isAKSMigration).lower() == 'true'
         if isAKSMigration:
             configuration_settings['scoringFe.namespace'] = "default"
-            configuration_settings['scoringFe.release-name'] = "scoring-fe-migration"
+            configuration_settings[self.IS_AKS_MIGRATION] = "true"
         feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
         feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
         allowInsecureConnections = _get_value_from_config_protected_config(
