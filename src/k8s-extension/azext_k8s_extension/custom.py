@@ -17,7 +17,7 @@ from ._validators import validate_cc_registration
 
 from .partner_extensions.ContainerInsights import ContainerInsights
 from .partner_extensions.AzureDefender import AzureDefender
-from .partner_extensions.Cassandra import Cassandra
+from .partner_extensions.DefaultExtensionWithIdentity import DefaultExtensionWithIdentity
 from .partner_extensions.AzureMLKubernetes import AzureMLKubernetes
 from .partner_extensions.OpenServiceMesh import OpenServiceMesh
 from .partner_extensions.DefaultExtension import DefaultExtension
@@ -35,7 +35,7 @@ def ExtensionFactory(extension_name):
         'microsoft.azuredefender.kubernetes': AzureDefender,
         'microsoft.openservicemesh': OpenServiceMesh,
         'microsoft.azureml.kubernetes': AzureMLKubernetes,
-        'cassandradatacentersoperator': Cassandra,
+        'cassandradatacentersoperator': DefaultExtensionWithIdentity,
     }
 
     # Return the extension if we find it in the map, else return the default
@@ -138,7 +138,8 @@ def create_k8s_extension(cmd, client, resource_group_name, cluster_name, name, c
     validate_cc_registration(cmd)
 
     # Create identity, if required
-    if create_identity:
+    # We don't create the identity if we are in DF
+    if create_identity and not __is_dogfood_cluster(cmd):
         extension_instance.identity, extension_instance.location = \
             __create_identity(cmd, resource_group_name, cluster_name, cluster_type, cluster_rp)
 
@@ -292,3 +293,7 @@ def __get_config_settings_from_file(file_path):
         raise Exception("File {} is empty".format(file_path))
 
     return settings
+
+
+def __is_dogfood_cluster(cmd):
+    return cmd.cli_ctx.cloud.endpoints.resource_manager == consts.DF_RM_ENDPOINT
