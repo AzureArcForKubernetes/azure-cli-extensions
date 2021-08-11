@@ -5,6 +5,8 @@
 
 # pylint: disable=unused-argument
 
+from azure.cli.core.util import user_confirmation
+
 from ..vendored_sdks.models import ExtensionInstance
 from ..vendored_sdks.models import ExtensionInstanceUpdate
 from ..vendored_sdks.models import ScopeCluster
@@ -56,5 +58,10 @@ class DefaultExtension(PartnerExtensionModel):
             version=version
         )
 
-    def Delete(self, client, resource_group_name, cluster_name, name, cluster_type):
-        pass
+    def Delete(self, client, resource_group_name, cluster_name, name, cluster_type, yes):
+        default_user_confirmation(yes)
+
+
+def default_user_confirmation(yes):
+    print(yes)
+    return user_confirmation("Are you sure you want to perform this operation?", yes=yes)
