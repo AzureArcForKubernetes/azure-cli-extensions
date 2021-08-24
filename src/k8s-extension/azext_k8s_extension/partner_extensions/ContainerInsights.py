@@ -17,7 +17,6 @@ from azure.cli.core.util import sdk_no_wait
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 from ..vendored_sdks.models import ExtensionInstance
-from ..vendored_sdks.models import ExtensionInstanceUpdate
 from ..vendored_sdks.models import ScopeCluster
 from ..vendored_sdks.models import Scope
 

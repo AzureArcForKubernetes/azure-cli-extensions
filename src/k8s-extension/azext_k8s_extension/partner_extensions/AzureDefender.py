@@ -8,7 +8,6 @@
 from knack.log import get_logger
 
 from ..vendored_sdks.models import ExtensionInstance
-from ..vendored_sdks.models import ExtensionInstanceUpdate
 from ..vendored_sdks.models import ScopeCluster
 from ..vendored_sdks.models import Scope
 

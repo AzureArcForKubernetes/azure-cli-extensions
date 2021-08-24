@@ -28,10 +28,9 @@ from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 
 from .._client_factory import cf_resources
-from .DefaultExtension import DefaultExtension, default_user_confirmation
+from .DefaultExtension import DefaultExtension, user_confirmation_factory
 from ..vendored_sdks.models import (
     ExtensionInstance,
-    ExtensionInstanceUpdate,
     Scope,
     ScopeCluster
 )
@@ -164,7 +163,7 @@ class AzureMLKubernetes(DefaultExtension):
         logger.warning("If nvidia.com/gpu or fuse resource is not recognized by kubernetes after this deletion, "
                        "you probably have installed nvidia-device-plugin or fuse-device-plugin before installing AMLArc extension. "
                        "Please try to reinstall device plugins to fix this issue.")
-        default_user_confirmation(cmd, yes)
+        user_confirmation_factory(cmd, yes)
 
     def __validate_config(self, configuration_settings, configuration_protected_settings):
         # perform basic validation of the input config

@@ -59,10 +59,10 @@ class DefaultExtension(PartnerExtensionModel):
         )
 
     def Delete(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, yes):
-        default_user_confirmation(cmd, yes)
+        user_confirmation_factory(cmd, yes)
 
 
-def default_user_confirmation(cmd, yes):
+def user_confirmation_factory(cmd, yes, message="Are you sure you want to perform this operation?"):
     if cmd.cli_ctx.config.getboolean('core', 'disable_confirm_prompt', fallback=False):
         return
-    return user_confirmation("Are you sure you want to perform this operation?", yes=yes)
+    user_confirmation(message, yes=yes)
