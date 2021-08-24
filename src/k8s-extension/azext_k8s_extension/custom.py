@@ -191,7 +191,7 @@ def update_k8s_extension(client, resource_group_name, cluster_type, cluster_name
     # return client.update(resource_group_name, cluster_rp, cluster_type, cluster_name, name, upd_extension)
 
 
-def delete_k8s_extension(client, resource_group_name, cluster_name, name, cluster_type, yes=False):
+def delete_k8s_extension(cmd, client, resource_group_name, cluster_name, name, cluster_type, yes=False):
     """Delete an existing Kubernetes Extension.
 
     """
@@ -206,7 +206,7 @@ def delete_k8s_extension(client, resource_group_name, cluster_name, name, cluste
     extension_class = ExtensionFactory(extension.extension_type.lower())
 
     # If there is any custom delete logic, this will call the logic
-    extension_class.Delete(client, resource_group_name, cluster_name, name, cluster_type, yes)
+    extension_class.Delete(cmd, client, resource_group_name, cluster_name, name, cluster_type, yes)
 
     return client.delete(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
 

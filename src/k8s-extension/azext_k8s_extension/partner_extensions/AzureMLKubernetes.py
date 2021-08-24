@@ -156,12 +156,12 @@ class AzureMLKubernetes(DefaultExtension):
         )
         return extension_instance, name, create_identity
 
-    def Delete(self, client, resource_group_name, cluster_name, name, cluster_type, yes):
+    def Delete(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, yes):
         # Give a warning message
         logger.warning("If nvidia.com/gpu or fuse resource is not recognized by kubernetes after this deletion, "
                        "you probably have installed nvidia-device-plugin or fuse-device-plugin before installing AMLArc extension. "
                        "Please try to reinstall device plugins to fix this issue.")
-        default_user_confirmation(yes)
+        default_user_confirmation(cmd, yes)
 
     def __validate_config(self, configuration_settings, configuration_protected_settings):
         # perform basic validation of the input config
