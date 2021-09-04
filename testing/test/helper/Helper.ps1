@@ -21,6 +21,10 @@ function Has-ExtensionData {
 
 function Has-Identity-Provisioned {
     $output = kubectl get azureclusteridentityrequests -n azure-arc container-insights-clusteridentityrequest -o json | ConvertFrom-Json
+    $otherOutput = kubectl get azureclusteridentityrequests -A
+    $podOutput = kubectl get pods -A
+    Write-Host $otherOutput
+    Write-Host $podOutput
     return ($null -ne $output.status.expirationTime) -and ($null -ne $output.status.tokenReference.dataName) -and ($null -ne $output.status.tokenReference.secretName)
 }
 

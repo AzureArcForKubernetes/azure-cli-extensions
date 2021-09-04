@@ -28,8 +28,8 @@ Describe 'Azure Monitor Testing' {
             }
             Start-Sleep -Seconds 10
             $n += 1
-        } while ($n -le $MAX_RETRY_ATTEMPTS)
-        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+        } while ($n -le 40)
+        $n | Should -BeLessOrEqual 40
     }
 
     It "Performs a show on the extension" {
