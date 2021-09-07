@@ -12,11 +12,25 @@ from ..confirm import user_confirmation_factory
 from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.util import sdk_no_wait, user_confirmation
+from azure.cli.core.commands.client_factory import get_subscription_id
+
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 
-from .._client_factory import k8s_configuration_fluxconfig_client
-from ..utils import get_cluster_rp, get_data_from_key_or_file, get_duration, has_prune_enabled, to_base64
+from .._client_factory import (
+    cf_resources,
+    k8s_configuration_fluxconfig_client,
+    k8s_configuration_extension_client
+)
+from ..utils import (
+    get_parent_api_version,
+    get_cluster_rp,
+    get_data_from_key_or_file,
+    get_duration,
+    has_prune_enabled,
+    to_base64,
+    is_dogfood_cluster
+)
 from ..validators import (
     validate_cc_registration,
     validate_known_hosts,
@@ -34,7 +48,10 @@ from ..vendored_sdks.v2021_06_01_preview.models import (
     RepositoryRefDefinition,
     KustomizationDefinition,
 )
-from .ExtensionProvider import ExtensionProvider
+from ..vendored_sdks.v2021_05_01_preview.models import (
+    Extension,
+    Identity
+)
 from .SourceControlConfigurationProvider import SourceControlConfigurationProvider
 
 logger = get_logger(__name__)
@@ -42,7 +59,7 @@ logger = get_logger(__name__)
 
 class FluxConfigurationProvider:
     def __init__(self, cmd):
-        self.extension_provider = ExtensionProvider(cmd)
+        self.extension_client = k8s_configuration_extension_client(cmd.cli_ctx)
         self.source_control_configuration_provider = SourceControlConfigurationProvider(cmd)
         self.cmd = cmd
         self.client = k8s_configuration_fluxconfig_client(cmd.cli_ctx)
@@ -255,7 +272,7 @@ class FluxConfigurationProvider:
                 consts.SCC_EXISTS_ON_CLUSTER_ERROR,
                 consts.SCC_EXISTS_ON_CLUSTER_HELP)
 
-    def _validate_extension_install(self, resource_group_name, cluster_type, cluster_name, no_wait):
+    def _validate_extension_install(self, resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait):
         # Validate if the extension is installed, if not, install it
         extensions = self.extension_provider.list(resource_group_name, cluster_type, cluster_name)
         found_flux_extension = False
@@ -266,11 +283,22 @@ class FluxConfigurationProvider:
         if not found_flux_extension:
             logger.warning("'Microsoft.Flux' extension not found on the cluster, installing it now."
                            " This may take a few minutes...")
-            self.extension_provider.create(resource_group_name, cluster_type, cluster_name,
-                                           "flux", consts.FLUX_EXTENSION_TYPE,
-                                           release_train=os.getenv(consts.FLUX_EXTENSION_RELEASETRAIN),
-                                           version=os.getenv(consts.FLUX_EXTENSION_VERSION),
-                                           no_wait=no_wait).result()
+
+            # Create identity, if required
+            extension = Extension(
+                extension_type="microsoft.flux",
+                auto_upgrade_minor_version=True,
+            )
+            if not is_dogfood_cluster(self.cmd):
+                extension = self.__add_identity(extension,
+                                                resource_group_name,
+                                                cluster_rp,
+                                                cluster_type,
+                                                cluster_name)
+
+            logger.info("Starting extension creation on the cluster. This might take a minute...")
+            sdk_no_wait(no_wait, self.extension_client.begin_create, resource_group_name, cluster_rp, cluster_type,
+                        cluster_name, "flux", extension).result()
             logger.warning("'Microsoft.Flux' extension was successfully installed on the cluster")
 
     def _validate_and_get_gitrepository(self, url, branch, tag, semver, commit, timeout, sync_interval,
@@ -307,6 +335,30 @@ class FluxConfigurationProvider:
             https_user=https_user,
             local_auth_ref=local_auth_ref
         )
+
+    def __add_identity(self, extension_instance, resource_group_name, cluster_rp, cluster_type, cluster_name):
+        subscription_id = get_subscription_id(self.cmd.cli_ctx)
+        resources = cf_resources(self.cmd.cli_ctx, subscription_id)
+
+        cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(subscription_id,
+                                                                                                resource_group_name,
+                                                                                                cluster_rp,
+                                                                                                cluster_type,
+                                                                                                cluster_name)
+
+        if cluster_rp == consts.MANAGED_RP_NAMESPACE:
+            return extension_instance
+        parent_api_version = get_parent_api_version(cluster_rp)
+        try:
+            resource = resources.get_by_id(cluster_resource_id, parent_api_version)
+            location = str(resource.location.lower())
+        except HttpResponseError as ex:
+            raise ex
+        identity_type = "SystemAssigned"
+
+        extension_instance.identity = Identity(type=identity_type)
+        extension_instance.location = location
+        return extension_instance
 
 
 def validate_and_get_repository_ref(branch, tag, semver, commit):
