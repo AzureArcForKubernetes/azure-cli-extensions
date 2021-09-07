@@ -29,7 +29,7 @@ from ..validators import (
 )
 
 from .._client_factory import cf_resources
-from .._client_factory import k8s_config_extension_client
+from .._client_factory import k8s_configuration_extension_client
 
 from .. import consts
 
@@ -53,7 +53,7 @@ def ExtensionFactory(extension_name):
 class ExtensionProvider:
     def __init__(self, cmd):
         self.cmd = cmd
-        self.client = k8s_config_extension_client(cmd.cli_ctx)
+        self.client = k8s_configuration_extension_client(cmd.cli_ctx)
 
     def show(self, resource_group_name, cluster_type, cluster_name, name):
         # Determine ClusterRP

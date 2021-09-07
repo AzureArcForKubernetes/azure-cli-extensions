@@ -42,6 +42,11 @@ def validate_fluxconfig_name(namespace):
     __validate_k8s_cr_name(namespace.name, "--name", 63)
 
 
+def validate_operator_instance_name(namespace):
+    if namespace.operator_instance_name:
+        __validate_k8s_name(namespace.operator_instance_name, "--operator-instance-name", 23)
+
+
 def validate_operator_namespace(namespace):
     if namespace.operator_namespace:
         __validate_k8s_name(namespace.operator_namespace, "--operator-namespace", 23)

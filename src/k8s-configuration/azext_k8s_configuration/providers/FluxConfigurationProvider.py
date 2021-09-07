@@ -7,7 +7,7 @@
 
 import os
 from re import L
-from azext_k8s_config.confirm import user_confirmation_factory
+from ..confirm import user_confirmation_factory
 
 from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
@@ -15,7 +15,7 @@ from azure.cli.core.util import sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 
-from .._client_factory import k8s_config_fluxconfig_client
+from .._client_factory import k8s_configuration_fluxconfig_client
 from ..utils import get_cluster_rp, get_data_from_key_or_file, get_duration, has_prune_enabled, to_base64
 from ..validators import (
     validate_cc_registration,
@@ -45,7 +45,7 @@ class FluxConfigurationProvider:
         self.extension_provider = ExtensionProvider(cmd)
         self.source_control_configuration_provider = SourceControlConfigurationProvider(cmd)
         self.cmd = cmd
-        self.client = k8s_config_fluxconfig_client(cmd.cli_ctx)
+        self.client = k8s_configuration_fluxconfig_client(cmd.cli_ctx)
 
     def show(self, resource_group_name, cluster_type, cluster_name, name):
         """Get an existing Kubernetes Source Control Configuration.

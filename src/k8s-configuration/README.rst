@@ -15,7 +15,7 @@ az extension add --name k8s-configuration
 Kubernetes SourceControl Configuration: [more info](https://docs.microsoft.com/en-us/azure/kubernetessconfiguration/)\
 *Examples:*
 
-##### Create a KubernetesConfiguration
+##### Create a Source Control Configuration (Fluxv1)
 ```
 az k8s-configuration create \
     --resource-group groupName \
@@ -31,7 +31,7 @@ az k8s-configuration create \
     --helm-operator-params chartParameters
 ```
 
-##### Get a KubernetesConfiguration
+##### Get a Source Control Configuration (Fluxv1)
 ```
 az k8s-configuration show \
     --resource-group groupName \
@@ -40,7 +40,7 @@ az k8s-configuration show \
     --name configurationName
 ```
 
-##### Delete a KubernetesConfiguration
+##### Delete a Source Control Configuration (Fluxv1)
 ```
 az k8s-configuration delete \
     --resource-group groupName \
@@ -49,7 +49,7 @@ az k8s-configuration delete \
     --name configurationName
 ```
 
-##### Update a KubernetesConfiguration
+##### Update a Source Control Configuration (Fluxv1)
 ```
 az k8s-configuration create \
     --resource-group groupName \
@@ -63,7 +63,7 @@ az k8s-configuration create \
     --helm-operator-params chartParameters
 ```
 
-##### List all KubernetesConfigurations of a cluster
+##### List all Source Control Configuration (Fluxv1) on a cluster
 ```
 az k8s-configuration list \
     --resource-group groupName \
