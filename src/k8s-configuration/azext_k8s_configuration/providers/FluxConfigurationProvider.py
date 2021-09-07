@@ -5,6 +5,8 @@
 
 # pylint: disable=unused-argument
 
+import os
+
 from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.util import sdk_no_wait, user_confirmation
@@ -284,10 +286,11 @@ class FluxConfigurationProvider:
             logger.warning("'Microsoft.Flux' extension not found on the cluster, installing it now."
                            " This may take a few minutes...")
 
-            # Create identity, if required
             extension = Extension(
                 extension_type="microsoft.flux",
                 auto_upgrade_minor_version=True,
+                release_train = os.getenv(consts.FLUX_EXTENSION_RELEASETRAIN),
+                version=os.getenv(consts.FLUX_EXTENSION_VERSION)
             )
             if not is_dogfood_cluster(self.cmd):
                 extension = self.__add_identity(extension,
@@ -358,7 +361,7 @@ class FluxConfigurationProvider:
 
         extension_instance.identity = Identity(type=identity_type)
         extension_instance.location = location
-        return extension_instance
+        return extension_instance        
 
 
 def validate_and_get_repository_ref(branch, tag, semver, commit):

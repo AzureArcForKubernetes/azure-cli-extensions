@@ -14,7 +14,7 @@ from . import consts
 
 def sourcecontrol_create(cmd, client, resource_group_name, cluster_name, name, repository_url, scope, cluster_type,
                          operator_instance_name=None, operator_namespace='default',
-                         helm_operator_chart_version='1.2.0', operator_type='flux', operator_params='',
+                         helm_operator_chart_version='1.4.0', operator_type='flux', operator_params='',
                          ssh_private_key='', ssh_private_key_file='', https_user='', https_key='',
                          ssh_known_hosts='', ssh_known_hosts_file='', enable_helm_operator=None,
                          helm_operator_params=''):
