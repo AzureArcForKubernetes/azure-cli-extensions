@@ -31,19 +31,19 @@ INVALID_DURATION_HELP = "Specify a valid ISO8601 duration and try again"
 INVALID_URL_ERROR = "Error! Invalid --url."
 INVALID_URL_HELP = "Url must beginwith one of ['http://', 'https://', 'git@', 'ssh://']"
 
-INVALID_KUBERNETES_NAME_LENGTH_ERROR = "Error! Invalid {0}."
+INVALID_KUBERNETES_NAME_LENGTH_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_NAME_LENGTH_HELP = "Parameter {0} can be a maximum of {1} characters. Specify a shorter name and try again."
 
-INVALID_KUBERNETES_NAME_HYPHEN_ERROR = "Error! Invalid {0}."
+INVALID_KUBERNETES_NAME_HYPHEN_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_NAME_HYPHEN_HELP = "Parameter {0} cannot begin or end with a hyphen."
 
-INVALID_KUBERNETES_NAME_PERIOD_ERROR = "Error! Invalid {0}."
+INVALID_KUBERNETES_NAME_PERIOD_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_NAME_PERIOD_HELP = "Parameter {0} cannot begin or end with a period."
 
-INVALID_KUBERNETES_DNS_NAME_ERROR = "Error! Invalid {0}."
+INVALID_KUBERNETES_DNS_NAME_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_DNS_NAME_HELP = "Parameter {0} can only contain lowercase alphanumeric characters and hyphens"
 
-INVALID_KUBERNETES_DNS_SUBDOMAIN_NAME_ERROR = "Error! Invalid {0}."
+INVALID_KUBERNETES_DNS_SUBDOMAIN_NAME_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_DNS_SUBDOMAIN_NAME_HELP = "Parameter {0} can only contain lowercase alphanumeric characters, hyphens, and periods"
 
 DUPLICATE_KUSTOMIZATION_NAME_ERROR = "Error! Invalid kustomization list. Kustomization name '{0}' duplicated in multiple Kustomization objects"

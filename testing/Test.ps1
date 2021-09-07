@@ -5,7 +5,7 @@ param (
     [switch] $OnlyPublicTests,
 
     [Parameter(Mandatory=$True)]
-    [ValidateSet('k8s-extension', 'k8s-configuration', 'k8s-extension-private', 'k8s-config')]
+    [ValidateSet('k8s-extension','k8s-configuration', 'k8s-extension-private')]
     [string]$Type
 )
 
@@ -51,9 +51,10 @@ if ($Type -eq 'k8s-extension') {
             exit 1
         }
     }
-    $testFilePath = "$PSScriptRoot/test/extensions"
     if ($OnlyPublicTests) {
-        $excludePath = "$PSScriptRoot/test/extensions/private"
+        $testFilePath = "$PSScriptRoot/test/extensions/public"
+    } else {
+        $testFilePath = "$PSScriptRoot/test/extensions"
     }
 } elseif ($Type -eq 'k8s-configuration') {
     $k8sConfigurationVersion = $ENVCONFIG.extensionVersion.'k8s-configuration'
@@ -64,29 +65,11 @@ if ($Type -eq 'k8s-extension') {
         az extension add --source ./bin/k8s_configuration-$k8sConfigurationVersion-py3-none-any.whl
     }
     $testFilePath = "$PSScriptRoot/test/configurations"
-} elseif ($Type -eq 'k8s-config') {
-    $k8sConfigVersion = $ENVCONFIG.extensionVersion.'k8s-config'
-    if (!$SkipInstall) {
-        Write-Host "Removing the old k8s-config extension..."
-        az extension remove -n k8s-config
-        Write-Host "Installing k8s-config version $k8sConfigVersion..."
-        az extension add --source ./bin/k8s_config-$k8sConfigVersion-py3-none-any.whl
-    }
-    $Env:K8sExtensionName = "k8s-config"
-    $testFilePath = "$PSScriptRoot/test/extensions"
-    $excludePath = "$PSScriptRoot/test/extensions/private"
 }
 
 if ($CI) {
     Write-Host "Invoking Pester to run tests from '$testFilePath'..."
-    if ($excludePath)
-    {
-        $testResult = Invoke-Pester $testFilePath -Passthru -Output Detailed -ExcludePath $excludePath
-    }
-    else
-    {
-        $testResult = Invoke-Pester $testFilePath -Passthru -Output Detailed
-    }
+    $testResult = Invoke-Pester $testFilePath -Passthru -Output Detailed
     $testResult | Export-JUnitReport -Path TestResults.xml
 } else {
     if ($Path) {

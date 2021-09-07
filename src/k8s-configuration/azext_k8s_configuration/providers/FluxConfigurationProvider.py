@@ -289,7 +289,7 @@ class FluxConfigurationProvider:
             extension = Extension(
                 extension_type="microsoft.flux",
                 auto_upgrade_minor_version=True,
-                release_train = os.getenv(consts.FLUX_EXTENSION_RELEASETRAIN),
+                release_train=os.getenv(consts.FLUX_EXTENSION_RELEASETRAIN),
                 version=os.getenv(consts.FLUX_EXTENSION_VERSION)
             )
             if not is_dogfood_cluster(self.cmd):
@@ -361,7 +361,7 @@ class FluxConfigurationProvider:
 
         extension_instance.identity = Identity(type=identity_type)
         extension_instance.location = location
-        return extension_instance        
+        return extension_instance
 
 
 def validate_and_get_repository_ref(branch, tag, semver, commit):

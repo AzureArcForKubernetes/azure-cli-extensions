@@ -54,14 +54,11 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from .vendored_sdks.azure_mgmt_preview_aks.v2021_05_01.models import (ContainerServiceLinuxProfile,
+from .vendored_sdks.azure_mgmt_preview_aks.v2021_07_01.models import (ContainerServiceLinuxProfile,
                                                                       ManagedClusterWindowsProfile,
                                                                       ContainerServiceNetworkProfile,
                                                                       ManagedClusterServicePrincipalProfile,
                                                                       ContainerServiceSshConfiguration,
-                                                                      MaintenanceConfiguration,
-                                                                      TimeInWeek,
-                                                                      TimeSpan,
                                                                       ContainerServiceSshPublicKey,
                                                                       ManagedCluster,
                                                                       ManagedClusterAADProfile,
@@ -73,17 +70,16 @@ from .vendored_sdks.azure_mgmt_preview_aks.v2021_05_01.models import (ContainerS
                                                                       ManagedClusterIdentity,
                                                                       ManagedClusterAPIServerAccessProfile,
                                                                       ManagedClusterSKU,
-                                                                      ManagedClusterIdentityUserAssignedIdentitiesValue,
+                                                                      ManagedServiceIdentityUserAssignedIdentitiesValue,
                                                                       ManagedClusterAutoUpgradeProfile,
                                                                       KubeletConfig,
                                                                       LinuxOSConfig,
+                                                                      ManagedClusterHTTPProxyConfig,
                                                                       SysctlConfig,
                                                                       ManagedClusterPodIdentityProfile,
                                                                       ManagedClusterPodIdentity,
                                                                       ManagedClusterPodIdentityException,
-                                                                      UserAssignedIdentity,
-                                                                      RunCommandRequest,
-                                                                      ManagedClusterPropertiesIdentityProfileValue)
+                                                                      UserAssignedIdentity)
 from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
@@ -99,9 +95,11 @@ from ._helpers import (_populate_api_server_access_profile, _set_vm_set_type,
                        _trim_fqdn_name_containing_hcp)
 from ._loadbalancer import (set_load_balancer_sku, is_load_balancer_profile_provided,
                             update_load_balancer_profile, create_load_balancer_profile)
+from ._natgateway import (create_nat_gateway_profile, update_nat_gateway_profile, is_nat_gateway_profile_provided)
 from ._consts import CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME
 from ._consts import CONST_MONITORING_ADDON_NAME
 from ._consts import CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID
+from ._consts import CONST_MONITORING_USING_AAD_MSI_AUTH
 from ._consts import CONST_VIRTUAL_NODE_ADDON_NAME
 from ._consts import CONST_VIRTUAL_NODE_SUBNET_NAME
 from ._consts import CONST_AZURE_POLICY_ADDON_NAME
@@ -111,6 +109,7 @@ from ._consts import CONST_INGRESS_APPGW_APPLICATION_GATEWAY_ID, CONST_INGRESS_A
 from ._consts import CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID
 from ._consts import CONST_INGRESS_APPGW_WATCH_NAMESPACE
 from ._consts import CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SPOT, CONST_SPOT_EVICTION_POLICY_DELETE
+from ._consts import CONST_SCALE_DOWN_MODE_DELETE
 from ._consts import CONST_CONFCOM_ADDON_NAME, CONST_ACC_SGX_QUOTE_HELPER_ENABLED
 from ._consts import CONST_OPEN_SERVICE_MESH_ADDON_NAME
 from ._consts import CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME, CONST_SECRET_ROTATION_ENABLED
@@ -984,9 +983,12 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
                outbound_type=None,
                enable_addons=None,
                workspace_resource_id=None,
+               enable_msi_auth_for_monitoring=False,
                min_count=None,
                max_count=None,
                vnet_subnet_id=None,
@@ -1010,7 +1012,7 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
                private_dns_zone=None,
                enable_managed_identity=True,
                fqdn_subdomain=None,
-               enable_public_fqdn=False,
+               disable_public_fqdn=False,
                api_server_authorized_ip_ranges=None,
                aks_custom_headers=None,
                appgw_name=None,
@@ -1026,6 +1028,7 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
                enable_sgxquotehelper=False,
                kubelet_config=None,
                linux_os_config=None,
+               http_proxy_config=None,
                assign_identity=None,
                auto_upgrade_channel=None,
                enable_pod_identity=False,
@@ -1144,7 +1147,7 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
 
     service_principal_profile = None
     principal_obj = None
-    # If customer explicitly provide a service principal, disable managed identity.
+    # If customer explicitly provides a service principal, disable managed identity.
     if service_principal and client_secret:
         enable_managed_identity = False
     if not enable_managed_identity:
@@ -1210,8 +1213,12 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
         load_balancer_outbound_ports,
         load_balancer_idle_timeout)
 
+    nat_gateway_profile = create_nat_gateway_profile(
+        nat_gateway_managed_outbound_ip_count,
+        nat_gateway_idle_timeout)
+
     outbound_type = _set_outbound_type(
-        outbound_type, network_plugin, load_balancer_sku, load_balancer_profile)
+        outbound_type, vnet_subnet_id, load_balancer_sku, load_balancer_profile)
 
     network_profile = None
     if any([network_plugin,
@@ -1234,14 +1241,16 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
             network_policy=network_policy,
             load_balancer_sku=load_balancer_sku.lower(),
             load_balancer_profile=load_balancer_profile,
+            nat_gateway_profile=nat_gateway_profile,
             outbound_type=outbound_type
         )
     else:
-        if load_balancer_sku.lower() == "standard" or load_balancer_profile:
+        if load_balancer_sku.lower() == "standard" or load_balancer_profile or nat_gateway_profile:
             network_profile = ContainerServiceNetworkProfile(
                 network_plugin="kubenet",
                 load_balancer_sku=load_balancer_sku.lower(),
                 load_balancer_profile=load_balancer_profile,
+                nat_gateway_profile=nat_gateway_profile,
                 outbound_type=outbound_type,
             )
         if load_balancer_sku.lower() == "basic":
@@ -1250,28 +1259,34 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
             )
 
     addon_profiles = _handle_addons_args(
-        cmd,
-        enable_addons,
-        subscription_id,
-        resource_group_name,
-        {},
-        workspace_resource_id,
-        appgw_name,
-        appgw_subnet_prefix,
-        appgw_subnet_cidr,
-        appgw_id,
-        appgw_subnet_id,
-        appgw_watch_namespace,
-        enable_sgxquotehelper,
-        aci_subnet_name,
-        vnet_subnet_id,
-        enable_secret_rotation
+        cmd=cmd,
+        addons_str=enable_addons,
+        subscription_id=subscription_id,
+        resource_group_name=resource_group_name,
+        addon_profiles={},
+        workspace_resource_id=workspace_resource_id,
+        enable_msi_auth_for_monitoring=enable_msi_auth_for_monitoring,
+        appgw_name=appgw_name,
+        appgw_subnet_prefix=appgw_subnet_prefix,
+        appgw_subnet_cidr=appgw_subnet_cidr,
+        appgw_id=appgw_id,
+        appgw_subnet_id=appgw_subnet_id,
+        appgw_watch_namespace=appgw_watch_namespace,
+        enable_sgxquotehelper=enable_sgxquotehelper,
+        aci_subnet_name=aci_subnet_name,
+        vnet_subnet_id=vnet_subnet_id,
+        enable_secret_rotation=enable_secret_rotation,
     )
     monitoring = False
     if CONST_MONITORING_ADDON_NAME in addon_profiles:
         monitoring = True
-        _ensure_container_insights_for_monitoring(
-            cmd, addon_profiles[CONST_MONITORING_ADDON_NAME])
+        if enable_msi_auth_for_monitoring and not enable_managed_identity:
+            raise ArgumentUsageError("--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
+        _ensure_container_insights_for_monitoring(cmd,
+                                                  addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id,
+                                                  resource_group_name, name, location,
+                                                  aad_route=enable_msi_auth_for_monitoring, create_dcr=True,
+                                                  create_dcra=False)
 
     # addon is in the list and is enabled
     ingress_appgw_addon_enabled = CONST_INGRESS_APPGW_ADDON_NAME in addon_profiles and \
@@ -1293,7 +1308,8 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
         aad_profile = ManagedClusterAADProfile(
             managed=True,
             enable_azure_rbac=enable_azure_rbac,
-            admin_group_object_ids=_parse_comma_separated_list(
+            # ids -> i_ds due to track 2 naming issue
+            admin_group_object_i_ds=_parse_comma_separated_list(
                 aad_admin_group_object_ids),
             tenant_id=aad_tenant_id
         )
@@ -1334,7 +1350,7 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
         )
     elif enable_managed_identity and assign_identity:
         user_assigned_identity = {
-            assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+            assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
         }
         identity = ManagedClusterIdentity(
             type="UserAssigned",
@@ -1347,7 +1363,7 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
             raise CLIError('--assign-kubelet-identity can only be specified when --assign-identity is specified')
         kubelet_identity = _get_user_assigned_identity(cmd.cli_ctx, assign_kubelet_identity)
         identity_profile = {
-            'kubeletidentity': ManagedClusterPropertiesIdentityProfileValue(
+            'kubeletidentity': UserAssignedIdentity(
                 resource_id=assign_kubelet_identity,
                 client_id=kubelet_identity.client_id,
                 object_id=kubelet_identity.principal_id
@@ -1401,8 +1417,8 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
         mc.node_resource_group = node_resource_group
 
     use_custom_private_dns_zone = False
-    if not enable_private_cluster and enable_public_fqdn:
-        raise ArgumentUsageError("--enable-public-fqdn should only be used with --enable-private-cluster")
+    if not enable_private_cluster and disable_public_fqdn:
+        raise ArgumentUsageError("--disable_public_fqdn should only be used with --enable-private-cluster")
     if enable_private_cluster:
         if load_balancer_sku.lower() != "standard":
             raise ArgumentUsageError(
@@ -1410,8 +1426,8 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
         mc.api_server_access_profile = ManagedClusterAPIServerAccessProfile(
             enable_private_cluster=True
         )
-        if enable_public_fqdn:
-            mc.api_server_access_profile.enable_private_cluster_public_fqdn = True
+        if disable_public_fqdn:
+            mc.api_server_access_profile.enable_private_cluster_public_fqdn = False
 
     if private_dns_zone:
         if not enable_private_cluster:
@@ -1431,6 +1447,9 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
                 "--fqdn-subdomain should only be used for private cluster with custom private dns zone")
         mc.fqdn_subdomain = fqdn_subdomain
 
+    if http_proxy_config:
+        mc.http_proxy_config = _get_http_proxy_config(http_proxy_config)
+
     if uptime_sla:
         mc.sku = ManagedClusterSKU(
             name="Basic",
@@ -1444,6 +1463,10 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
+            if monitoring and enable_msi_auth_for_monitoring:
+                # Creating a DCR Association (for the monitoring addon) requires waiting for cluster creation to finish
+                no_wait = False
+
             created_cluster = _put_managed_cluster_ensuring_permission(
                 cmd,
                 client,
@@ -1460,6 +1483,15 @@ def aks_create(cmd,     # pylint: disable=too-many-locals,too-many-statements,to
                 attach_acr,
                 headers,
                 no_wait)
+
+            if monitoring and enable_msi_auth_for_monitoring:
+                # Create the DCR Association here
+                _ensure_container_insights_for_monitoring(cmd,
+                                                          addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id,
+                                                          resource_group_name, name, location,
+                                                          aad_route=enable_msi_auth_for_monitoring, create_dcr=False,
+                                                          create_dcra=True)
+
             return created_cluster
         except CloudError as ex:
             retry_exception = ex
@@ -1484,6 +1516,8 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
                load_balancer_outbound_ip_prefixes=None,
                load_balancer_outbound_ports=None,
                load_balancer_idle_timeout=None,
+               nat_gateway_managed_outbound_ip_count=None,
+               nat_gateway_idle_timeout=None,
                api_server_authorized_ip_ranges=None,
                enable_pod_security_policy=False,
                disable_pod_security_policy=False,
@@ -1522,6 +1556,7 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
                                                           load_balancer_outbound_ip_prefixes,
                                                           load_balancer_outbound_ports,
                                                           load_balancer_idle_timeout)
+    update_natgw_profile = is_nat_gateway_profile_provided(nat_gateway_managed_outbound_ip_count, nat_gateway_idle_timeout)
     update_aad_profile = not (
         aad_tenant_id is None and aad_admin_group_object_ids is None and not enable_azure_rbac and not disable_azure_rbac)
     # pylint: disable=too-many-boolean-expressions
@@ -1532,6 +1567,7 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
        and api_server_authorized_ip_ranges is None and \
        not update_pod_security and \
        not update_lb_profile and \
+       not update_natgw_profile and \
        not uptime_sla and \
        not no_uptime_sla and \
        not enable_aad and \
@@ -1565,6 +1601,8 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
                        '"--load-balancer-managed-outbound-ip-count" or '
                        '"--load-balancer-outbound-ips" or '
                        '"--load-balancer-outbound-ip-prefixes" or '
+                       '"--nat-gateway-managed-outbound-ip-count" or '
+                       '"--nat-gateway-idle-timeout" or '
                        '"--enable-aad" or '
                        '"--aad-tenant-id" or '
                        '"--aad-admin-group-object-ids" or '
@@ -1666,6 +1704,12 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
             load_balancer_idle_timeout,
             instance.network_profile.load_balancer_profile)
 
+    if update_natgw_profile:
+        instance.network_profile.nat_gateway_profile = update_nat_gateway_profile(
+            nat_gateway_managed_outbound_ip_count,
+            nat_gateway_idle_timeout,
+            instance.network_profile.nat_gateway_profile)
+
     if attach_acr and detach_acr:
         raise CLIError(
             'Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
@@ -1733,7 +1777,8 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
         if aad_tenant_id is not None:
             instance.aad_profile.tenant_id = aad_tenant_id
         if aad_admin_group_object_ids is not None:
-            instance.aad_profile.admin_group_object_ids = _parse_comma_separated_list(
+            # ids -> i_ds due to track 2 naming issue
+            instance.aad_profile.admin_group_object_i_ds = _parse_comma_separated_list(
                 aad_admin_group_object_ids)
         if enable_azure_rbac and disable_azure_rbac:
             raise CLIError(
@@ -1767,10 +1812,9 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
             raise ArgumentUsageError('--disable-public-fqdn cannot be applied for none mode private dns zone cluster')
         instance.api_server_access_profile.enable_private_cluster_public_fqdn = False
 
-    if instance.auto_upgrade_profile is None:
-        instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
-
     if auto_upgrade_channel is not None:
+        if instance.auto_upgrade_profile is None:
+            instance.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile()
         instance.auto_upgrade_profile.upgrade_channel = auto_upgrade_channel
 
     if not enable_managed_identity and assign_identity:
@@ -1807,7 +1851,7 @@ def aks_update(cmd,     # pylint: disable=too-many-statements,too-many-branches,
             )
         elif goal_identity_type == "userassigned":
             user_assigned_identity = {
-                assign_identity: ManagedClusterIdentityUserAssignedIdentitiesValue()
+                assign_identity: ManagedServiceIdentityUserAssignedIdentitiesValue()
             }
             instance.identity = ManagedClusterIdentity(
                 type="UserAssigned",
@@ -2171,7 +2215,7 @@ def aks_scale(cmd,  # pylint: disable=unused-argument
             # null out the SP and AAD profile because otherwise validation complains
             instance.service_principal_profile = None
             instance.aad_profile = None
-            return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+            return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
@@ -2263,120 +2307,11 @@ def aks_upgrade(cmd,    # pylint: disable=unused-argument, too-many-return-state
 
     headers = get_aks_custom_headers(aks_custom_headers)
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance, custom_headers=headers)
-
-
-def aks_runcommand(cmd, client, resource_group_name, name, command_string="", command_files=None):
-    colorama.init()
-
-    mc = client.get(resource_group_name, name)
-
-    if not command_string:
-        raise CLIError('Command cannot be empty.')
-
-    request_payload = RunCommandRequest(command=command_string)
-    request_payload.context = _get_command_context(command_files)
-    if mc.aad_profile is not None and mc.aad_profile.managed:
-        request_payload.cluster_token = _get_dataplane_aad_token(
-            cmd.cli_ctx, "6dae42f8-4368-4678-94ff-3960e28e3630")
-
-    commandResultFuture = client.run_command(
-        resource_group_name, name, request_payload, long_running_operation_timeout=5, retry_total=0)
-
-    return _print_command_result(cmd.cli_ctx, commandResultFuture.result(300))
-
-
-def aks_command_result(cmd, client, resource_group_name, name, command_id=""):
-    if not command_id:
-        raise CLIError('CommandID cannot be empty.')
-
-    commandResult = client.get_command_result(
-        resource_group_name, name, command_id)
-    return _print_command_result(cmd.cli_ctx, commandResult)
-
-
-def _print_command_result(cli_ctx, commandResult):
-    # cli_ctx.data['safe_params'] contains list of parameter name user typed in, without value.
-    # cli core also use this calculate ParameterSetName header for all http request from cli.
-    if cli_ctx.data['safe_params'] is None or "-o" in cli_ctx.data['safe_params'] or "--output" in cli_ctx.data['safe_params']:
-        # user specified output format, honor their choice, return object to render pipeline
-        return commandResult
-    else:
-        # user didn't specified any format, we can customize the print for best experience
-        if commandResult.provisioning_state == "Succeeded":
-            # succeed, print exitcode, and logs
-            print(f"{colorama.Fore.GREEN}command started at {commandResult.started_at}, finished at {commandResult.finished_at}, with exitcode={commandResult.exit_code}{colorama.Style.RESET_ALL}")
-            print(commandResult.logs)
-            return
-
-        if commandResult.provisioning_state == "Failed":
-            # failed, print reason in error
-            print(
-                f"{colorama.Fore.RED}command failed with reason: {commandResult.reason}{colorama.Style.RESET_ALL}")
-            return
-
-        # *-ing state
-        print(f"{colorama.Fore.BLUE}command is in : {commandResult.provisioning_state} state{colorama.Style.RESET_ALL}")
-        return None
-
-
-def _get_command_context(command_files):
-    if not command_files:
-        return ""
-
-    filesToAttach = {}
-    # . means to attach current folder, cannot combine more files. (at least for now)
-    if len(command_files) == 1 and command_files[0] == ".":
-        # current folder
-        cwd = os.getcwd()
-        for filefolder, _, files in os.walk(cwd):
-            for file in files:
-                # retain folder structure
-                rel = os.path.relpath(filefolder, cwd)
-                filesToAttach[os.path.join(
-                    filefolder, file)] = os.path.join(rel, file)
-    else:
-        for file in command_files:
-            if file == ".":
-                raise CLIError(
-                    ". is used to attach current folder, not expecting other attachements.")
-            if os.path.isfile(file):
-                # for individual attached file, flatten them to same folder
-                filesToAttach[file] = os.path.basename(file)
-            else:
-                raise CLIError(f"{file} is not valid file, or not accessable.")
-
-    if len(filesToAttach) < 1:
-        logger.debug("no files to attach!")
-        return ""
-
-    zipStream = io.BytesIO()
-    zipFile = zipfile.ZipFile(zipStream, "w")
-    for _, (osfile, zipEntry) in enumerate(filesToAttach.items()):
-        zipFile.write(osfile, zipEntry)
-    # zipFile.printdir() // use this to debug
-    zipFile.close()
-
-    return str(base64.encodebytes(zipStream.getbuffer()), "utf-8")
-
-
-def _get_dataplane_aad_token(cli_ctx, serverAppId):
-    # this function is mostly copied from keyvault cli
-    import adal
-    try:
-        return Profile(cli_ctx=cli_ctx).get_raw_token(resource=serverAppId)[0][2].get('accessToken')
-    except adal.AdalError as err:
-        # pylint: disable=no-member
-        if (hasattr(err, 'error_response') and
-                ('error_description' in err.error_response) and
-                ('AADSTS70008:' in err.error_response['error_description'])):
-            raise CLIError(
-                "Credentials have expired due to inactivity. Please run 'az login'")
-        raise CLIError(err)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, headers=headers)
 
 
 def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name, cluster_name, nodepool_name):
-    return sdk_no_wait(no_wait, client.upgrade_node_image_version, resource_group_name, cluster_name, nodepool_name)
+    return sdk_no_wait(no_wait, client.begin_upgrade_node_image_version, resource_group_name, cluster_name, nodepool_name)
 
 
 def _handle_addons_args(cmd,  # pylint: disable=too-many-statements
@@ -2385,6 +2320,7 @@ def _handle_addons_args(cmd,  # pylint: disable=too-many-statements
                         resource_group_name,
                         addon_profiles=None,
                         workspace_resource_id=None,
+                        enable_msi_auth_for_monitoring=False,
                         appgw_name=None,
                         appgw_subnet_prefix=None,
                         appgw_subnet_cidr=None,
@@ -2412,13 +2348,11 @@ def _handle_addons_args(cmd,  # pylint: disable=too-many-statements
             # use default workspace if exists else create default workspace
             workspace_resource_id = _ensure_default_log_analytics_workspace_for_monitoring(
                 cmd, subscription_id, resource_group_name)
-
         workspace_resource_id = _sanitize_loganalytics_ws_resource_id(workspace_resource_id)
-
-        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True, config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id})
+        addon_profiles[CONST_MONITORING_ADDON_NAME] = ManagedClusterAddonProfile(enabled=True,
+                                                                                 config={CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id,
+                                                                                         CONST_MONITORING_USING_AAD_MSI_AUTH: enable_msi_auth_for_monitoring})
         addons.remove('monitoring')
-
-    # error out if '--enable-addons=monitoring' isn't set but workspace_resource_id is
     elif workspace_resource_id:
         raise CLIError(
             '"--workspace-resource-id" requires "--enable-addons monitoring".')
@@ -2665,7 +2599,27 @@ def _sanitize_loganalytics_ws_resource_id(workspace_resource_id):
     return workspace_resource_id
 
 
-def _ensure_container_insights_for_monitoring(cmd, addon):
+def _ensure_container_insights_for_monitoring(cmd,
+                                              addon,
+                                              cluster_subscription,
+                                              cluster_resource_group_name,
+                                              cluster_name,
+                                              cluster_region,
+                                              remove_monitoring=False,
+                                              aad_route=False,
+                                              create_dcr=False,
+                                              create_dcra=False):
+    """
+    Either adds the ContainerInsights solution to a LA Workspace OR sets up a DCR (Data Collection Rule) and DCRA
+    (Data Collection Rule Association). Both let the monitoring addon send data to a Log Analytics Workspace.
+
+    Set aad_route == True to set up the DCR data route. Otherwise the solution route will be used. Create_dcr and
+    create_dcra have no effect if aad_route == False.
+
+    Set remove_monitoring to True and create_dcra to True to remove the DCRA from a cluster. The association makes
+    it very hard to delete either the DCR or cluster. (It is not obvious how to even navigate to the association from
+    the portal, and it prevents the cluster and DCR from being deleted individually).
+    """
     if not addon.enabled:
         return None
 
@@ -2687,104 +2641,243 @@ def _ensure_container_insights_for_monitoring(cmd, addon):
     try:
         subscription_id = workspace_resource_id.split('/')[2]
         resource_group = workspace_resource_id.split('/')[4]
+        workspace_name = workspace_resource_id.split('/')[8]
     except IndexError:
         raise CLIError(
             'Could not locate resource group in workspace-resource-id URL.')
 
     # region of workspace can be different from region of RG so find the location of the workspace_resource_id
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
-    from azure.core.exceptions import HttpResponseError
-    try:
-        resource = resources.get_by_id(
-            workspace_resource_id, '2015-11-01-preview')
-        location = resource.location
-    except HttpResponseError as ex:
-        raise ex
+    if not remove_monitoring:
+        resources = cf_resources(cmd.cli_ctx, subscription_id)
+        from azure.core.exceptions import HttpResponseError
+        try:
+            resource = resources.get_by_id(
+                workspace_resource_id, '2015-11-01-preview')
+            location = resource.location
+        except HttpResponseError as ex:
+            raise ex
 
-    unix_time_in_millis = int(
-        (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
+    if aad_route:
+        cluster_resource_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
+        dataCollectionRuleName = f"DCR-{workspace_name}"
+        dcr_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.profiles import ResourceType
 
-    solution_deployment_name = 'ContainerInsights-{}'.format(
-        unix_time_in_millis)
+        if create_dcr:
+            # first get the association between region display names and region IDs (because for some reason
+            # the "which RPs are available in which regions" check returns region display names)
+            region_names_to_id = {}
+            # retry the request up to two times
+            for _ in range(3):
+                try:
+                    location_list_url = f"https://management.azure.com/subscriptions/{subscription_id}/locations?api-version=2019-11-01"
+                    r = send_raw_request(cmd.cli_ctx, "GET", location_list_url)
 
-    # pylint: disable=line-too-long
-    template = {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-            "workspaceResourceId": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics Resource ID"
+                    # this is required to fool the static analyzer. The else statement will only run if an exception
+                    # is thrown, but flake8 will complain that e is undefined if we don't also define it here.
+                    error = None
+                    break
+                except CLIError as e:
+                    error = e
+            else:
+                # This will run if the above for loop was not broken out of. This means all three requests failed
+                raise error
+            json_response = json.loads(r.text)
+            for region_data in json_response["value"]:
+                region_names_to_id[region_data["displayName"]] = region_data["name"]
+
+            # check if region supports DCRs and DCR-A
+            for _ in range(3):
+                try:
+                    feature_check_url = f"https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Insights?api-version=2020-10-01"
+                    r = send_raw_request(cmd.cli_ctx, "GET", feature_check_url)
+                    error = None
+                    break
+                except CLIError as e:
+                    error = e
+            else:
+                raise error
+            json_response = json.loads(r.text)
+            for resource in json_response["resourceTypes"]:
+                region_ids = map(lambda x: region_names_to_id[x], resource["locations"])  # map is lazy, so doing this for every region isn't slow
+                if resource["resourceType"].lower() == "datacollectionrules" and location not in region_ids:
+                    raise ClientRequestError(f'Data Collection Rules are not supported for LA workspace region {location}')
+                elif resource["resourceType"].lower() == "datacollectionruleassociations" and cluster_region not in region_ids:
+                    raise ClientRequestError(f'Data Collection Rule Associations are not supported for cluster region {location}')
+
+            # create the DCR
+            dcr_creation_body = json.dumps({"location": location,
+                                            "properties": {
+                                                "dataSources": {
+                                                    "extensions": [
+                                                        {
+                                                            "name": "ContainerInsightsExtension",
+                                                            "streams": [
+                                                                "Microsoft-Perf",
+                                                                "Microsoft-ContainerInventory",
+                                                                "Microsoft-ContainerLog",
+                                                                "Microsoft-ContainerLogV2",
+                                                                "Microsoft-ContainerNodeInventory",
+                                                                "Microsoft-KubeEvents",
+                                                                "Microsoft-KubeHealth",
+                                                                "Microsoft-KubeMonAgentEvents",
+                                                                "Microsoft-KubeNodeInventory",
+                                                                "Microsoft-KubePodInventory",
+                                                                "Microsoft-KubePVInventory",
+                                                                "Microsoft-KubeServices",
+                                                                "Microsoft-InsightsMetrics"
+                                                            ],
+                                                            "extensionName": "ContainerInsights"
+                                                        }
+                                                    ]
+                                                },
+                                                "dataFlows": [
+                                                    {
+                                                        "streams": [
+                                                            "Microsoft-Perf",
+                                                            "Microsoft-ContainerInventory",
+                                                            "Microsoft-ContainerLog",
+                                                            "Microsoft-ContainerLogV2",
+                                                            "Microsoft-ContainerNodeInventory",
+                                                            "Microsoft-KubeEvents",
+                                                            "Microsoft-KubeHealth",
+                                                            "Microsoft-KubeMonAgentEvents",
+                                                            "Microsoft-KubeNodeInventory",
+                                                            "Microsoft-KubePodInventory",
+                                                            "Microsoft-KubePVInventory",
+                                                            "Microsoft-KubeServices",
+                                                            "Microsoft-InsightsMetrics"
+                                                        ],
+                                                        "destinations": [
+                                                            "la-workspace"
+                                                        ]
+                                                    }
+                                                ],
+                                                "destinations": {
+                                                    "logAnalytics": [
+                                                        {
+                                                            "workspaceResourceId": workspace_resource_id,
+                                                            "name": "la-workspace"
+                                                        }
+                                                    ]
+                                                }
+                                            }})
+            dcr_url = f"https://management.azure.com/{dcr_resource_id}?api-version=2019-11-01-preview"
+            for _ in range(3):
+                try:
+                    send_raw_request(cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body)
+                    error = None
+                    break
+                except CLIError as e:
+                    error = e
+            else:
+                raise error
+
+        if create_dcra:
+            # only create or delete the association between the DCR and cluster
+            association_body = json.dumps({"location": cluster_region,
+                                           "properties": {
+                                               "dataCollectionRuleId": dcr_resource_id,
+                                               "description": "routes monitoring data to a Log Analytics workspace"
+                                           }})
+            association_url = f"https://management.azure.com/{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/send-to-{workspace_name}?api-version=2019-11-01-preview"
+            for _ in range(3):
+                try:
+                    send_raw_request(cmd.cli_ctx, "PUT" if not remove_monitoring else "DELETE", association_url, body=association_body)
+                    error = None
+                    break
+                except CLIError as e:
+                    error = e
+            else:
+                raise error
+
+    else:
+        # legacy auth with LA workspace solution
+        unix_time_in_millis = int(
+            (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds() * 1000.0)
+
+        solution_deployment_name = 'ContainerInsights-{}'.format(
+            unix_time_in_millis)
+
+        # pylint: disable=line-too-long
+        template = {
+            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "workspaceResourceId": {
+                    "type": "string",
+                    "metadata": {
+                        "description": "Azure Monitor Log Analytics Resource ID"
+                    }
+                },
+                "workspaceRegion": {
+                    "type": "string",
+                    "metadata": {
+                        "description": "Azure Monitor Log Analytics workspace region"
+                    }
+                },
+                "solutionDeploymentName": {
+                    "type": "string",
+                    "metadata": {
+                        "description": "Name of the solution deployment"
+                    }
                 }
+            },
+            "resources": [
+                {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[parameters('solutionDeploymentName')]",
+                    "apiVersion": "2017-05-10",
+                    "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
+                    "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
+                    "properties": {
+                        "mode": "Incremental",
+                        "template": {
+                            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                            "contentVersion": "1.0.0.0",
+                            "parameters": {},
+                            "variables": {},
+                            "resources": [
+                                {
+                                    "apiVersion": "2015-11-01-preview",
+                                    "type": "Microsoft.OperationsManagement/solutions",
+                                    "location": "[parameters('workspaceRegion')]",
+                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                    "properties": {
+                                        "workspaceResourceId": "[parameters('workspaceResourceId')]"
+                                    },
+                                    "plan": {
+                                        "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
+                                        "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
+                                        "promotionCode": "",
+                                        "publisher": "Microsoft"
+                                    }
+                                }
+                            ]
+                        },
+                        "parameters": {}
+                    }
+                }
+            ]
+        }
+
+        params = {
+            "workspaceResourceId": {
+                "value": workspace_resource_id
             },
             "workspaceRegion": {
-                "type": "string",
-                "metadata": {
-                    "description": "Azure Monitor Log Analytics workspace region"
-                }
+                "value": location
             },
             "solutionDeploymentName": {
-                "type": "string",
-                "metadata": {
-                    "description": "Name of the solution deployment"
-                }
+                "value": solution_deployment_name
             }
-        },
-        "resources": [
-            {
-                "type": "Microsoft.Resources/deployments",
-                "name": "[parameters('solutionDeploymentName')]",
-                "apiVersion": "2017-05-10",
-                "subscriptionId": "[split(parameters('workspaceResourceId'),'/')[2]]",
-                "resourceGroup": "[split(parameters('workspaceResourceId'),'/')[4]]",
-                "properties": {
-                    "mode": "Incremental",
-                    "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {},
-                        "variables": {},
-                        "resources": [
-                            {
-                                "apiVersion": "2015-11-01-preview",
-                                "type": "Microsoft.OperationsManagement/solutions",
-                                "location": "[parameters('workspaceRegion')]",
-                                "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                "properties": {
-                                    "workspaceResourceId": "[parameters('workspaceResourceId')]"
-                                },
-                                "plan": {
-                                    "name": "[Concat('ContainerInsights', '(', split(parameters('workspaceResourceId'),'/')[8], ')')]",
-                                    "product": "[Concat('OMSGallery/', 'ContainerInsights')]",
-                                    "promotionCode": "",
-                                    "publisher": "Microsoft"
-                                }
-                            }
-                        ]
-                    },
-                    "parameters": {}
-                }
-            }
-        ]
-    }
-
-    params = {
-        "workspaceResourceId": {
-            "value": workspace_resource_id
-        },
-        "workspaceRegion": {
-            "value": location
-        },
-        "solutionDeploymentName": {
-            "value": solution_deployment_name
         }
-    }
 
-    deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
-    # publish the Container Insights solution to the Log Analytics workspace
-    return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
-                              validate=False, no_wait=False, subscription_id=subscription_id)
+        deployment_name = 'aks-monitoring-{}'.format(unix_time_in_millis)
+        # publish the Container Insights solution to the Log Analytics workspace
+        return _invoke_deployment(cmd, resource_group, deployment_name, template, params,
+                                  validate=False, no_wait=False, subscription_id=subscription_id)
 
 
 def _ensure_aks_service_principal(cli_ctx,
@@ -3009,6 +3102,7 @@ def aks_agentpool_add(cmd,      # pylint: disable=unused-argument,too-many-local
                       min_count=None,
                       max_count=None,
                       enable_cluster_autoscaler=False,
+                      scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
                       node_taints=None,
                       priority=CONST_SCALE_SET_PRIORITY_REGULAR,
                       eviction_policy=CONST_SPOT_EVICTION_POLICY_DELETE,
@@ -3070,6 +3164,7 @@ def aks_agentpool_add(cmd,      # pylint: disable=unused-argument,too-many-local
         node_public_ip_prefix_id=node_public_ip_prefix_id,
         node_taints=taints_array,
         scale_set_priority=priority,
+        scale_down_mode=scale_down_mode,
         upgrade_settings=upgradeSettings,
         enable_encryption_at_host=enable_encryption_at_host,
         enable_ultra_ssd=enable_ultra_ssd,
@@ -3098,7 +3193,7 @@ def aks_agentpool_add(cmd,      # pylint: disable=unused-argument,too-many-local
         agent_pool.linux_os_config = _get_linux_os_config(linux_os_config)
 
     headers = get_aks_custom_headers(aks_custom_headers)
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool, custom_headers=headers)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, agent_pool, headers=headers)
 
 
 def aks_agentpool_scale(cmd,    # pylint: disable=unused-argument
@@ -3116,7 +3211,7 @@ def aks_agentpool_scale(cmd,    # pylint: disable=unused-argument
         raise CLIError(
             "The new node count is the same as the current node count.")
     instance.count = new_node_count  # pylint: disable=no-member
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
 
 def aks_agentpool_upgrade(cmd,  # pylint: disable=unused-argument
@@ -3127,7 +3222,8 @@ def aks_agentpool_upgrade(cmd,  # pylint: disable=unused-argument
                           kubernetes_version='',
                           no_wait=False,
                           node_image_only=False,
-                          max_surge=None):
+                          max_surge=None,
+                          aks_custom_headers=None):
     if kubernetes_version != '' and node_image_only:
         raise CLIError('Conflicting flags. Upgrading the Kubernetes version will also upgrade node image version.'
                        'If you only want to upgrade the node version please use the "--node-image-only" option only.')
@@ -3148,7 +3244,9 @@ def aks_agentpool_upgrade(cmd,  # pylint: disable=unused-argument
     if max_surge:
         instance.upgrade_settings.max_surge = max_surge
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    headers = get_aks_custom_headers(aks_custom_headers)
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=headers)
 
 
 def aks_agentpool_get_upgrade_profile(cmd,   # pylint: disable=unused-argument
@@ -3168,6 +3266,7 @@ def aks_agentpool_update(cmd,   # pylint: disable=unused-argument
                          enable_cluster_autoscaler=False,
                          disable_cluster_autoscaler=False,
                          update_cluster_autoscaler=False,
+                         scale_down_mode=None,
                          min_count=None, max_count=None,
                          max_surge=None,
                          mode=None,
@@ -3176,11 +3275,11 @@ def aks_agentpool_update(cmd,   # pylint: disable=unused-argument
     update_autoscaler = enable_cluster_autoscaler + \
         disable_cluster_autoscaler + update_cluster_autoscaler
 
-    if (update_autoscaler != 1 and not tags and not mode and not max_surge):
+    if (update_autoscaler != 1 and not tags and not scale_down_mode and not mode and not max_surge):
         raise CLIError('Please specify one or more of "--enable-cluster-autoscaler" or '
                        '"--disable-cluster-autoscaler" or '
                        '"--update-cluster-autoscaler" or '
-                       '"--tags" or "--mode" or "--max-surge"')
+                       '"--tags" or "--mode" or "--max-surge" or "--scale-down-mode"')
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
 
@@ -3227,10 +3326,14 @@ def aks_agentpool_update(cmd,   # pylint: disable=unused-argument
         instance.max_count = None
 
     instance.tags = tags
+
+    if scale_down_mode is not None:
+        instance.scale_down_mode = scale_down_mode
+
     if mode is not None:
         instance.mode = mode
 
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance)
 
 
 def aks_agentpool_delete(cmd,   # pylint: disable=unused-argument
@@ -3250,12 +3353,33 @@ def aks_agentpool_delete(cmd,   # pylint: disable=unused-argument
         raise CLIError("Node pool {} doesnt exist, "
                        "use 'aks nodepool list' to get current node pool list".format(nodepool_name))
 
-    return sdk_no_wait(no_wait, client.delete, resource_group_name, cluster_name, nodepool_name)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
 
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    try:
+        if addons == "monitoring" and CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled and \
+                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            # remove the DCR association because otherwise the DCR can't be deleted
+            _ensure_container_insights_for_monitoring(
+                cmd,
+                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                subscription_id,
+                resource_group_name,
+                name,
+                instance.location,
+                remove_monitoring=True,
+                aad_route=True,
+                create_dcr=False,
+                create_dcra=True
+            )
+    except TypeError:
+        pass
 
     instance = _update_addons(
         cmd,
@@ -3269,22 +3393,33 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     )
 
     # send the managed cluster representation to update the addon profiles
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
 
 def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_resource_id=None,
                       subnet_name=None, appgw_name=None, appgw_subnet_prefix=None, appgw_subnet_cidr=None, appgw_id=None, appgw_subnet_id=None,
-                      appgw_watch_namespace=None, enable_sgxquotehelper=False, enable_secret_rotation=False, no_wait=False):
+                      appgw_watch_namespace=None, enable_sgxquotehelper=False, enable_secret_rotation=False, no_wait=False, enable_msi_auth_for_monitoring=False):
+
     instance = client.get(resource_group_name, name)
+    msi_auth = True if instance.service_principal_profile.client_id == "msi" else False  # this is overwritten by _update_addons(), so the value needs to be recorded here
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
     instance = _update_addons(cmd, instance, subscription_id, resource_group_name, name, addons, enable=True,
-                              workspace_resource_id=workspace_resource_id, subnet_name=subnet_name,
+                              workspace_resource_id=workspace_resource_id, enable_msi_auth_for_monitoring=enable_msi_auth_for_monitoring, subnet_name=subnet_name,
                               appgw_name=appgw_name, appgw_subnet_prefix=appgw_subnet_prefix, appgw_subnet_cidr=appgw_subnet_cidr, appgw_id=appgw_id, appgw_subnet_id=appgw_subnet_id, appgw_watch_namespace=appgw_watch_namespace,
                               enable_sgxquotehelper=enable_sgxquotehelper, enable_secret_rotation=enable_secret_rotation, no_wait=no_wait)
 
     if CONST_MONITORING_ADDON_NAME in instance.addon_profiles and instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled:
-        _ensure_container_insights_for_monitoring(
-            cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME])
+        if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
+                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            if not msi_auth:
+                raise ArgumentUsageError("--enable-msi-auth-for-monitoring can not be used on clusters with service principal auth.")
+            else:
+                # create a Data Collection Rule (DCR) and associate it with the cluster
+                _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=True, create_dcr=True, create_dcra=True)
+        else:
+            # monitoring addon will use legacy path
+            _ensure_container_insights_for_monitoring(cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
     monitoring = CONST_MONITORING_ADDON_NAME in instance.addon_profiles and instance.addon_profiles[
         CONST_MONITORING_ADDON_NAME].enabled
@@ -3300,7 +3435,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
     if need_post_creation_role_assignment:
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
-            client.create_or_update(resource_group_name, name, instance))
+            client.begin_create_or_update(resource_group_name, name, instance))
         cloud_name = cmd.cli_ctx.cloud.name
         # mdm metrics supported only in Azure Public cloud so add the role assignment only in this cloud
         if monitoring and cloud_name.lower() == 'azurecloud':
@@ -3325,13 +3460,13 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons, workspace_
             # we don't need to handle it in client side in this case.
 
     else:
-        result = sdk_no_wait(no_wait, client.create_or_update,
+        result = sdk_no_wait(no_wait, client.begin_create_or_update,
                              resource_group_name, name, instance)
     return result
 
 
 def aks_rotate_certs(cmd, client, resource_group_name, name, no_wait=True):     # pylint: disable=unused-argument
-    return sdk_no_wait(no_wait, client.rotate_cluster_certificates, resource_group_name, name)
+    return sdk_no_wait(no_wait, client.begin_rotate_cluster_certificates, resource_group_name, name)
 
 
 def _update_addons(cmd,  # pylint: disable=too-many-branches,too-many-statements
@@ -3342,6 +3477,7 @@ def _update_addons(cmd,  # pylint: disable=too-many-branches,too-many-statements
                    addons,
                    enable,
                    workspace_resource_id=None,
+                   enable_msi_auth_for_monitoring=False,
                    subnet_name=None,
                    appgw_name=None,
                    appgw_subnet_prefix=None,
@@ -3392,8 +3528,8 @@ def _update_addons(cmd,  # pylint: disable=too-many-branches,too-many-statements
                         resource_group_name)
                 workspace_resource_id = _sanitize_loganalytics_ws_resource_id(workspace_resource_id)
 
-                addon_profile.config = {
-                    logAnalyticsConstName: workspace_resource_id}
+                addon_profile.config = {logAnalyticsConstName: workspace_resource_id}
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = enable_msi_auth_for_monitoring
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -3797,11 +3933,11 @@ def _put_managed_cluster_ensuring_permission(
                                           need_grant_vnet_permission_to_cluster_identity)
     if need_post_creation_role_assignment:
         # adding a wait here since we rely on the result for role assignment
-        cluster = LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
+        cluster = LongRunningOperation(cmd.cli_ctx)(client.begin_create_or_update(
             resource_group_name=resource_group_name,
             resource_name=name,
             parameters=managed_cluster,
-            custom_headers=headers))
+            headers=headers))
         cloud_name = cmd.cli_ctx.cloud.name
         # add cluster spn/msi Monitoring Metrics Publisher role assignment to publish metrics to MDM
         # mdm metrics is supported only in azure public cloud, so add the role assignment only in this cloud
@@ -3840,11 +3976,11 @@ def _put_managed_cluster_ensuring_permission(
                                 acr_name_or_id=attach_acr,
                                 subscription_id=subscription_id)
     else:
-        cluster = sdk_no_wait(no_wait, client.create_or_update,
+        cluster = sdk_no_wait(no_wait, client.begin_create_or_update,
                               resource_group_name=resource_group_name,
                               resource_name=name,
                               parameters=managed_cluster,
-                              custom_headers=headers)
+                              headers=headers)
 
     return cluster
 
@@ -3855,6 +3991,8 @@ def _is_msi_cluster(managed_cluster):
 
 
 def _get_kubelet_config(file_path):
+    if not os.path.isfile(file_path):
+        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
     kubelet_config = get_file_json(file_path)
     if not isinstance(kubelet_config, dict):
         raise CLIError(
@@ -3877,12 +4015,16 @@ def _get_kubelet_config(file_path):
     config_object.container_log_max_files = kubelet_config.get(
         "containerLogMaxFiles", None)
     config_object.container_log_max_size_mb = kubelet_config.get(
-        "containerLogMaxSizeMb", None)
+        "containerLogMaxSizeMB", None)
+    config_object.pod_max_pids = kubelet_config.get(
+        "podMaxPids", None)
 
     return config_object
 
 
 def _get_linux_os_config(file_path):
+    if not os.path.isfile(file_path):
+        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
     os_config = get_file_json(file_path)
     if not isinstance(os_config, dict):
         raise CLIError(
@@ -3950,6 +4092,22 @@ def _get_linux_os_config(file_path):
     config_object.sysctls.vm_swappiness = sysctls.get("vmSwappiness", None)
     config_object.sysctls.vm_vfs_cache_pressure = sysctls.get(
         "vmVfsCachePressure", None)
+
+    return config_object
+
+
+def _get_http_proxy_config(file_path):
+    if not os.path.isfile(file_path):
+        raise CLIError("{} is not valid file, or not accessable.".format(file_path))
+    hp_config = get_file_json(file_path)
+    if not isinstance(hp_config, dict):
+        raise CLIError(
+            "Error reading Http Proxy Config at {}. Please see https://aka.ms/HttpProxyConfig for correct format.".format(file_path))
+    config_object = ManagedClusterHTTPProxyConfig()
+    config_object.http_proxy = hp_config.get("httpProxy", None)
+    config_object.https_proxy = hp_config.get("httpsProxy", None)
+    config_object.no_proxy = hp_config.get("noProxy", None)
+    config_object.trusted_ca = hp_config.get("trustedCa", None)
 
     return config_object
 
@@ -4083,7 +4241,7 @@ def aks_pod_identity_add(cmd, client, resource_group_name, cluster_name,
     )
 
     # send the managed cluster represeentation to update the pod identity addon
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, instance)
 
 
 def aks_pod_identity_delete(cmd, client, resource_group_name, cluster_name,
@@ -4107,7 +4265,7 @@ def aks_pod_identity_delete(cmd, client, resource_group_name, cluster_name,
     )
 
     # send the managed cluster represeentation to update the pod identity addon
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, instance)
 
 
 def aks_pod_identity_list(cmd, client, resource_group_name, cluster_name):  # pylint: disable=unused-argument
@@ -4134,7 +4292,7 @@ def aks_pod_identity_exception_add(cmd, client, resource_group_name, cluster_nam
     )
 
     # send the managed cluster represeentation to update the pod identity addon
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, instance)
 
 
 def aks_pod_identity_exception_delete(cmd, client, resource_group_name, cluster_name,
@@ -4157,7 +4315,7 @@ def aks_pod_identity_exception_delete(cmd, client, resource_group_name, cluster_
     )
 
     # send the managed cluster represeentation to update the pod identity addon
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, instance)
 
 
 def aks_pod_identity_exception_update(cmd, client, resource_group_name, cluster_name,
@@ -4188,7 +4346,7 @@ def aks_pod_identity_exception_update(cmd, client, resource_group_name, cluster_
     )
 
     # send the managed cluster represeentation to update the pod identity addon
-    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, cluster_name, instance)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, instance)
 
 
 def aks_pod_identity_exception_list(cmd, client, resource_group_name, cluster_name):

@@ -107,6 +107,9 @@ def load_arguments(self, _):
     with self.argument_context('k8s-configuration flux delete') as c:
         c.argument('force',
                    help='Specify whether to force delete the flux configuration from the cluster.')
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Ignore confirmation prompts')
 
     with self.argument_context('k8s-configuration') as c:
         c.argument('name',

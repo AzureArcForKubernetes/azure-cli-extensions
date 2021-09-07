@@ -2,11 +2,11 @@ trigger:
   batch: true
   branches:
     include:
-      - k8s-config
+      - k8s-configuration
 pr:
   branches:
     include:
-      - k8s-config
+      - k8s-configuration
 
 stages:
 - stage: BuildTestPublishExtension
@@ -14,11 +14,11 @@ stages:
   variables:
     TEST_PATH: $(Agent.BuildDirectory)/s/testing
     CLI_REPO_PATH: $(Agent.BuildDirectory)/s
-    EXTENSION_NAME: "k8s-config"
-    EXTENSION_FILE_NAME: "k8s_config"
+    EXTENSION_NAME: "k8s-configuration"
+    EXTENSION_FILE_NAME: "k8s_configuration"
     SUBSCRIPTION_ID: "15c06b1b-01d6-407b-bb21-740b8617dea3"
     RESOURCE_GROUP: "K8sPartnerExtensionTest"
-    BASE_CLUSTER_NAME: "k8s-config-cluster"
+    BASE_CLUSTER_NAME: "k8s-configuration-cluster"
   jobs:
   - job: K8sConfigurationTestSuite
     displayName: "Run the Test Suite"
@@ -82,7 +82,7 @@ stages:
                           --arg AKS_CLUSTER_NAME "$AKS_CLUSTER_NAME" \
                           --arg ARC_CLUSTER_NAME "$ARC_CLUSTER_NAME" \
                           --arg K8S_CONFIG_VERSION "$K8S_CONFIG_VERSION" \
-                          '{subscriptionId: $SUB_ID, resourceGroup: $RG, aksClusterName: $AKS_CLUSTER_NAME, arcClusterName: $ARC_CLUSTER_NAME, extensionVersion: {"k8s-config": $K8S_CONFIG_VERSION, connectedk8s: "1.0.0"}}')
+                          '{subscriptionId: $SUB_ID, resourceGroup: $RG, aksClusterName: $AKS_CLUSTER_NAME, arcClusterName: $ARC_CLUSTER_NAME, extensionVersion: {"k8s-configuration": $K8S_CONFIG_VERSION, connectedk8s: "1.0.0"}}')
           echo $JSON_STRING > settings.json
           cat settings.json
         workingDirectory: $(TEST_PATH)
@@ -112,7 +112,7 @@ stages:
           scriptType: pscore
           scriptLocation: inlineScript
           inlineScript: |
-            .\Test.ps1 -Type k8s-config -CI
+            .\Test.ps1 -Type k8s-configuration -CI
           workingDirectory: $(TEST_PATH)
         continueOnError: true
 
@@ -140,7 +140,7 @@ stages:
     displayName: "Build and Publish the Extension Artifact"
     variables: 
       CLI_REPO_PATH: $(Agent.BuildDirectory)/s
-      EXTENSION_NAME: "k8s-config"
+      EXTENSION_NAME: "k8s-configuration"
     steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.6'

@@ -9,7 +9,7 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     }
 
     It 'Creates a configuration with helm enabled on the cluster' {
-        $output = az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator --operator-namespace $configurationName --helm-operator-params "--set helm.versions=v3"
+        $output = az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator --operator-namespace $configurationName --helm-operator-params "--set helm.versions=v3"
         $? | Should -BeTrue
 
         # Loop and retry until the configuration installs and helm pod comes up
@@ -30,10 +30,10 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     It "Updates the helm operator params and performs a show" {
         Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
         
-        az k8s-config fluxv1 update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --helm-operator-params $customOperatorParams
+        az k8s-configuration update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --helm-operator-params $customOperatorParams
         $? | Should -BeTrue
 
-        $output = az k8s-config fluxv1 show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        $output = az k8s-configuration show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         $configData = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
@@ -58,10 +58,10 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     It "Updates the helm operator chart version and performs a show" {
         Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
         
-        az k8s-config fluxv1 update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --helm-operator-chart-version $customChartVersion
+        az k8s-configuration update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --helm-operator-chart-version $customChartVersion
         $? | Should -BeTrue
 
-        $output = az k8s-config fluxv1 show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        $output = az k8s-configuration show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         # Check that the helmOperatorProperties chartValues didn't change
@@ -88,10 +88,10 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     It "Disables the helm operator on the cluster" {
         Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
 
-        az k8s-config fluxv1 update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --enable-helm-operator=false
+        az k8s-configuration update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --enable-helm-operator=false
         $? | Should -BeTrue
 
-        $output = az k8s-config fluxv1 show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        $output = az k8s-configuration show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         $helmOperatorEnabled = ($output | ConvertFrom-Json).enableHelmOperator
@@ -113,7 +113,7 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     }
 
     It "Lists the configurations on the cluster" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
@@ -121,16 +121,16 @@ Describe 'Source Control Configuration (Helm Operator Properties) Testing' {
     }
 
     It "Deletes the configuration from the cluster" {
-        az k8s-config fluxv1 delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         # Configuration should be removed from the resource model
-        az k8s-config fluxv1 show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeFalse
     }
 
     It "Performs another list after the delete" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
         $configExists | Should -BeNullOrEmpty
     }

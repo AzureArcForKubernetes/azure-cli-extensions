@@ -13,24 +13,24 @@ helps['k8s-configuration'] = """
 
 helps['k8s-configuration create'] = """
     type: command
-    short-summary: Create a Kubernetes configuration.
+    short-summary: Create a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux create").
     examples:
-      - name: Create a Kubernetes configuration
+      - name: Create a Flux v1 Kubernetes configuration
         text: |-
             az k8s-configuration create --resource-group MyResourceGroup --cluster-name MyClusterName \\
             --cluster-type connectedClusters --name MyGitConfig --operator-instance-name OperatorInst01 \\
             --operator-namespace OperatorNamespace01 --operator-type flux --operator-params "'--git-readonly'" \\
             --repository-url git://github.com/fluxHowTo/flux-get-started --enable-helm-operator  \\
-            --helm-operator-chart-version 1.2.0 --scope namespace --helm-operator-params '--set helm.versions=v3' \\
+            --helm-operator-chart-version 1.4.0 --scope namespace --helm-operator-params '--set helm.versions=v3' \\
             --ssh-private-key '' --ssh-private-key-file '' --https-user '' --https-key '' \\
             --ssh-known-hosts '' --ssh-known-hosts-file ''
 """
 
 helps['k8s-configuration list'] = """
     type: command
-    short-summary: List Kubernetes configurations.
+    short-summary: List Flux v1 Kubernetes configurations (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux list").
     examples:
-      - name: List all Kubernetes configurations of a cluster
+      - name: List Flux v1 Kubernetes configuration
         text: |-
             az k8s-configuration list --resource-group MyResourceGroup --cluster-name MyClusterName \\
             --cluster-type connectedClusters
@@ -38,9 +38,9 @@ helps['k8s-configuration list'] = """
 
 helps['k8s-configuration delete'] = """
     type: command
-    short-summary: Delete a Kubernetes configuration.
+    short-summary: Delete a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux delete").
     examples:
-      - name: Delete a Kubernetes configuration
+      - name: Delete a Flux v1 Kubernetes configuration
         text: |-
             az k8s-configuration delete --resource-group MyResourceGroup --cluster-name MyClusterName \\
             --cluster-type connectedClusters --name MyConfigurationName
@@ -48,9 +48,9 @@ helps['k8s-configuration delete'] = """
 
 helps['k8s-configuration show'] = """
     type: command
-    short-summary: Show details of a Kubernetes configuration.
+    short-summary: Show details of a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux show").
     examples:
-      - name: Show a Kubernetes configuration
+      - name: Show details of a Flux v1 Kubernetes configuration
         text: |-
             az k8s-configuration show --resource-group MyResourceGroup --cluster-name MyClusterName \\
             --cluster-type connectedClusters --name MyConfigurationName
@@ -101,51 +101,4 @@ helps['k8s-configuration flux delete'] = """
         text: |-
           az k8s-configuration flux delete --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters --name myconfig
-"""
-
-helps['k8s-config extension'] = """
-    type: group
-    short-summary: Commands to manage Kubernetes Extensions.
-"""
-
-helps['k8s-config extension create'] = """
-    type: command
-    short-summary: Create a Kubernetes Extension.
-    examples:
-      - name: Create a Kubernetes Extension
-        text: |-
-          az k8s-config extension create --resource-group my-resource-group \\
-          --cluster-name mycluster --cluster-type connectedClusters \\
-          --name myextension --extension-type microsoft.openservicemesh \\
-          --scope cluster --release-train stable
-"""
-
-helps['k8s-config extension list'] = """
-    type: command
-    short-summary: List Kubernetes Extensions.
-    examples:
-      - name: List all Kubernetes Extensions on a cluster
-        text: |-
-          az k8s-config extension list --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters
-"""
-
-helps['k8s-config extension show'] = """
-    type: command
-    short-summary: Show a Kubernetes Extension.
-    examples:
-      - name: Show details of a Kubernetes Extension
-        text: |-
-          az k8s-config extension show --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters --name myextension
-"""
-
-helps['k8s-config extension delete'] = """
-    type: command
-    short-summary: Delete a Kubernetes Extension.
-    examples:
-      - name: Delete an existing Kubernetes Extension
-        text: |-
-          az k8s-config extension delete --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters --name myextension
 """

@@ -10,10 +10,10 @@ Describe 'Azure Monitor Testing' {
     }
 
     It 'Creates the extension and checks that it onboards correctly' {
-        $output = az $Env:K8sExtensionName extension create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName
+        $output = az $Env:K8sExtensionName create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --extension-type $extensionType -n $extensionName
         $? | Should -BeTrue
 
-        $output = az $Env:K8sExtensionName extension show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
+        $output = az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         $? | Should -BeTrue
 
         $isAutoUpgradeMinorVersion = ($output | ConvertFrom-Json).autoUpgradeMinorVersion 
@@ -35,7 +35,7 @@ Describe 'Azure Monitor Testing' {
     }
 
     It "Performs a show on the extension" {
-        $output = az $Env:K8sExtensionName extension show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
+        $output = az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         $? | Should -BeTrue
         $output | Should -Not -BeNullOrEmpty
     }
@@ -43,10 +43,10 @@ Describe 'Azure Monitor Testing' {
     It "Runs an update on the extension on the cluster" {
         Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
 
-        # az $Env:K8sExtensionName extension update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName --auto-upgrade-minor-version false
+        # az $Env:K8sExtensionName update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName --auto-upgrade-minor-version false
         # $? | Should -BeTrue
 
-        # $output = az $Env:K8sExtensionName extension show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
+        # $output = az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         # $? | Should -BeTrue
 
         # $isAutoUpgradeMinorVersion = ($output | ConvertFrom-Json).autoUpgradeMinorVersion 
@@ -71,7 +71,7 @@ Describe 'Azure Monitor Testing' {
     }
 
     It "Lists the extensions on the cluster" {
-        $output = az $Env:K8sExtensionName extension list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az $Env:K8sExtensionName list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         $extensionExists = $output | ConvertFrom-Json | Where-Object { $_.extensionType -eq $extensionType }
@@ -79,16 +79,16 @@ Describe 'Azure Monitor Testing' {
     }
 
     It "Deletes the extension from the cluster" {
-        az $Env:K8sExtensionName extension delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
+        az $Env:K8sExtensionName delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         $? | Should -BeTrue
 
         # Extension should not be found on the cluster
-        az $Env:K8sExtensionName extension show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
+        az $Env:K8sExtensionName show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $extensionName
         $? | Should -BeFalse
     }
 
     It "Performs another list after the delete" {
-        $output = az $Env:K8sExtensionName extension list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az $Env:K8sExtensionName list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $extensionExists = $output | ConvertFrom-Json | Where-Object { $_.extensionType -eq $extensionName }
         $extensionExists | Should -BeNullOrEmpty
     }

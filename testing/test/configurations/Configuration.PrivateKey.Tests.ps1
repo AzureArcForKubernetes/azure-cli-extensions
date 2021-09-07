@@ -4,7 +4,6 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
         . $PSScriptRoot/Helper.ps1
 
         $RSA_KEYPATH = "$TMP_DIRECTORY\rsa.private"
-        $DSA_KEYPATH = "$TMP_DIRECTORY\dsa.private"
         $ECDSA_KEYPATH = "$TMP_DIRECTORY\ecdsa.private"
         $ED25519_KEYPATH = "$TMP_DIRECTORY\ed25519.private"
 
@@ -26,7 +25,8 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
 
     It 'Creates a configuration with each type of ssh private key' {
         foreach($configData in $CONFIG_ARR) {
-            az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --operator-namespace $configData.Item1 --ssh-private-key-file $configData.Item2
+            Write-Host "Creating a configuration of type $($configData.Item1)"
+            az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --operator-namespace $configData.Item1 --ssh-private-key-file $configData.Item2
             $? | Should -BeTrue
         }
     
@@ -48,12 +48,12 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
     }
 
     It 'Fails when trying to create a configuration with ssh url and https auth values' {
-        az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --operator-namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH
+        az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --operator-namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH
         $? | Should -BeFalse
     }
 
     It "Lists the configurations on the cluster" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         foreach ($configData in $CONFIG_ARR) {
@@ -64,17 +64,17 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
 
     It "Deletes the configuration from the cluster" {
         foreach ($configData in $CONFIG_ARR) {
-            az k8s-config fluxv1 delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configData.Item1
+            az k8s-configuration delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configData.Item1
             $? | Should -BeTrue
 
             # Configuration should be removed from the resource model
-            az k8s-config fluxv1 show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configData.Item1
+            az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configData.Item1
             $? | Should -BeFalse
         }
     }
 
     It "Performs another list after the delete" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         foreach ($configData in $CONFIG_ARR) {

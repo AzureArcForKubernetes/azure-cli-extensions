@@ -9,7 +9,7 @@ Describe 'Source Control Configuration (HTTPS) Testing' {
     }
 
     It 'Creates a configuration with https user and https key on the cluster' {
-        $output = az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --https-user $dummyValue --https-key $dummyValue --operator-namespace $configurationName 
+        $output = az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --https-user $dummyValue --https-key $dummyValue --operator-namespace $configurationName 
         $? | Should -BeTrue
 
         # Loop and retry until the configuration installs and helm pod comes up
@@ -30,7 +30,7 @@ Describe 'Source Control Configuration (HTTPS) Testing' {
     }
 
     It "Lists the configurations on the cluster" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
@@ -38,16 +38,16 @@ Describe 'Source Control Configuration (HTTPS) Testing' {
     }
 
     It "Deletes the configuration from the cluster" {
-        az k8s-config fluxv1 delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         # Configuration should be removed from the resource model
-        az k8s-config fluxv1 show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeFalse
     }
 
     It "Performs another list after the delete" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
         $configExists | Should -BeNullOrEmpty
     }

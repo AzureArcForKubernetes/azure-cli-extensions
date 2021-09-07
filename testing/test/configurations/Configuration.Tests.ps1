@@ -6,7 +6,7 @@ Describe 'Basic Source Control Configuration Testing' {
     }
 
     It 'Creates a configuration and checks that it onboards correctly' {
-        az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator=false --operator-namespace $configurationName
+        az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator=false --operator-namespace $configurationName
         $? | Should -BeTrue
 
         # Loop and retry until the configuration installs
@@ -23,7 +23,7 @@ Describe 'Basic Source Control Configuration Testing' {
     }
 
     It "Performs a show on the configuration" {
-        $output = az k8s-config fluxv1 show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
+        $output = az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
         $? | Should -BeTrue
         $output | Should -Not -BeNullOrEmpty
     }
@@ -31,10 +31,10 @@ Describe 'Basic Source Control Configuration Testing' {
     It "Runs an update on the configuration on the cluster" {
         Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
 
-        az k8s-config fluxv1 update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName --enable-helm-operator
+        az k8s-configuration update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName --enable-helm-operator
         $? | Should -BeTrue
 
-        $output = az k8s-config fluxv1 show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        $output = az k8s-configuration show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         $helmOperatorEnabled = ($output | ConvertFrom-Json).enableHelmOperator
@@ -56,12 +56,12 @@ Describe 'Basic Source Control Configuration Testing' {
     }
 
     It "Performs a re-PUT of the configuration on the cluster, with HTTPS in caps" {
-        az k8s-config fluxv1 create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "HTTPS://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator=false --operator-namespace $configurationName
+        az k8s-configuration create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "HTTPS://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --enable-helm-operator=false --operator-namespace $configurationName
         $? | Should -BeTrue
     }
 
     It "Lists the configurations on the cluster" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $? | Should -BeTrue
 
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
@@ -69,16 +69,16 @@ Describe 'Basic Source Control Configuration Testing' {
     }
 
     It "Deletes the configuration from the cluster" {
-        az k8s-config fluxv1 delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration delete -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeTrue
 
         # Configuration should be removed from the resource model
-        az k8s-config fluxv1 show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeFalse
     }
 
     It "Performs another list after the delete" {
-        $output = az k8s-config fluxv1 list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
+        $output = az k8s-configuration list -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters
         $configExists = $output | ConvertFrom-Json | Where-Object { $_.id -Match $configurationName }
         $configExists | Should -BeNullOrEmpty
     }
