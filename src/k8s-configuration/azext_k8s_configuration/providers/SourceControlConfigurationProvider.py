@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ..validators import validate_cc_registration, validate_known_hosts, validate_url_with_params
 from azure.cli.core.azclierror import ResourceNotFoundError
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 
 from .._client_factory import k8s_configuration_sourcecontrol_client
 from ..utils import fix_compliance_state, get_cluster_rp, get_data_from_key_or_file, to_base64
+from ..validators import validate_cc_registration, validate_known_hosts, validate_url_with_params
 from .. import consts
 
 from ..vendored_sdks.v2021_03_01.models import (

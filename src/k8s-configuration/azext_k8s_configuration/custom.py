@@ -5,7 +5,6 @@
 
 # pylint: disable=unused-argument
 
-from .providers.ExtensionProvider import ExtensionProvider
 from .providers.FluxConfigurationProvider import FluxConfigurationProvider
 from .providers.SourceControlConfigurationProvider import SourceControlConfigurationProvider
 from . import consts
@@ -24,6 +23,7 @@ def sourcecontrol_create(cmd, client, resource_group_name, cluster_name, name, r
                            operator_instance_name, operator_namespace, helm_operator_chart_version, operator_type,
                            operator_params, ssh_private_key, ssh_private_key_file, https_user, https_key,
                            ssh_known_hosts, ssh_known_hosts_file, enable_helm_operator, helm_operator_params)
+
 
 def sourcecontrol_show(cmd, client, resource_group_name, cluster_type, cluster_name, name):
     provider = SourceControlConfigurationProvider(cmd)
@@ -89,35 +89,7 @@ def flux_config_create_kustomization(cmd, client, resource_group_name, cluster_t
                                          validation, force)
 
 
-def flux_config_delete(cmd, client, resource_group_name, cluster_type, cluster_name, name, force=False, no_wait=False, yes=False):
+def flux_config_delete(cmd, client, resource_group_name, cluster_type,
+                       cluster_name, name, force=False, no_wait=False, yes=False):
     provider = FluxConfigurationProvider(cmd)
     return provider.delete(resource_group_name, cluster_type, cluster_name, name, force, no_wait, yes)
-
-
-# Extension Methods
-
-def extension_show(cmd, client, resource_group_name, cluster_type, cluster_name, name):
-    provider = ExtensionProvider(cmd)
-    return provider.show(resource_group_name, cluster_type, cluster_name, name)
-
-
-def extension_list(cmd, client, resource_group_name, cluster_type, cluster_name):
-    provider = ExtensionProvider(cmd)
-    return provider.list(resource_group_name, cluster_type, cluster_name)
-
-
-def extension_create(cmd, client, resource_group_name, cluster_type, cluster_name, name,
-                     extension_type, scope=None, auto_upgrade_minor_version=None, release_train=None,
-                     version=None, target_namespace=None, release_namespace=None, configuration_settings=None,
-                     configuration_protected_settings=None, configuration_settings_file=None,
-                     configuration_protected_settings_file=None, tags=None, no_wait=False):
-    provider = ExtensionProvider(cmd)
-    return provider.create(resource_group_name, cluster_type, cluster_name, name, extension_type, scope,
-                           auto_upgrade_minor_version, release_train, version, target_namespace,
-                           release_namespace, configuration_settings, configuration_protected_settings,
-                           configuration_settings_file, configuration_protected_settings_file)
-
-
-def extension_delete(cmd, client, resource_group_name, cluster_type, cluster_name, name, force=False, no_wait=False):
-    provider = ExtensionProvider(cmd)
-    return provider.delete(resource_group_name, cluster_type, cluster_name, name, force, no_wait)

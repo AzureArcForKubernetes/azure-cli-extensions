@@ -5,10 +5,6 @@
 
 # pylint: disable=unused-argument
 
-import os
-from re import L
-from ..confirm import user_confirmation_factory
-
 from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError
 from azure.cli.core.commands import cached_get, cached_put, upsert_to_collection, get_property
 from azure.cli.core.util import sdk_no_wait, user_confirmation
@@ -17,6 +13,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 
+from ..confirm import user_confirmation_factory
 from .._client_factory import (
     cf_resources,
     k8s_configuration_fluxconfig_client,
@@ -146,7 +143,7 @@ class FluxConfigurationProvider:
         )
 
         self._validate_source_control_config_not_installed(resource_group_name, cluster_type, cluster_name)
-        self._validate_extension_install(resource_group_name, cluster_type, cluster_name, no_wait)
+        self._validate_extension_install(resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait)
 
         logger.warning("Creating the flux configuration '%s' in the cluster. This may take a few minutes...", name)
 
@@ -166,7 +163,7 @@ class FluxConfigurationProvider:
         # Validate the extension install if this is not a deferred command
         if not self._is_deferred():
             self._validate_source_control_config_not_installed(resource_group_name, cluster_type, cluster_name)
-            self._validate_extension_install(resource_group_name, cluster_type, cluster_name, no_wait)
+            self._validate_extension_install(resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait)
 
         if kind == consts.GIT:
             dp_source_kind = consts.GIT_REPOSITORY
@@ -210,7 +207,7 @@ class FluxConfigurationProvider:
         # Validate the extension install if this is not a deferred command
         if not self._is_deferred():
             self._validate_source_control_config_not_installed(resource_group_name, cluster_type, cluster_name)
-            self._validate_extension_install(resource_group_name, cluster_type, cluster_name, no_wait=False)
+            self._validate_extension_install(resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait=False)
 
         flux_configuration = cached_get(self.cmd, self.client.get, resource_group_name=resource_group_name,
                                         flux_configuration_name=name, cluster_rp=cluster_rp,
@@ -246,11 +243,14 @@ class FluxConfigurationProvider:
         try:
             config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         except HttpResponseError:
-            logger.warning("No flux configuration with name '%s' found on cluster '%s', so nothing to delete", name, cluster_name)
+            logger.warning("No flux configuration with name '%s' found on cluster '%s', so nothing to delete",
+                           name, cluster_name)
             return None
 
         if has_prune_enabled(config):
-            logger.warning("Prune is enabled on one or more of your kustomizations. Deleting a Flux configuration with prune enabled will also delete the Kubernetes objects deployed by the kustomization(s).")
+            logger.warning("Prune is enabled on one or more of your kustomizations. Deleting a Flux "
+                           "configuration with prune enabled will also delete the Kubernetes objects "
+                           "deployed by the kustomization(s).")
             user_confirmation_factory(self.cmd, yes, "Do you want to continue?")
 
         if not force:
@@ -274,7 +274,7 @@ class FluxConfigurationProvider:
 
     def _validate_extension_install(self, resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait):
         # Validate if the extension is installed, if not, install it
-        extensions = self.extension_provider.list(resource_group_name, cluster_type, cluster_name)
+        extensions = self.extension_client.list(resource_group_name, cluster_rp, cluster_type, cluster_name)
         found_flux_extension = False
         for extension in extensions:
             if extension.extension_type.lower() == consts.FLUX_EXTENSION_TYPE:
@@ -341,10 +341,10 @@ class FluxConfigurationProvider:
         resources = cf_resources(self.cmd.cli_ctx, subscription_id)
 
         cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(subscription_id,
-                                                                                                resource_group_name,
-                                                                                                cluster_rp,
-                                                                                                cluster_type,
-                                                                                                cluster_name)
+                                                                                                   resource_group_name,
+                                                                                                   cluster_rp,
+                                                                                                   cluster_type,
+                                                                                                   cluster_name)
 
         if cluster_rp == consts.MANAGED_RP_NAMESPACE:
             return extension_instance

@@ -18,7 +18,10 @@ def k8s_configuration_fluxconfig_client(cli_ctx, *_):
 
 
 def k8s_configuration_sourcecontrol_client(cli_ctx, *_):
-    return k8s_configuration_client(cli_ctx, api_version=consts.SOURCE_CONTROL_API_VERSION).source_control_configurations
+    return k8s_configuration_client(
+        cli_ctx,
+        api_version=consts.SOURCE_CONTROL_API_VERSION
+    ).source_control_configurations
 
 
 def k8s_configuration_extension_client(cli_ctx, *_):
