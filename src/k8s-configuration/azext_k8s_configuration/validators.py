@@ -27,15 +27,11 @@ logger = get_logger(__name__)
 
 def validate_namespace(namespace):
     if namespace.namespace:
-        __validate_k8s_name(namespace.namespace, "--namespace", 63)
+        __validate_k8s_name(namespace.namespace, "--namespace", 253)
 
 
 def validate_configuration_name(namespace):
     __validate_k8s_name(namespace.name, "--name", 63)
-
-
-def validate_extension_name(namespace):
-    __validate_k8s_cr_name(namespace.name, "--name", 253)
 
 
 def validate_fluxconfig_name(namespace):
@@ -57,7 +53,7 @@ def validate_kustomization(values):
     for item in values:
         key, value = item.split('=', 1)
         if key == "name":
-            __validate_k8s_name(value, key, 63)
+            __validate_k8s_cr_name(value, key, 63)
         elif key in consts.SYNC_INTERVAL_KEYS:
             validate_duration("sync-interval", value)
         elif key in consts.TIMEOUT_KEYS:

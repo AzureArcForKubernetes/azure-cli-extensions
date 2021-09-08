@@ -69,7 +69,7 @@ helps['k8s-configuration flux create'] = """
         text: |-
           az k8s-configuration flux create --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters --name myconfig --scope cluster --namespace my-namespace \\
-          --kind git --url https://github.com/Azure/arc-k8s-demo --branch master --kustomization \\
+          --kind git --url https://github.com/Azure/arc-k8s-demo --branch main --kustomization \\
           name=my-kustomization
 """
 
