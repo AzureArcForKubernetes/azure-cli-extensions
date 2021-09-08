@@ -315,6 +315,7 @@ class FluxConfigurationProvider:
         knownhost_data = get_data_from_key_or_file(known_hosts, known_hosts_file)
         if knownhost_data:
             validate_known_hosts(knownhost_data)
+            knownhost_data = knownhost_data.strip('\n')
 
         # Validate registration with the RP endpoint
         validate_cc_registration(self.cmd)
