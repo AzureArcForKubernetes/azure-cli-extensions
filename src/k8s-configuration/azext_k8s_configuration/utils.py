@@ -24,14 +24,14 @@ def get_cluster_rp(cluster_type):
     raise InvalidArgumentValueError("Error! Cluster type '{}' is not supported".format(cluster_type))
 
 
-def get_data_from_key_or_file(key, filepath):
+def get_data_from_key_or_file(key, filepath, strip_newline=False):
     if key and filepath:
         raise MutuallyExclusiveArgumentError(
             consts.KEY_AND_FILE_TOGETHER_ERROR,
             consts.KEY_AND_FILE_TOGETHER_HELP)
     data = ''
     if filepath:
-        data = read_key_file(filepath)
+        data = read_key_file(filepath, strip_newline)
     elif key:
         data = key
     return data
@@ -48,7 +48,7 @@ def read_config_settings_file(file_path):
         raise Exception("File {} is not a valid JSON file".format(file_path)) from ex
 
 
-def read_key_file(path):
+def read_key_file(path, strip_newline=False):
     try:
         with open(path, "r") as myfile:  # user passed in filename
             data_list = myfile.readlines()  # keeps newline characters intact
@@ -56,6 +56,8 @@ def read_key_file(path):
             if (data_list_len) <= 0:
                 raise Exception("File provided does not contain any data")
             raw_data = ''.join(data_list)
+        if strip_newline:
+            raw_data = raw_data.strip()
         return to_base64(raw_data)
     except Exception as ex:
         raise InvalidArgumentValueError(

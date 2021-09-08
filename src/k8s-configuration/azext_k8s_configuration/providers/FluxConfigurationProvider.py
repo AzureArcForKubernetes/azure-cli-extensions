@@ -312,10 +312,9 @@ class FluxConfigurationProvider:
         validate_duration("--sync-interval", sync_interval)
 
         # Get the known hosts data and validate it
-        knownhost_data = get_data_from_key_or_file(known_hosts, known_hosts_file)
+        knownhost_data = get_data_from_key_or_file(known_hosts, known_hosts_file, strip_newline=True)
         if knownhost_data:
             validate_known_hosts(knownhost_data)
-            knownhost_data = knownhost_data.strip('\n')
 
         # Validate registration with the RP endpoint
         validate_cc_registration(self.cmd)
