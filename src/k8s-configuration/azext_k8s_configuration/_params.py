@@ -109,7 +109,7 @@ def load_arguments(self, _):
                    help='Specify whether to force delete the flux configuration from the cluster.')
         c.argument('yes',
                    options_list=['--yes', '-y'],
-                   help='Ignore confirmation prompts')
+                   help='Do not prompt for confirmation')
 
     with self.argument_context('k8s-configuration') as c:
         c.argument('name',

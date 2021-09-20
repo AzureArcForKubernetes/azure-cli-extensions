@@ -58,14 +58,14 @@ helps['k8s-configuration show'] = """
 
 helps['k8s-configuration flux'] = """
     type: group
-    short-summary: Commands to manage Flux V2 Kubernetes configurations.
+    short-summary: Commands to manage Flux v2 Kubernetes configurations.
 """
 
 helps['k8s-configuration flux create'] = """
     type: command
-    short-summary: Create a Kubernetes Flux Configuration.
+    short-summary: Create a Kubernetes Flux v2 Configuration.
     examples:
-      - name: Create a Kubernetes Flux Configuration
+      - name: Create a Kubernetes v2 Flux Configuration
         text: |-
           az k8s-configuration flux create --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters --name myconfig --scope cluster --namespace my-namespace \\
@@ -75,9 +75,9 @@ helps['k8s-configuration flux create'] = """
 
 helps['k8s-configuration flux list'] = """
     type: command
-    short-summary: List Kubernetes Flux Configurations.
+    short-summary: List Kubernetes Flux v2 Configurations.
     examples:
-      - name: List all Kubernetes Flux Configurations on a cluster
+      - name: List all Kubernetes Flux v2 Configurations on a cluster
         text: |-
           az k8s-configuration flux list --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters
@@ -85,9 +85,9 @@ helps['k8s-configuration flux list'] = """
 
 helps['k8s-configuration flux show'] = """
     type: command
-    short-summary: Show a Kubernetes Flux Configuration.
+    short-summary: Show a Kubernetes Flux v2 Configuration.
     examples:
-      - name: Show details of a Kubernetes Flux Configuration
+      - name: Show details of a Kubernetes Flux v2 Configuration
         text: |-
           az k8s-configuration flux show --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters --name myconfig
@@ -95,9 +95,9 @@ helps['k8s-configuration flux show'] = """
 
 helps['k8s-configuration flux delete'] = """
     type: command
-    short-summary: Delete a Kubernetes Flux Configuration.
+    short-summary: Delete a Kubernetes Flux v2 Configuration.
     examples:
-      - name: Delete an existing Kubernetes Flux Configuration
+      - name: Delete an existing Kubernetes Flux v2 Configuration
         text: |-
           az k8s-configuration flux delete --resource-group my-resource-group --cluster-name mycluster \\
           --cluster-type connectedClusters --name myconfig

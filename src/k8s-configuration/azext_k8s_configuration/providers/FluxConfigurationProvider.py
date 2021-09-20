@@ -277,12 +277,12 @@ class FluxConfigurationProvider:
     def _validate_extension_install(self, resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait):
         # Validate if the extension is installed, if not, install it
         extensions = self.extension_client.list(resource_group_name, cluster_rp, cluster_type, cluster_name)
-        found_flux_extension = False
+        flux_extension = None
         for extension in extensions:
             if extension.extension_type.lower() == consts.FLUX_EXTENSION_TYPE:
-                found_flux_extension = True
+                flux_extension = extension
                 break
-        if not found_flux_extension:
+        if not flux_extension:
             logger.warning("'Microsoft.Flux' extension not found on the cluster, installing it now."
                            " This may take a few minutes...")
 
@@ -303,6 +303,11 @@ class FluxConfigurationProvider:
             sdk_no_wait(no_wait, self.extension_client.begin_create, resource_group_name, cluster_rp, cluster_type,
                         cluster_name, "flux", extension).result()
             logger.warning("'Microsoft.Flux' extension was successfully installed on the cluster")
+        elif flux_extension.provisioning_state != consts.SUCCEEDED:
+            raise DeploymentError(
+                consts.FLUX_EXTENSION_NOT_SUCCEEDED_ERROR,
+                consts.FLUX_EXTENSION_NOT_SUCCEEDED_HELP
+            )
 
     def _validate_and_get_gitrepository(self, url, branch, tag, semver, commit, timeout, sync_interval,
                                         ssh_private_key, ssh_private_key_file, https_user, https_key,
