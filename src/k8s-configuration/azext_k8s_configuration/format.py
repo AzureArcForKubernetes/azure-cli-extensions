@@ -37,7 +37,7 @@ def __get_fluxconfig_table_row(result):
     return OrderedDict([
         ('name', result['name']),
         ('provisioningState', result['provisioningState']),
-        ('syncState', result['syncState']),
+        ('complianceState', result['syncState']),
         ('namespace', result['namespace']),
         ('scope', result['scope']),
         ('lastSyncedTime', result['lastSyncedTime']),
