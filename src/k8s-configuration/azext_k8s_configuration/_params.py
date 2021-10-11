@@ -101,7 +101,7 @@ def load_arguments(self, _):
                    help='Suspend the reconciliation of the source and kustomizations associated with this configuration')
         c.argument('kustomization',
                    action=KustomizationAddAction,
-                   help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'validation', 'force']",
+                   help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force']",
                    nargs='+')
 
     with self.argument_context('k8s-configuration flux delete') as c:
