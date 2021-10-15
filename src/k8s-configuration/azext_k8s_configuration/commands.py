@@ -33,8 +33,12 @@ def load_command_table(self, _):
         g.custom_command('list', "flux_config_list", table_transformer=fluxconfig_list_table_format)
         g.custom_show_command('show', 'flux_config_show', table_transformer=fluxconfig_show_table_format)
         g.custom_command('delete', 'flux_config_delete', confirmation=True, supports_no_wait=True)
-        # g.custom_command('source create', 'flux_config_create_source', supports_local_cache=True)
-        # g.custom_command('kustomization create', 'flux_config_create_kustomization', supports_local_cache=True)
+        g.custom_command('source create', 'flux_config_create_source')
+        g.custom_command('kustomization create', 'flux_config_create_kustomization')
+        g.custom_command('source update', 'flux_config_update_source')
+        g.custom_command('kustomization create', 'flux_config_update_kustomization')
+        g.custom_command('suspend', 'flux_config_suspend', supports_no_wait=True)
+        g.custom_command('unsuspend', 'flux_config_unsuspsned', supports_no_wait=True)
 
     with self.command_group('k8s-configuration', k8s_configuration_sourcecontrol_sdk, client_factory=k8s_configuration_sourcecontrol_client) as g:
         g.custom_command('create', 'sourcecontrol_create', deprecate_info=self.deprecate(redirect='k8s-configuration flux create'))

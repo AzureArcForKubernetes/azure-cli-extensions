@@ -71,7 +71,7 @@ class ExtensionsOperations(object):
         url = self._create_initial.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -180,7 +180,7 @@ class ExtensionsOperations(object):
 
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -242,7 +242,7 @@ class ExtensionsOperations(object):
         url = self.get.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -298,7 +298,7 @@ class ExtensionsOperations(object):
         url = self._delete_initial.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -397,7 +397,7 @@ class ExtensionsOperations(object):
 
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -462,7 +462,7 @@ class ExtensionsOperations(object):
                 url = self.list.metadata['url']  # type: ignore
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
                     'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
                     'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
                     'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),

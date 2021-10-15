@@ -31,7 +31,7 @@ class KustomizationAddAction(argparse._AppendAction):
                     retry_interval = value
                 elif key in consts.TIMEOUT_KEYS:
                     timeout = value
-                elif key != 'validation':
+                else:
                     kwargs[key] = value
             except ValueError as ex:
                 raise InvalidArgumentValueError('usage error: {} KEY=VALUE [KEY=VALUE ...]'

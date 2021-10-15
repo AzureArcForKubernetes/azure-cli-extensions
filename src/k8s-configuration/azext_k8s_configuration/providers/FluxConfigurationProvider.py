@@ -41,8 +41,9 @@ from ..validators import (
     validate_url_with_params
 )
 from .. import consts
-from ..vendored_sdks.v2021_06_01_preview.models import (
+from ..vendored_sdks.v2021_11_01_preview.models import (
     FluxConfiguration,
+    FluxConfigurationPatch,
     GitRepositoryDefinition,
     RepositoryRefDefinition,
     KustomizationDefinition,
@@ -237,6 +238,22 @@ class FluxConfigurationProvider:
                                         cluster_rp=cluster_rp, cluster_resource_name=cluster_type,
                                         cluster_name=cluster_name, setter_arg_name='flux_configuration')
         return get_property(flux_configuration.kustomizations, name)
+
+    def suspend(self, resource_group_name, cluster_type, cluster_name, name, no_wait=False):
+        cluster_rp = get_cluster_rp(cluster_type)
+        flux_configuration_patch = FluxConfigurationPatch(
+            suspend = True
+        )
+        return sdk_no_wait(no_wait, self.client.begin_update, flux_configuration_patch, resource_group_name,
+                           cluster_rp, cluster_type, cluster_name, name)
+
+    def unsuspend(self, resource_group_name, cluster_type, cluster_name, name, no_wait=False):
+        cluster_rp = get_cluster_rp(cluster_type)
+        flux_configuration_patch = FluxConfigurationPatch(
+            suspend = False
+        )
+        return sdk_no_wait(no_wait, self.client.begin_update, flux_configuration_patch, resource_group_name,
+                           cluster_rp, cluster_type, cluster_name, name)
 
     def delete(self, resource_group_name, cluster_type, cluster_name, name, force, no_wait, yes):
         cluster_rp = get_cluster_rp(cluster_type)
