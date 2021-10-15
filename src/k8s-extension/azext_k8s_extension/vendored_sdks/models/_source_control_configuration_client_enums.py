@@ -26,23 +26,6 @@ class _CaseInsensitiveEnumMeta(EnumMeta):
             raise AttributeError(name)
 
 
-class ClusterTypes(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """Cluster types
-    """
-
-    CONNECTED_CLUSTERS = "connectedClusters"
-    MANAGED_CLUSTERS = "managedClusters"
-
-class ComplianceStateType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """The compliance state of the configuration.
-    """
-
-    PENDING = "Pending"
-    COMPLIANT = "Compliant"
-    NONCOMPLIANT = "Noncompliant"
-    INSTALLED = "Installed"
-    FAILED = "Failed"
-
 class CreatedByType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     """The type of identity that created the resource.
     """
@@ -62,11 +45,6 @@ class Enum1(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     MANAGED_CLUSTERS = "managedClusters"
     CONNECTED_CLUSTERS = "connectedClusters"
 
-class Enum5(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-
-    MANAGED_CLUSTERS = "managedClusters"
-    CONNECTED_CLUSTERS = "connectedClusters"
-
 class LevelType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     """Level of the status.
     """
@@ -74,27 +52,6 @@ class LevelType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     ERROR = "Error"
     WARNING = "Warning"
     INFORMATION = "Information"
-
-class MessageLevelType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """Level of the message.
-    """
-
-    ERROR = "Error"
-    WARNING = "Warning"
-    INFORMATION = "Information"
-
-class OperatorScopeType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """Scope at which the operator will be installed.
-    """
-
-    CLUSTER = "cluster"
-    NAMESPACE = "namespace"
-
-class OperatorType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """Type of the operator
-    """
-
-    FLUX = "Flux"
 
 class ProvisioningState(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     """The provisioning state of the extension resource.
@@ -106,13 +63,3 @@ class ProvisioningState(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
     CREATING = "Creating"
     UPDATING = "Updating"
     DELETING = "Deleting"
-
-class ProvisioningStateType(with_metaclass(_CaseInsensitiveEnumMeta, str, Enum)):
-    """The provisioning state of the resource provider.
-    """
-
-    ACCEPTED = "Accepted"
-    DELETING = "Deleting"
-    RUNNING = "Running"
-    SUCCEEDED = "Succeeded"
-    FAILED = "Failed"

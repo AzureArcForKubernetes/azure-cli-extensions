@@ -28,7 +28,7 @@ class SourceControlConfigurationsOperations:
     instantiates it for you and attaches it as an attribute.
 
     :ivar models: Alias to model classes used in this operation group.
-    :type models: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models
+    :type models: ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
@@ -54,21 +54,21 @@ class SourceControlConfigurationsOperations:
     ) -> "_models.SourceControlConfiguration":
         """Gets details of the Source Control Configuration.
 
-        :param resource_group_name: The name of the resource group. The name is case insensitive.
+        :param resource_group_name: The name of the resource group.
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param source_control_configuration_name: Name of the Source Control Configuration.
         :type source_control_configuration_name: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: SourceControlConfiguration, or the result of cls(response)
-        :rtype: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.SourceControlConfiguration
+        :rtype: ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.SourceControlConfiguration
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         cls = kwargs.pop('cls', None)  # type: ClsType["_models.SourceControlConfiguration"]
@@ -76,14 +76,14 @@ class SourceControlConfigurationsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2020-07-01-preview"
         accept = "application/json"
 
         # Construct URL
         url = self.get.metadata['url']  # type: ignore
         path_format_arguments = {
-            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -128,23 +128,23 @@ class SourceControlConfigurationsOperations:
     ) -> "_models.SourceControlConfiguration":
         """Create a new Kubernetes Source Control Configuration.
 
-        :param resource_group_name: The name of the resource group. The name is case insensitive.
+        :param resource_group_name: The name of the resource group.
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param source_control_configuration_name: Name of the Source Control Configuration.
         :type source_control_configuration_name: str
         :param source_control_configuration: Properties necessary to Create KubernetesConfiguration.
-        :type source_control_configuration: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.SourceControlConfiguration
+        :type source_control_configuration: ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.SourceControlConfiguration
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: SourceControlConfiguration, or the result of cls(response)
-        :rtype: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.SourceControlConfiguration
+        :rtype: ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.SourceControlConfiguration
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         cls = kwargs.pop('cls', None)  # type: ClsType["_models.SourceControlConfiguration"]
@@ -152,15 +152,15 @@ class SourceControlConfigurationsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2020-07-01-preview"
         content_type = kwargs.pop("content_type", "application/json")
         accept = "application/json"
 
         # Construct URL
         url = self.create_or_update.metadata['url']  # type: ignore
         path_format_arguments = {
-            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -215,14 +215,14 @@ class SourceControlConfigurationsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2020-07-01-preview"
         accept = "application/json"
 
         # Construct URL
         url = self._delete_initial.metadata['url']  # type: ignore
         path_format_arguments = {
-            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -264,14 +264,14 @@ class SourceControlConfigurationsOperations:
         """This will delete the YAML file used to set up the Source control configuration, thus stopping
         future sync from the source repo.
 
-        :param resource_group_name: The name of the resource group. The name is case insensitive.
+        :param resource_group_name: The name of the resource group.
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param source_control_configuration_name: Name of the Source Control Configuration.
@@ -312,8 +312,8 @@ class SourceControlConfigurationsOperations:
                 return cls(pipeline_response, None, {})
 
         path_format_arguments = {
-            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -344,19 +344,19 @@ class SourceControlConfigurationsOperations:
     ) -> AsyncIterable["_models.SourceControlConfigurationList"]:
         """List all Source Control Configurations.
 
-        :param resource_group_name: The name of the resource group. The name is case insensitive.
+        :param resource_group_name: The name of the resource group.
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: An iterator like instance of either SourceControlConfigurationList or the result of cls(response)
-        :rtype: ~azure.core.async_paging.AsyncItemPaged[~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.SourceControlConfigurationList]
+        :rtype: ~azure.core.async_paging.AsyncItemPaged[~azure.mgmt.kubernetesconfiguration.v2020_07_01_preview.models.SourceControlConfigurationList]
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         cls = kwargs.pop('cls', None)  # type: ClsType["_models.SourceControlConfigurationList"]
@@ -364,7 +364,7 @@ class SourceControlConfigurationsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2020-07-01-preview"
         accept = "application/json"
 
         def prepare_request(next_link=None):
@@ -376,8 +376,8 @@ class SourceControlConfigurationsOperations:
                 # Construct URL
                 url = self.list.metadata['url']  # type: ignore
                 path_format_arguments = {
-                    'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                    'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str'),
+                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
                     'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
                     'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
                     'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),

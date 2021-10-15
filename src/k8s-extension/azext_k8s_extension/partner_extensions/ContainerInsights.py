@@ -57,9 +57,9 @@ class ContainerInsights(DefaultExtension):
         _get_container_insights_settings(cmd, resource_group_name, cluster_name, configuration_settings,
                                          configuration_protected_settings, is_ci_extension_type)
 
-        # NOTE-2: Return a valid ExtensionInstance object, Instance name and flag for Identity
+        # NOTE-2: Return a valid Extension object, Instance name and flag for Identity
         create_identity = True
-        extension_instance = Extension(
+        extension = Extension(
             extension_type=extension_type,
             auto_upgrade_minor_version=auto_upgrade_minor_version,
             release_train=release_train,
@@ -68,7 +68,7 @@ class ContainerInsights(DefaultExtension):
             configuration_settings=configuration_settings,
             configuration_protected_settings=configuration_protected_settings
         )
-        return extension_instance, name, create_identity
+        return extension, name, create_identity
 
 
 # Custom Validation Logic for Container Insights

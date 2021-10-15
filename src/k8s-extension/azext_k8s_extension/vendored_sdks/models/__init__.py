@@ -7,22 +7,17 @@
 # --------------------------------------------------------------------------
 
 try:
-    from ._models_py3 import ClusterScopeSettings
-    from ._models_py3 import ComplianceStatus
     from ._models_py3 import ErrorAdditionalInfo
     from ._models_py3 import ErrorDetail
     from ._models_py3 import ErrorResponse
     from ._models_py3 import Extension
+    from ._models_py3 import ExtensionPropertiesAksAssignedIdentity
     from ._models_py3 import ExtensionStatus
-    from ._models_py3 import ExtensionType
-    from ._models_py3 import ExtensionTypeList
-    from ._models_py3 import ExtensionVersionList
-    from ._models_py3 import ExtensionVersionListVersionsItem
     from ._models_py3 import ExtensionsList
-    from ._models_py3 import HelmOperatorProperties
     from ._models_py3 import Identity
     from ._models_py3 import OperationStatusList
     from ._models_py3 import OperationStatusResult
+    from ._models_py3 import PatchExtension
     from ._models_py3 import ProxyResource
     from ._models_py3 import Resource
     from ._models_py3 import ResourceProviderOperation
@@ -31,27 +26,19 @@ try:
     from ._models_py3 import Scope
     from ._models_py3 import ScopeCluster
     from ._models_py3 import ScopeNamespace
-    from ._models_py3 import SourceControlConfiguration
-    from ._models_py3 import SourceControlConfigurationList
-    from ._models_py3 import SupportedScopes
     from ._models_py3 import SystemData
 except (SyntaxError, ImportError):
-    from ._models import ClusterScopeSettings  # type: ignore
-    from ._models import ComplianceStatus  # type: ignore
     from ._models import ErrorAdditionalInfo  # type: ignore
     from ._models import ErrorDetail  # type: ignore
     from ._models import ErrorResponse  # type: ignore
     from ._models import Extension  # type: ignore
+    from ._models import ExtensionPropertiesAksAssignedIdentity  # type: ignore
     from ._models import ExtensionStatus  # type: ignore
-    from ._models import ExtensionType  # type: ignore
-    from ._models import ExtensionTypeList  # type: ignore
-    from ._models import ExtensionVersionList  # type: ignore
-    from ._models import ExtensionVersionListVersionsItem  # type: ignore
     from ._models import ExtensionsList  # type: ignore
-    from ._models import HelmOperatorProperties  # type: ignore
     from ._models import Identity  # type: ignore
     from ._models import OperationStatusList  # type: ignore
     from ._models import OperationStatusResult  # type: ignore
+    from ._models import PatchExtension  # type: ignore
     from ._models import ProxyResource  # type: ignore
     from ._models import Resource  # type: ignore
     from ._models import ResourceProviderOperation  # type: ignore
@@ -60,43 +47,28 @@ except (SyntaxError, ImportError):
     from ._models import Scope  # type: ignore
     from ._models import ScopeCluster  # type: ignore
     from ._models import ScopeNamespace  # type: ignore
-    from ._models import SourceControlConfiguration  # type: ignore
-    from ._models import SourceControlConfigurationList  # type: ignore
-    from ._models import SupportedScopes  # type: ignore
     from ._models import SystemData  # type: ignore
 
 from ._source_control_configuration_client_enums import (
-    ClusterTypes,
-    ComplianceStateType,
     CreatedByType,
     Enum0,
     Enum1,
-    Enum5,
     LevelType,
-    MessageLevelType,
-    OperatorScopeType,
-    OperatorType,
     ProvisioningState,
-    ProvisioningStateType,
 )
 
 __all__ = [
-    'ClusterScopeSettings',
-    'ComplianceStatus',
     'ErrorAdditionalInfo',
     'ErrorDetail',
     'ErrorResponse',
     'Extension',
+    'ExtensionPropertiesAksAssignedIdentity',
     'ExtensionStatus',
-    'ExtensionType',
-    'ExtensionTypeList',
-    'ExtensionVersionList',
-    'ExtensionVersionListVersionsItem',
     'ExtensionsList',
-    'HelmOperatorProperties',
     'Identity',
     'OperationStatusList',
     'OperationStatusResult',
+    'PatchExtension',
     'ProxyResource',
     'Resource',
     'ResourceProviderOperation',
@@ -105,20 +77,10 @@ __all__ = [
     'Scope',
     'ScopeCluster',
     'ScopeNamespace',
-    'SourceControlConfiguration',
-    'SourceControlConfigurationList',
-    'SupportedScopes',
     'SystemData',
-    'ClusterTypes',
-    'ComplianceStateType',
     'CreatedByType',
     'Enum0',
     'Enum1',
-    'Enum5',
     'LevelType',
-    'MessageLevelType',
-    'OperatorScopeType',
-    'OperatorType',
     'ProvisioningState',
-    'ProvisioningStateType',
 ]

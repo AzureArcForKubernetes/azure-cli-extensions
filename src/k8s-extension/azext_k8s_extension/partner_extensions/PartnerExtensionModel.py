@@ -5,6 +5,7 @@
 
 from abc import ABC, abstractmethod
 from ..vendored_sdks.models import Extension
+from ..vendored_sdks.models import PatchExtension
 
 
 class PartnerExtensionModel(ABC):
@@ -17,8 +18,8 @@ class PartnerExtensionModel(ABC):
         pass
 
     @abstractmethod
-    def Update(self, extension: Extension, auto_upgrade_minor_version: bool,
-               release_train: str, version: str) -> Extension:
+    def Update(self, auto_upgrade_minor_version: bool, release_train: str, version: str,
+               configuration_settings: dict, configuration_protected_settings: dict) -> PatchExtension:
         pass
 
     @abstractmethod

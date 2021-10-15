@@ -28,7 +28,7 @@ class ExtensionsOperations:
     instantiates it for you and attaches it as an attribute.
 
     :ivar models: Alias to model classes used in this operation group.
-    :type models: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models
+    :type models: ~azure.mgmt.kubernetesconfiguration.models
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
@@ -58,7 +58,7 @@ class ExtensionsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2021-09-01"
         content_type = kwargs.pop("content_type", "application/json")
         accept = "application/json"
 
@@ -66,7 +66,7 @@ class ExtensionsOperations:
         url = self._create_initial.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -123,16 +123,16 @@ class ExtensionsOperations:
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param extension_name: Name of the Extension.
         :type extension_name: str
         :param extension: Properties necessary to Create an Extension.
-        :type extension: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Extension
+        :type extension: ~azure.mgmt.kubernetesconfiguration.models.Extension
         :keyword callable cls: A custom type or function that will be passed the direct response
         :keyword str continuation_token: A continuation token to restart a poller from a saved state.
         :keyword polling: By default, your polling method will be AsyncARMPolling.
@@ -140,7 +140,7 @@ class ExtensionsOperations:
         :paramtype polling: bool or ~azure.core.polling.AsyncPollingMethod
         :keyword int polling_interval: Default waiting time between two polls for LRO operations if no Retry-After header is present.
         :return: An instance of AsyncLROPoller that returns either Extension or the result of cls(response)
-        :rtype: ~azure.core.polling.AsyncLROPoller[~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Extension]
+        :rtype: ~azure.core.polling.AsyncLROPoller[~azure.mgmt.kubernetesconfiguration.models.Extension]
         :raises ~azure.core.exceptions.HttpResponseError:
         """
         polling = kwargs.pop('polling', True)  # type: Union[bool, AsyncPollingMethod]
@@ -174,7 +174,7 @@ class ExtensionsOperations:
 
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -210,17 +210,17 @@ class ExtensionsOperations:
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param extension_name: Name of the Extension.
         :type extension_name: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: Extension, or the result of cls(response)
-        :rtype: ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Extension
+        :rtype: ~azure.mgmt.kubernetesconfiguration.models.Extension
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         cls = kwargs.pop('cls', None)  # type: ClsType["_models.Extension"]
@@ -228,14 +228,14 @@ class ExtensionsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2021-09-01"
         accept = "application/json"
 
         # Construct URL
         url = self.get.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -283,14 +283,14 @@ class ExtensionsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2021-09-01"
         accept = "application/json"
 
         # Construct URL
         url = self._delete_initial.metadata['url']  # type: ignore
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -339,10 +339,10 @@ class ExtensionsOperations:
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :param extension_name: Name of the Extension.
@@ -388,7 +388,7 @@ class ExtensionsOperations:
 
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
             'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
             'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
             'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
@@ -409,6 +409,156 @@ class ExtensionsOperations:
             return AsyncLROPoller(self._client, raw_result, get_long_running_output, polling_method)
     begin_delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{clusterRp}/{clusterResourceName}/{clusterName}/providers/Microsoft.KubernetesConfiguration/extensions/{extensionName}'}  # type: ignore
 
+    async def _update_initial(
+        self,
+        resource_group_name: str,
+        cluster_rp: Union[str, "_models.Enum0"],
+        cluster_resource_name: Union[str, "_models.Enum1"],
+        cluster_name: str,
+        extension_name: str,
+        patch_extension: "_models.PatchExtension",
+        **kwargs: Any
+    ) -> "_models.Extension":
+        cls = kwargs.pop('cls', None)  # type: ClsType["_models.Extension"]
+        error_map = {
+            401: ClientAuthenticationError,
+            404: ResourceNotFoundError,
+            409: lambda response: ResourceExistsError(response=response, model=self._deserialize(_models.ErrorResponse, response), error_format=ARMErrorFormat),
+        }
+        error_map.update(kwargs.pop('error_map', {}))
+        api_version = "2021-09-01"
+        content_type = kwargs.pop("content_type", "application/json")
+        accept = "application/json"
+
+        # Construct URL
+        url = self._update_initial.metadata['url']  # type: ignore
+        path_format_arguments = {
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
+            'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
+            'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
+            'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
+            'extensionName': self._serialize.url("extension_name", extension_name, 'str'),
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}  # type: Dict[str, Any]
+        query_parameters['api-version'] = self._serialize.query("api_version", api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}  # type: Dict[str, Any]
+        header_parameters['Content-Type'] = self._serialize.header("content_type", content_type, 'str')
+        header_parameters['Accept'] = self._serialize.header("accept", accept, 'str')
+
+        body_content_kwargs = {}  # type: Dict[str, Any]
+        body_content = self._serialize.body(patch_extension, 'PatchExtension')
+        body_content_kwargs['content'] = body_content
+        request = self._client.patch(url, query_parameters, header_parameters, **body_content_kwargs)
+        pipeline_response = await self._client._pipeline.run(request, stream=False, **kwargs)
+        response = pipeline_response.http_response
+
+        if response.status_code not in [202]:
+            map_error(status_code=response.status_code, response=response, error_map=error_map)
+            error = self._deserialize.failsafe_deserialize(_models.ErrorResponse, response)
+            raise HttpResponseError(response=response, model=error, error_format=ARMErrorFormat)
+
+        deserialized = self._deserialize('Extension', pipeline_response)
+
+        if cls:
+            return cls(pipeline_response, deserialized, {})
+
+        return deserialized
+    _update_initial.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{clusterRp}/{clusterResourceName}/{clusterName}/providers/Microsoft.KubernetesConfiguration/extensions/{extensionName}'}  # type: ignore
+
+    async def begin_update(
+        self,
+        resource_group_name: str,
+        cluster_rp: Union[str, "_models.Enum0"],
+        cluster_resource_name: Union[str, "_models.Enum1"],
+        cluster_name: str,
+        extension_name: str,
+        patch_extension: "_models.PatchExtension",
+        **kwargs: Any
+    ) -> AsyncLROPoller["_models.Extension"]:
+        """Patch an existing Kubernetes Cluster Extension.
+
+        :param resource_group_name: The name of the resource group. The name is case insensitive.
+        :type resource_group_name: str
+        :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
+         clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.models.Enum0
+        :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
+         (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.models.Enum1
+        :param cluster_name: The name of the kubernetes cluster.
+        :type cluster_name: str
+        :param extension_name: Name of the Extension.
+        :type extension_name: str
+        :param patch_extension: Properties to Patch in an existing Extension.
+        :type patch_extension: ~azure.mgmt.kubernetesconfiguration.models.PatchExtension
+        :keyword callable cls: A custom type or function that will be passed the direct response
+        :keyword str continuation_token: A continuation token to restart a poller from a saved state.
+        :keyword polling: By default, your polling method will be AsyncARMPolling.
+         Pass in False for this operation to not poll, or pass in your own initialized polling object for a personal polling strategy.
+        :paramtype polling: bool or ~azure.core.polling.AsyncPollingMethod
+        :keyword int polling_interval: Default waiting time between two polls for LRO operations if no Retry-After header is present.
+        :return: An instance of AsyncLROPoller that returns either Extension or the result of cls(response)
+        :rtype: ~azure.core.polling.AsyncLROPoller[~azure.mgmt.kubernetesconfiguration.models.Extension]
+        :raises ~azure.core.exceptions.HttpResponseError:
+        """
+        polling = kwargs.pop('polling', True)  # type: Union[bool, AsyncPollingMethod]
+        cls = kwargs.pop('cls', None)  # type: ClsType["_models.Extension"]
+        lro_delay = kwargs.pop(
+            'polling_interval',
+            self._config.polling_interval
+        )
+        cont_token = kwargs.pop('continuation_token', None)  # type: Optional[str]
+        if cont_token is None:
+            raw_result = await self._update_initial(
+                resource_group_name=resource_group_name,
+                cluster_rp=cluster_rp,
+                cluster_resource_name=cluster_resource_name,
+                cluster_name=cluster_name,
+                extension_name=extension_name,
+                patch_extension=patch_extension,
+                cls=lambda x,y,z: x,
+                **kwargs
+            )
+
+        kwargs.pop('error_map', None)
+        kwargs.pop('content_type', None)
+
+        def get_long_running_output(pipeline_response):
+            deserialized = self._deserialize('Extension', pipeline_response)
+
+            if cls:
+                return cls(pipeline_response, deserialized, {})
+            return deserialized
+
+        path_format_arguments = {
+            'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
+            'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
+            'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
+            'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),
+            'extensionName': self._serialize.url("extension_name", extension_name, 'str'),
+        }
+
+        if polling is True: polling_method = AsyncARMPolling(lro_delay, lro_options={'final-state-via': 'azure-async-operation'}, path_format_arguments=path_format_arguments,  **kwargs)
+        elif polling is False: polling_method = AsyncNoPolling()
+        else: polling_method = polling
+        if cont_token:
+            return AsyncLROPoller.from_continuation_token(
+                polling_method=polling_method,
+                continuation_token=cont_token,
+                client=self._client,
+                deserialization_callback=get_long_running_output
+            )
+        else:
+            return AsyncLROPoller(self._client, raw_result, get_long_running_output, polling_method)
+    begin_update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{clusterRp}/{clusterResourceName}/{clusterName}/providers/Microsoft.KubernetesConfiguration/extensions/{extensionName}'}  # type: ignore
+
     def list(
         self,
         resource_group_name: str,
@@ -423,15 +573,15 @@ class ExtensionsOperations:
         :type resource_group_name: str
         :param cluster_rp: The Kubernetes cluster RP - either Microsoft.ContainerService (for AKS
          clusters) or Microsoft.Kubernetes (for OnPrem K8S clusters).
-        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum0
+        :type cluster_rp: str or ~azure.mgmt.kubernetesconfiguration.models.Enum0
         :param cluster_resource_name: The Kubernetes cluster resource name - either managedClusters
          (for AKS clusters) or connectedClusters (for OnPrem K8S clusters).
-        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.Enum1
+        :type cluster_resource_name: str or ~azure.mgmt.kubernetesconfiguration.models.Enum1
         :param cluster_name: The name of the kubernetes cluster.
         :type cluster_name: str
         :keyword callable cls: A custom type or function that will be passed the direct response
         :return: An iterator like instance of either ExtensionsList or the result of cls(response)
-        :rtype: ~azure.core.async_paging.AsyncItemPaged[~azure.mgmt.kubernetesconfiguration.v2021_05_01_preview.models.ExtensionsList]
+        :rtype: ~azure.core.async_paging.AsyncItemPaged[~azure.mgmt.kubernetesconfiguration.models.ExtensionsList]
         :raises: ~azure.core.exceptions.HttpResponseError
         """
         cls = kwargs.pop('cls', None)  # type: ClsType["_models.ExtensionsList"]
@@ -439,7 +589,7 @@ class ExtensionsOperations:
             401: ClientAuthenticationError, 404: ResourceNotFoundError, 409: ResourceExistsError
         }
         error_map.update(kwargs.pop('error_map', {}))
-        api_version = "2021-05-01-preview"
+        api_version = "2021-09-01"
         accept = "application/json"
 
         def prepare_request(next_link=None):
@@ -452,7 +602,7 @@ class ExtensionsOperations:
                 url = self.list.metadata['url']  # type: ignore
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self._config.subscription_id", self._config.subscription_id, 'str', min_length=1),
-                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1, pattern=r'^[-\w\._\(\)]+$'),
+                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str', max_length=90, min_length=1),
                     'clusterRp': self._serialize.url("cluster_rp", cluster_rp, 'str'),
                     'clusterResourceName': self._serialize.url("cluster_resource_name", cluster_resource_name, 'str'),
                     'clusterName': self._serialize.url("cluster_name", cluster_name, 'str'),

@@ -5,8 +5,7 @@
 
 from azure.cli.core.commands.parameters import (
     get_enum_type,
-    get_three_state_flag,
-    tags_type
+    get_three_state_flag
 )
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from . import consts
@@ -19,7 +18,6 @@ from .action import (
 
 def load_arguments(self, _):
     with self.argument_context(consts.EXTENSION_NAME) as c:
-        c.argument('tags', tags_type)
         c.argument('location',
                    validator=get_default_location_from_resource_group)
         c.argument('name',

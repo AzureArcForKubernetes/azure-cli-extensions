@@ -3,6 +3,13 @@
 Release History
 ===============
 
+1.0.0
+++++++++++++++++++
+* Switch to GA api-version of Extensions (2021-09-01)
+* Support Extensions PATCH
+* Enable Dapr extension type
+* Enable ManagedClusters clusterType
+
 0.7.1
 ++++++++++++++++++
 * Fix DF resource manager endpoint check
@@ -27,7 +34,7 @@ Release History
 
 0.5.1
 ++++++++++++++++++
-* Remove pyhelm dependency from osm customization
+* Remove pyhelm dependency
 
 0.5.0
 ++++++++++++++++++
