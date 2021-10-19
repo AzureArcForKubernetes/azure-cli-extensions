@@ -39,33 +39,6 @@ Describe 'AzureML Kubernetes Testing' {
         $relayResourceID | Should -Not -BeNullOrEmpty
     }
 
-    It "Runs an update on the extension on the cluster" {
-        Set-ItResult -Skipped -Because "Update is not a valid scenario for now"
-        az k8s-extension update --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --name $extensionName --auto-upgrade-minor-version false
-        $? | Should -BeTrue
-
-        $output = az k8s-extension show --cluster-name $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters --name $extensionName
-        $? | Should -BeTrue
-
-        $isAutoUpgradeMinorVersion = ($output | ConvertFrom-Json).autoUpgradeMinorVersion 
-        $isAutoUpgradeMinorVersion.ToString() -eq "False" | Should -BeTrue
-
-        # Loop and retry until the extension config updates
-        $n = 0
-        do 
-        {
-            $isAutoUpgradeMinorVersion = (Get-ExtensionData $extensionName).spec.autoUpgradeMinorVersion
-            if (!$isAutoUpgradeMinorVersion) {  #autoUpgradeMinorVersion doesn't exist in ExtensionConfig CRD if false
-                if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
-                    break
-                }
-            }
-            Start-Sleep -Seconds 20
-            $n += 1
-        } while ($n -le $MAX_RETRY_ATTEMPTS)
-        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
-    }
-
     It "Performs a show on the extension" {
         $output = Invoke-Expression "az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName" -ErrorVariable badOut
         $badOut | Should -BeNullOrEmpty

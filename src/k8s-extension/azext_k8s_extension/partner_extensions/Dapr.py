@@ -7,8 +7,6 @@
 # pylint: disable=line-too-long
 # pylint: disable=too-many-locals
 
-from azure.cli.core.azclierror import InvalidArgumentValueError
-
 from .DefaultExtension import DefaultExtension
 
 from ..vendored_sdks.models import (

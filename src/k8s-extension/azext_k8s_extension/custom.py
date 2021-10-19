@@ -162,10 +162,10 @@ def update_k8s_extension(cmd, client, resource_group_name, cluster_name, name, c
                          no_wait=False, yes=False):
     """Patch an existing Extension Instance.
     """
-    msg = ('Updating properties in Configsettings or Configprotectedsettings may lead to undesirable state'
+    msg = ('Updating properties in --config-settings or --config-protected-settings may lead to undesirable state'
            ' if the cluster extension type does not support it. Please refer to the documentation of the'
-           ' cluster extension service to check if update to these properties is supported.'
-           ' Do you wish to proceed? (y/n)')
+           ' cluster extension service to check if updates to these properties is supported.'
+           ' Do you wish to proceed?')
     user_confirmation_factory(cmd, yes, msg)
 
     # Determine ClusterRP
@@ -200,7 +200,7 @@ def update_k8s_extension(cmd, client, resource_group_name, cluster_name, name, c
     # Get the extension class based on the extension type
     extension_class = ExtensionFactory(extension_type_lower)
 
-    upd_extension = extension_class.Update(cmd, auto_upgrade_minor_version, release_train, version,
+    upd_extension = extension_class.Update(auto_upgrade_minor_version, release_train, version,
                                            configuration_settings, configuration_protected_settings)
 
     return sdk_no_wait(no_wait, client.begin_update, resource_group_name, cluster_rp, cluster_type,

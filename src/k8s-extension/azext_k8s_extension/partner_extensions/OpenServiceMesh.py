@@ -20,7 +20,6 @@ from .DefaultExtension import DefaultExtension
 
 from ..vendored_sdks.models import (
     Extension,
-    PatchExtension,
     ScopeCluster,
     Scope
 )
@@ -66,25 +65,6 @@ class OpenServiceMesh(DefaultExtension):
             location=""
         )
         return extension, name, create_identity
-
-    def Update(self, auto_upgrade_minor_version, release_train, version, configuration_settings,
-               configuration_protected_settings):
-        """ExtensionType 'microsoft.openservicemesh' specific validations & defaults for Update
-           Must create and return a valid 'PatchExtension' object.
-        """
-        #  auto-upgrade-minor-version MUST be set to False if release_train is staging or pilot
-        if release_train.lower() in ['staging', 'pilot']:
-            if auto_upgrade_minor_version or auto_upgrade_minor_version is None:
-                auto_upgrade_minor_version = False
-                # Set version to None to always get the latest version - user cannot override
-                version = None
-                logger.warning("Setting auto-upgrade-minor-version to False since release-train is '%s'", release_train)
-
-        return PatchExtension(
-            auto_upgrade_minor_version=auto_upgrade_minor_version,
-            release_train=release_train,
-            version=version
-        )
 
 
 def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version):
