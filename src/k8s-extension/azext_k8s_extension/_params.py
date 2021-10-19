@@ -72,6 +72,11 @@ def load_arguments(self, _):
         c.argument('target_namespace',
                    help='Specify the target namespace to install to for the extension instance. This'
                    ' parameter is required if extension scope is set to \'namespace\'')
+    
+    with self.argument_context(f"{consts.EXTENSION_NAME} update") as c:
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Ignore confirmation prompts')
 
     with self.argument_context(f"{consts.EXTENSION_NAME} delete") as c:
         c.argument('yes',

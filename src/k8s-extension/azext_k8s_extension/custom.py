@@ -22,7 +22,7 @@ from .partner_extensions.AzureDefender import AzureDefender
 from .partner_extensions.OpenServiceMesh import OpenServiceMesh
 from .partner_extensions.AzureMLKubernetes import AzureMLKubernetes
 from .partner_extensions.Dapr import Dapr
-from .partner_extensions.DefaultExtension import DefaultExtension
+from .partner_extensions.DefaultExtension import DefaultExtension, user_confirmation_factory
 from . import consts
 
 from ._client_factory import cf_resources
@@ -159,16 +159,14 @@ def update_k8s_extension(cmd, client, resource_group_name, cluster_name, name, c
                          auto_upgrade_minor_version='', release_train='', version='',
                          configuration_settings=None, configuration_protected_settings=None,
                          configuration_settings_file=None, configuration_protected_settings_file=None,
-                         no_wait=False):
+                         no_wait=False, yes=False):
     """Patch an existing Extension Instance.
     """
     msg = ('Updating properties in Configsettings or Configprotectedsettings may lead to undesirable state'
            ' if the cluster extension type does not support it. Please refer to the documentation of the'
            ' cluster extension service to check if update to these properties is supported.'
            ' Do you wish to proceed? (y/n)')
-    from knack.prompting import prompt_y_n
-    if not prompt_y_n(msg, default="n"):
-        return None
+    user_confirmation_factory(cmd, yes, msg)
 
     # Determine ClusterRP
     cluster_rp = __get_cluster_rp(cluster_type)
