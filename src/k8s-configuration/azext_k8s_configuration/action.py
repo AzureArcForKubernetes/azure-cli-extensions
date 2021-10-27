@@ -6,10 +6,15 @@
 
 import argparse
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
-from .vendored_sdks.v2021_06_01_preview.models import KustomizationDefinition
+from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition
 from .validators import validate_kustomization
 from . import consts
 from .utils import parse_dependencies, get_duration
+
+
+class InternalKustomizationDefinition(KustomizationDefinition):
+    def __init__(self, **kwargs):
+        self.name = kwargs.get('name', "")
 
 
 class KustomizationAddAction(argparse._AppendAction):
@@ -39,7 +44,7 @@ class KustomizationAddAction(argparse._AppendAction):
         super().__call__(
             parser,
             namespace,
-            KustomizationDefinition(
+            InternalKustomizationDefinition(
                 depends_on=dependencies,
                 sync_interval_in_seconds=get_duration(sync_interval),
                 retry_interval_in_seconds=get_duration(retry_interval),

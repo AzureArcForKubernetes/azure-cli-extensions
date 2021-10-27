@@ -9,6 +9,7 @@
 
 SOURCE_CONTROL_API_VERSION = '2021-03-01'
 FLUXCONFIG_API_VERSION = '2021-11-01-preview'
+EXTENSION_API_VERSION = "2021-09-01"
 
 # ERROR/HELP TEXT DEFINITIONS -----------------------------------------
 
@@ -86,7 +87,8 @@ FLUX_EXTENSION_NOT_SUCCEEDED_HELP = "Try resolving the extension error on the cl
 
 HTTP_URL_NO_AUTH_WARNING = "Warning! https url is being used without https auth params, ensure the repository url provided is not a private repo"
 
-NO_KUSTOMIZATIONS_WARNING = "Warning! No kustomizations were specified for this configuration. The specified source may not be applied to the cluster."
+NO_KUSTOMIZATIONS_WARNING = "Warning! No kustomizations were specified for this configuration. A kustomization will be generated with the default name 'kustomization-1'."
+DEFAULT_KUSTOMIZATION_NAME = "kustomization-1"
 
 # PROVIDER REGISTRATION -----------------------------------------
 

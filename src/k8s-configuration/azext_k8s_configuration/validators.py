@@ -69,22 +69,6 @@ def validate_kustomization(values):
         )
 
 
-def validate_kustomization_list(name, kustomizations):
-    kustomization_names = set()
-    for kustomization in kustomizations:
-        if kustomization.name in kustomization_names:
-            raise InvalidArgumentValueError(
-                consts.DUPLICATE_KUSTOMIZATION_NAME_ERROR.format(kustomization.name),
-                consts.DUPLICATE_KUSTOMIZATION_NAME_HELP
-            )
-        if len(f"{name}-{kustomization.name}") > consts.KUBERNETES_MAX_NAME_SIZE:
-            raise InvalidArgumentValueError(
-                consts.KUSTOMIZATION_NAME_TOO_LONG_ERROR.format(name, kustomization.name),
-                consts.KUSTOMIZATION_NAME_TOO_LONG_HELP
-            )
-        kustomization_names.add(kustomization.name)
-
-
 def validate_repository_ref(branch: str, tag: str, semver: str, commit: str):
     num_set_args = 0
     for elem in [branch, tag, semver, commit]:

@@ -104,8 +104,9 @@ class FluxConfigurationProvider:
     def create(self, resource_group_name, cluster_type, cluster_name, name, url=None, scope='cluster',
                namespace='default', kind=consts.GIT, timeout=None, sync_interval=None, branch=None,
                tag=None, semver=None, commit=None, local_auth_ref=None, ssh_private_key=None,
-               ssh_private_key_file=None, https_user=None, https_key=None, known_hosts=None,
-               known_hosts_file=None, suspend=False, kustomization=None, no_wait=False):
+               ssh_private_key_file=None, https_user=None, https_key=None, https_ca=None,
+               https_ca_file=None, known_hosts=None, known_hosts_file=None, suspend=False,
+               kustomization=None, source_only=False, no_wait=False):
 
         # Determine the cluster RP
         cluster_rp = get_cluster_rp(cluster_type)
@@ -119,14 +120,19 @@ class FluxConfigurationProvider:
                                                                   sync_interval, ssh_private_key,
                                                                   ssh_private_key_file, https_user,
                                                                   https_key, known_hosts, known_hosts_file,
-                                                                  local_auth_ref)
+                                                                  https_ca, https_ca_file, local_auth_ref, True)
 
         # Do Validations on the Kustomization List
         if kustomization:
             validate_kustomization_list(name, kustomization)
-        else:
+
+            # Convert the Internal List Representation of Kustomization to Dictionary
+            kustomization = {k.name : KustomizationDefinition(**k.__dict__) for k in kustomization}
+        elif not source_only:
             logger.warning(consts.NO_KUSTOMIZATIONS_WARNING)
-            user_confirmation("Are you sure you want to proceed without any kustomizations?")
+            kustomization = {
+                consts.DEFAULT_KUSTOMIZATION_NAME: KustomizationDefinition()
+            }
 
         # Get the protected settings and validate the private key value
         protected_settings = get_protected_settings(
@@ -156,25 +162,21 @@ class FluxConfigurationProvider:
     def create_source(self, resource_group_name, cluster_type, cluster_name, name, url=None, scope='cluster',
                       namespace='default', kind=consts.GIT, timeout=None, sync_interval=None, branch=None,
                       tag=None, semver=None, commit=None, local_auth_ref=None, ssh_private_key=None,
-                      ssh_private_key_file=None, https_user=None, https_key=None, known_hosts=None,
-                      known_hosts_file=None, no_wait=False):
+                      ssh_private_key_file=None, https_user=None, https_key=None, https_ca=None, 
+                      https_ca_file=None, known_hosts=None, known_hosts_file=None, no_wait=False):
         # Determine the cluster RP
         cluster_rp = get_cluster_rp(cluster_type)
         dp_source_kind = ""
         git_repository = None
-
-        # Validate the extension install if this is not a deferred command
-        if not self._is_deferred():
-            self._validate_source_control_config_not_installed(resource_group_name, cluster_type, cluster_name)
-            self._validate_extension_install(resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait)
 
         if kind == consts.GIT:
             dp_source_kind = consts.GIT_REPOSITORY
             git_repository = self._validate_and_get_gitrepository(url, branch, tag, semver, commit,
                                                                   timeout, sync_interval,
                                                                   ssh_private_key, ssh_private_key_file,
-                                                                  https_user, https_key, known_hosts,
-                                                                  known_hosts_file, local_auth_ref)
+                                                                  https_user, https_key, https_ca,
+                                                                  https_ca_file, known_hosts,
+                                                                  known_hosts_file, local_auth_ref, True)
 
         # Get the protected settings and validate the private key value
         protected_settings = get_protected_settings(
@@ -182,8 +184,6 @@ class FluxConfigurationProvider:
         )
         if consts.SSH_PRIVATE_KEY_KEY in protected_settings:
             validate_private_key(protected_settings['sshPrivateKey'])
-
-        print(protected_settings)
 
         flux_configuration = FluxConfiguration(
             scope=scope,
@@ -194,66 +194,88 @@ class FluxConfigurationProvider:
             configuration_protected_settings=protected_settings,
         )
 
-        # cache the payload if --defer used or send to Azure
-        return cached_put(self.cmd, self.client.begin_create_or_update, flux_configuration,
-                          resource_group_name=resource_group_name, flux_configuration_name=name,
-                          cluster_rp=cluster_rp, cluster_resource_name=cluster_type,
-                          cluster_name=cluster_name, setter_arg_name='flux_configuration')
+        return sdk_no_wait(no_wait, self.client.begin_create_or_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration)
 
-    def create_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
-                             kustomization_name, dependencies, timeout, sync_interval,
-                             retry_interval, path='', prune=False, validation='none',
-                             force=False):
+    def patch_source(self, resource_group_name, cluster_type, cluster_name, name, url=None,
+                      timeout=None, sync_interval=None, branch=None, tag=None, semver=None,
+                      commit=None, local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None, 
+                      https_user=None, https_key=None, https_ca=None, https_ca_file=None, known_hosts=None,
+                      known_hosts_file=None, no_wait=False):
+        # Determine the cluster RP
+        cluster_rp = get_cluster_rp(cluster_type)
+        git_repository = self._validate_and_get_gitrepository(url, branch, tag, semver, commit,
+                                                                timeout, sync_interval,
+                                                                ssh_private_key, ssh_private_key_file,
+                                                                https_user, https_key, https_ca,
+                                                                https_ca_file, known_hosts,
+                                                                known_hosts_file, local_auth_ref, False)
+
+        # Get the protected settings and validate the private key value
+        protected_settings = get_protected_settings(
+            ssh_private_key, ssh_private_key_file, https_user, https_key
+        )
+        if consts.SSH_PRIVATE_KEY_KEY in protected_settings:
+            validate_private_key(protected_settings['sshPrivateKey'])
+
+        flux_configuration = FluxConfiguration(
+            git_repository=git_repository,
+            configuration_protected_settings=protected_settings,
+        )
+
+        return sdk_no_wait(no_wait, self.client.begin_create_or_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration)
+
+    def patch_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
+                            kustomization_name, dependencies=None, timeout=None, sync_interval=None,
+                            retry_interval=None, path='', prune=False, force=False, no_wait=False):
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
 
-        # Validate the extension install if this is not a deferred command
-        if not self._is_deferred():
-            self._validate_source_control_config_not_installed(resource_group_name, cluster_type, cluster_name)
-            self._validate_extension_install(resource_group_name, cluster_rp, cluster_type, cluster_name, no_wait=False)
-
-        flux_configuration = cached_get(self.cmd, self.client.get, resource_group_name=resource_group_name,
-                                        flux_configuration_name=name, cluster_rp=cluster_rp,
-                                        cluster_resource_name=cluster_type, cluster_name=cluster_name)
-
-        kustomization = KustomizationDefinition(
-            name=name,
-            path=path,
-            dependencies=dependencies,
-            timeout_in_seconds=timeout,
-            sync_interval_in_seconds=sync_interval,
-            retry_interval_in_seconds=retry_interval,
-            prune=prune,
-            validation=validation,
-            force=force
+        kustomization = {
+            kustomization_name: KustomizationDefinition(
+                path=path,
+                dependencies=dependencies,
+                timeout_in_seconds=timeout,
+                sync_interval_in_seconds=sync_interval,
+                retry_interval_in_seconds=retry_interval,
+                prune=prune,
+                force=force
+            )
+        }
+        flux_configuration_patch = FluxConfigurationPatch(
+            kustomizations=kustomization
         )
+        return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration_patch)
 
-        proposed_change = flux_configuration.kustomizations[:] + [kustomization]
-        validate_kustomization_list(name, proposed_change)
+    def delete_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
+                      kustomization_name, no_wait=False):
 
-        upsert_to_collection(flux_configuration, 'kustomizations', kustomization, 'name')
-        flux_configuration.configuration_protected_settings = None
-        flux_configuration = cached_put(self.cmd, self.client.begin_create_or_update, flux_configuration,
-                                        resource_group_name=resource_group_name, flux_configuration_name=name,
-                                        cluster_rp=cluster_rp, cluster_resource_name=cluster_type,
-                                        cluster_name=cluster_name, setter_arg_name='flux_configuration')
-        return get_property(flux_configuration.kustomizations, name)
+        kustomization = {
+            kustomization_name: None
+        }
+        flux_configuration_patch = FluxConfigurationPatch(
+            kustomizations=kustomization
+        )
+        return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration_patch)
 
     def suspend(self, resource_group_name, cluster_type, cluster_name, name, no_wait=False):
         cluster_rp = get_cluster_rp(cluster_type)
         flux_configuration_patch = FluxConfigurationPatch(
             suspend = True
         )
-        return sdk_no_wait(no_wait, self.client.begin_update, flux_configuration_patch, resource_group_name,
-                           cluster_rp, cluster_type, cluster_name, name)
+        return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration_patch)
 
-    def unsuspend(self, resource_group_name, cluster_type, cluster_name, name, no_wait=False):
+    def resume(self, resource_group_name, cluster_type, cluster_name, name, no_wait=False):
         cluster_rp = get_cluster_rp(cluster_type)
         flux_configuration_patch = FluxConfigurationPatch(
             suspend = False
         )
-        return sdk_no_wait(no_wait, self.client.begin_update, flux_configuration_patch, resource_group_name,
-                           cluster_rp, cluster_type, cluster_name, name)
+        return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
+                           cluster_type, cluster_name, name, flux_configuration_patch)
 
     def delete(self, resource_group_name, cluster_type, cluster_name, name, force, no_wait, yes):
         cluster_rp = get_cluster_rp(cluster_type)
@@ -328,7 +350,8 @@ class FluxConfigurationProvider:
 
     def _validate_and_get_gitrepository(self, url, branch, tag, semver, commit, timeout, sync_interval,
                                         ssh_private_key, ssh_private_key_file, https_user, https_key,
-                                        known_hosts, known_hosts_file, local_auth_ref):
+                                        https_ca, https_ca_file, known_hosts, known_hosts_file, local_auth_ref,
+                                        is_create):
         # Pre-Validation
         validate_duration("--timeout", timeout)
         validate_duration("--sync-interval", sync_interval)
@@ -338,14 +361,23 @@ class FluxConfigurationProvider:
         if knownhost_data:
             validate_known_hosts(knownhost_data)
 
+        https_ca_data = get_data_from_key_or_file(https_ca, https_ca_file, strip_newline=True)
+
         # Validate registration with the RP endpoint
         validate_cc_registration(self.cmd)
 
-        validate_git_repository(url)
-        validate_url_with_params(url, ssh_private_key, ssh_private_key_file,
-                                 known_hosts, known_hosts_file, https_user, https_key)
+        if is_create:
+            validate_git_repository(url)
+            validate_url_with_params(url, ssh_private_key, ssh_private_key_file,
+                                    known_hosts, known_hosts_file, https_user, https_key)
+            validate_repository_ref(branch, tag, semver, commit)
 
-        repository_ref = validate_and_get_repository_ref(branch, tag, semver, commit)
+        repository_ref = RepositoryRefDefinition(
+            branch=branch,
+            tag=tag,
+            semver=semver,
+            commit=commit
+        )
 
         # Encode the https username to base64
         if https_user:
@@ -358,7 +390,8 @@ class FluxConfigurationProvider:
             repository_ref=repository_ref,
             ssh_known_hosts=knownhost_data,
             https_user=https_user,
-            local_auth_ref=local_auth_ref
+            local_auth_ref=local_auth_ref,
+            https_ca_file=https_ca_data
         )
 
     def __add_identity(self, extension_instance, resource_group_name, cluster_rp, cluster_type, cluster_name):
@@ -386,17 +419,6 @@ class FluxConfigurationProvider:
         return extension_instance
 
 
-def validate_and_get_repository_ref(branch, tag, semver, commit):
-    validate_repository_ref(branch, tag, semver, commit)
-
-    return RepositoryRefDefinition(
-        branch=branch,
-        tag=tag,
-        semver=semver,
-        commit=commit
-    )
-
-
 def get_protected_settings(ssh_private_key, ssh_private_key_file, https_user, https_key):
     protected_settings = {}
     ssh_private_key_data = get_data_from_key_or_file(ssh_private_key, ssh_private_key_file)
@@ -410,4 +432,5 @@ def get_protected_settings(ssh_private_key, ssh_private_key_file, https_user, ht
     if https_user and https_key:
         protected_settings[consts.HTTPS_KEY_KEY] = to_base64(https_key)
 
-    return protected_settings
+    # Return the protected settings dict if there are any values there
+    return protected_settings if len(protected_settings) > 0 else None
