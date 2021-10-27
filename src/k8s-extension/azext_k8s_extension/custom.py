@@ -22,7 +22,6 @@ from .partner_extensions.AzureDefender import AzureDefender
 from .partner_extensions.OpenServiceMesh import OpenServiceMesh
 from .partner_extensions.AzureMLKubernetes import AzureMLKubernetes
 from .partner_extensions.Dapr import Dapr
-from .partner_extensions.AzurePolicy import AzurePolicy
 from .partner_extensions.DefaultExtension import DefaultExtension, user_confirmation_factory
 from . import consts
 
@@ -39,7 +38,6 @@ def ExtensionFactory(extension_name):
         'microsoft.openservicemesh': OpenServiceMesh,
         'microsoft.azureml.kubernetes': AzureMLKubernetes,
         'microsoft.dapr': Dapr,
-        'microsoft.policyinsights': AzurePolicy,
     }
 
     # Return the extension if we find it in the map, else return the default
