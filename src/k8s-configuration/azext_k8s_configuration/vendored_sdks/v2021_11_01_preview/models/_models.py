@@ -772,7 +772,7 @@ class FluxConfigurationPatch(msrest.serialization.Model):
     ):
         super(FluxConfigurationPatch, self).__init__(**kwargs)
         self.source_kind = kwargs.get('source_kind', None)
-        self.suspend = kwargs.get('suspend', False)
+        self.suspend = kwargs.get('suspend', None)
         self.git_repository = kwargs.get('git_repository', None)
         self.kustomizations = kwargs.get('kustomizations', None)
         self.configuration_protected_settings = kwargs.get('configuration_protected_settings', None)
@@ -996,7 +996,6 @@ class KustomizationDefinition(msrest.serialization.Model):
         'sync_interval_in_seconds': {'key': 'syncIntervalInSeconds', 'type': 'long'},
         'retry_interval_in_seconds': {'key': 'retryIntervalInSeconds', 'type': 'long'},
         'prune': {'key': 'prune', 'type': 'bool'},
-        'validation': {'key': 'validation', 'type': 'str'},
         'force': {'key': 'force', 'type': 'bool'},
     }
 
@@ -1010,9 +1009,8 @@ class KustomizationDefinition(msrest.serialization.Model):
         self.timeout_in_seconds = kwargs.get('timeout_in_seconds', 600)
         self.sync_interval_in_seconds = kwargs.get('sync_interval_in_seconds', 600)
         self.retry_interval_in_seconds = kwargs.get('retry_interval_in_seconds', None)
-        self.prune = kwargs.get('prune', False)
-        self.validation = kwargs.get('validation', "none")
-        self.force = kwargs.get('force', False)
+        self.prune = kwargs.get('prune', None)
+        self.force = kwargs.get('force', None)
 
 
 class ObjectReferenceDefinition(msrest.serialization.Model):

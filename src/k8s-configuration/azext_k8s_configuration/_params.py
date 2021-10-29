@@ -42,8 +42,6 @@ def load_arguments(self, _):
                    options_list=['--name', '-n'],
                    help='Name of the flux configuration',
                    validator=validate_fluxconfig_name)
-
-    with self.argument_context('k8s-configuration flux create') as c:
         c.argument('scope',
                    options_list=['--scope', '-s'],
                    arg_type=get_enum_type(['namespace', 'cluster']),
@@ -87,12 +85,12 @@ def load_arguments(self, _):
         c.argument('https_key',
                    arg_group="Auth",
                    help='HTTPS token/password for private repository sync')
-        c.argument('https_ca',
+        c.argument('https_ca_cert',
                    arg_group="Auth",
-                   help='Base64-encoded HTTPS CA file for TLS communication with private repository sync')
-        c.argument('https_ca_file',
+                   help='Base64-encoded HTTPS CA certificate for TLS communication with private repository sync')
+        c.argument('https_ca_cert_file',
                    arg_group="Auth",
-                   help='Filepath to HTTPS CA file for TLS communication with private repository sync')
+                   help='Filepath to HTTPS CA certificate file for TLS communication with private repository sync')
         c.argument('known_hosts',
                    arg_group="Auth",
                    help='Base64-encoded known_hosts data containing public SSH keys required to access private Git instances')
@@ -104,6 +102,7 @@ def load_arguments(self, _):
                    arg_group="Auth",
                    help='Local reference to a kubernetes secret in the configuration namespace to use for communication to the source')
         c.argument('suspend',
+                   arg_type=get_three_state_flag(),
                    help='Suspend the reconciliation of the source and kustomizations associated with this configuration')
         c.argument('kustomization',
                    action=KustomizationAddAction,

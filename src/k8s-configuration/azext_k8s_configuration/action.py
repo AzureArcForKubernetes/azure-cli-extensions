@@ -15,6 +15,7 @@ from .utils import parse_dependencies, get_duration
 class InternalKustomizationDefinition(KustomizationDefinition):
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', "")
+        super(KustomizationDefinition, self).__init__(**kwargs)
 
 
 class KustomizationAddAction(argparse._AppendAction):
