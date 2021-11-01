@@ -175,76 +175,13 @@ def load_arguments(self, _):
                    arg_group="Auth",
                    help='Specify filepath to known_hosts contents containing public SSH keys required to access private Git instances')
 
-    with self.argument_context('k8s-config flux source') as c:
-        c.argument('kind',
-                   arg_type=get_enum_type([consts.GIT]),
-                   help='Source kind to reconcile')
-        c.argument('url',
-                   options_list=['--url', '-u'],
-                   help='URL of the source to reconcile')
-        c.argument('timeout',
-                   help='Maximum time to reconcile the source before timing out')
-        c.argument('sync_interval',
-                   options_list=['--interval', '--sync-interval'],
-                   help='Time between reconciliations of the source on the cluster')
-        c.argument('branch',
-                   arg_group="Repo Ref",
-                   help='Branch to reconcile with the git source')
-        c.argument('tag',
-                   arg_group="Repo Ref",
-                   help='Tag to reconcile with the git source')
-        c.argument('semver',
-                   arg_group="Repo Ref",
-                   help='Semver range to reconcile with the git source')
-        c.argument('commit',
-                   arg_group="Repo Ref",
-                   help='Specific commit to reconcile with the git source')
-        c.argument('ssh_private_key',
-                   arg_group="Auth",
-                   help='Base64-encoded private ssh key for private repository sync')
-        c.argument('ssh_private_key_file',
-                   arg_group="Auth",
-                   help='Filepath to private ssh key for private repository sync')
-        c.argument('https_user',
-                   arg_group="Auth",
-                   help='HTTPS username for private repository sync')
-        c.argument('https_key',
-                   arg_group="Auth",
-                   help='HTTPS token/password for private repository sync')
-        c.argument('https_ca',
-                   arg_group="Auth",
-                   help='Base64-encoded HTTPS CA file for TLS communication with private repository sync')
-        c.argument('https_ca_file',
-                   arg_group="Auth",
-                   help='Filepath to HTTPS CA file for TLS communication with private repository sync')
-        c.argument('known_hosts',
-                   arg_group="Auth",
-                   help='Base64-encoded known_hosts data containing public SSH keys required to access private Git instances')
-        c.argument('known_hosts_file',
-                   arg_group="Auth",
-                   help='Filepath to known_hosts contents containing public SSH keys required to access private Git instances')
-        c.argument('local_auth_ref',
-                   options_list=['--local-auth-ref'],
-                   arg_group="Auth",
-                   help='Local reference to a kubernetes secret in the configuration namespace to use for communication to the source')
-
-    with self.argument_context('k8s-config flux source create') as c:
-        c.argument('scope',
-                   options_list=['--scope', '-s'],
-                   arg_type=get_enum_type(['namespace', 'cluster']),
-                   help="Specify scope of the operator to be 'namespace' or 'cluster'")
-        c.argument('namespace',
-                   help='Namespace to deploy the configuration',
-                   options_list=['--namespace', '--ns'],
-                   validator=validate_namespace)
-
-    with self.argument_context('k8s-config flux kustomization') as c:
-        c.argument('config_name',
-                   help='Specify the name of the kustomization to add to the configuration')
+    with self.argument_context('k8s-configuration flux kustomization') as c:
+        c.argument('kustomization_name',
+                   help='Specify the name of the kustomization to target')
         c.argument('path',
                    help='Specify the path in the source that the kustomization should apply')
         c.argument('dependencies',
-                   options_list=['--depends', '--dependencies'],
+                   options_list=['--depends', '--dependencies', "--depends-on"],
                    help='Specify the names of kustomization dependencies')
         c.argument('timeout',
                    help='Maximum time to reconcile the kustomization before timing out')
@@ -257,3 +194,8 @@ def load_arguments(self, _):
                    help='Whether to garbage collect resources deployed by the kustomization on the cluster')
         c.argument('force',
                    help='Whether to re-create resources that cannot be updated on the cluster (i.e. jobs)')
+    
+    with self.argument_context('k8s-configuration flux kustomization delete') as c:
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation')

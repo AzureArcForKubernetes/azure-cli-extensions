@@ -6,7 +6,7 @@
 
 import argparse
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
-from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition
+from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition, DependsOnDefinition
 from .validators import validate_kustomization
 from . import consts
 from .utils import parse_dependencies, get_duration
@@ -17,11 +17,18 @@ class InternalKustomizationDefinition(KustomizationDefinition):
         self.name = kwargs.get('name', "")
         super(KustomizationDefinition, self).__init__(**kwargs)
 
+    def to_KustomizationDefinition(self):
+        k_dict = self.__dict__
+        del k_dict['name']
+        del k_dict['additional_properties']
+        print(k_dict)
+        return KustomizationDefinition(**k_dict)
+
 
 class KustomizationAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         validate_kustomization(values)
-        dependencies = []
+        model_dependency = []
         sync_interval = None
         retry_interval = None
         timeout = None
@@ -31,6 +38,12 @@ class KustomizationAddAction(argparse._AppendAction):
                 key, value = item.split('=', 1)
                 if key in consts.DEPENDENCY_KEYS:
                     dependencies = parse_dependencies(value)
+                    for dep in dependencies:
+                        model_dependency.append(
+                            DependsOnDefinition(
+                                kustomization_name=dep
+                            )
+                        )
                 elif key in consts.SYNC_INTERVAL_KEYS:
                     sync_interval = value
                 elif key in consts.RETRY_INTERVAL_KEYS:
@@ -46,7 +59,7 @@ class KustomizationAddAction(argparse._AppendAction):
             parser,
             namespace,
             InternalKustomizationDefinition(
-                depends_on=dependencies,
+                depends_on=model_dependency,
                 sync_interval_in_seconds=get_duration(sync_interval),
                 retry_interval_in_seconds=get_duration(retry_interval),
                 timeout_in_seconds=get_duration(timeout),

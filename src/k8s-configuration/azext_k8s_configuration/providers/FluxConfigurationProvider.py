@@ -121,7 +121,7 @@ class FluxConfigurationProvider:
                                                                   known_hosts, known_hosts_file, local_auth_ref, True)
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
-            kustomization = {k.name : KustomizationDefinition(**k.__dict__) for k in kustomization}
+            kustomization = {k.name : k._to_KustomizationDefinition() for k in kustomization}
         else:
             logger.warning(consts.NO_KUSTOMIZATIONS_WARNING)
             kustomization = {
@@ -132,7 +132,7 @@ class FluxConfigurationProvider:
         protected_settings = get_protected_settings(
             ssh_private_key, ssh_private_key_file, https_user, https_key
         )
-        if consts.SSH_PRIVATE_KEY_KEY in protected_settings:
+        if protected_settings and consts.SSH_PRIVATE_KEY_KEY in protected_settings:
             validate_private_key(protected_settings['sshPrivateKey'])
 
         flux_configuration = FluxConfiguration(
@@ -179,7 +179,7 @@ class FluxConfigurationProvider:
 
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
-            kustomization = {k.name : KustomizationDefinition(**k.__dict__) for k in kustomization}
+            kustomization = {k.name : k.to_KustomizationDefinition() for k in kustomization}
 
         # Get the protected settings and validate the private key value
         protected_settings = get_protected_settings(
@@ -189,8 +189,6 @@ class FluxConfigurationProvider:
             validate_private_key(protected_settings['sshPrivateKey'])
 
         flux_configuration = FluxConfigurationPatch(
-            scope=None,
-            namespace=None,
             git_repository=git_repository,
             suspend=suspend,
             kustomizations=kustomization,
@@ -254,6 +252,8 @@ class FluxConfigurationProvider:
 
     def delete_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
                       kustomization_name, no_wait=False, yes=False):
+        # Determine ClusterRP
+        cluster_rp = get_cluster_rp(cluster_type)
 
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
@@ -369,12 +369,14 @@ class FluxConfigurationProvider:
                                     known_hosts, known_hosts_file, https_user, https_key)
             validate_repository_ref(branch, tag, semver, commit)
 
-        repository_ref = RepositoryRefDefinition(
-            branch=branch,
-            tag=tag,
-            semver=semver,
-            commit=commit
-        )
+        repository_ref = None
+        if any([branch, tag, semver, commit]):
+            repository_ref = RepositoryRefDefinition(
+                branch=branch,
+                tag=tag,
+                semver=semver,
+                commit=commit
+            )
 
         # Encode the https username to base64
         if https_user:

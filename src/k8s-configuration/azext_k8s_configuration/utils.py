@@ -29,7 +29,7 @@ def get_data_from_key_or_file(key, filepath, strip_newline=False):
         raise MutuallyExclusiveArgumentError(
             consts.KEY_AND_FILE_TOGETHER_ERROR,
             consts.KEY_AND_FILE_TOGETHER_HELP)
-    data = ''
+    data = None
     if filepath:
         data = read_key_file(filepath, strip_newline)
     elif key:
