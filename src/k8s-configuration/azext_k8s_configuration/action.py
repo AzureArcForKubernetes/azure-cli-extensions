@@ -21,7 +21,6 @@ class InternalKustomizationDefinition(KustomizationDefinition):
         k_dict = self.__dict__
         del k_dict['name']
         del k_dict['additional_properties']
-        print(k_dict)
         return KustomizationDefinition(**k_dict)
 
 

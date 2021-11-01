@@ -1080,8 +1080,8 @@ class KustomizationDefinition(msrest.serialization.Model):
         timeout_in_seconds: Optional[int] = 600,
         sync_interval_in_seconds: Optional[int] = 600,
         retry_interval_in_seconds: Optional[int] = None,
-        prune: Optional[bool] = False,
-        force: Optional[bool] = False,
+        prune: Optional[bool] = None,
+        force: Optional[bool] = None,
         **kwargs
     ):
         super(KustomizationDefinition, self).__init__(**kwargs)

@@ -41,7 +41,6 @@ def sourcecontrol_delete(cmd, client, resource_group_name, cluster_type, cluster
 
 
 # Flux Configuration Methods
-
 def flux_config_show(cmd, client, resource_group_name, cluster_type, cluster_name, name):
     provider = FluxConfigurationProvider(cmd)
     return provider.show(resource_group_name, cluster_type, cluster_name, name)
@@ -104,6 +103,19 @@ def flux_config_delete_kustomization(cmd, client, resource_group_name, cluster_t
 
     provider = FluxConfigurationProvider(cmd)
     return provider.delete_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name, no_wait, yes)
+
+
+def flux_config_list_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name):
+
+    provider = FluxConfigurationProvider(cmd)
+    return provider.list_kustomization(resource_group_name, cluster_type, cluster_name, name)
+
+
+def flux_config_show_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
+                              kustomization_name):
+
+    provider = FluxConfigurationProvider(cmd)
+    return provider.show_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name)
 
 
 def flux_config_delete(cmd, client, resource_group_name, cluster_type,

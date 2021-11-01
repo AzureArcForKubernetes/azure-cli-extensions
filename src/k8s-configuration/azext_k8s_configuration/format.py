@@ -36,9 +36,28 @@ def fluxconfig_show_table_format(result):
 def __get_fluxconfig_table_row(result):
     return OrderedDict([
         ('name', result['name']),
-        ('provisioningState', result['provisioningState']),
-        ('complianceState', result['complianceState']),
         ('namespace', result['namespace']),
         ('scope', result['scope']),
+        ('provisioningState', result['provisioningState']),
+        ('complianceState', result['complianceState']),
         ('lastSourceSyncedAt', result['lastSourceSyncedAt']),
+    ])
+
+
+def fluxconfig_kustomization_list_table_format(results):
+    return [__get_fluxconfig_kustomization_table_row(k, v) for k, v in results.items()]
+
+
+def fluxconfig_kustomization_show_table_format(results):
+    return [__get_fluxconfig_kustomization_table_row(k, v) for k, v in results.items()]
+
+
+def __get_fluxconfig_kustomization_table_row(key, value):
+    return OrderedDict([
+        ('name', key),
+        ('path', value['path']),
+        ('prune', value['prune']),
+        ('syncIntervalInSeconds', value['syncIntervalInSeconds']),
+        ('timeoutInSeconds', value['timeoutInSeconds']),
+        ('force', value['force'])
     ])

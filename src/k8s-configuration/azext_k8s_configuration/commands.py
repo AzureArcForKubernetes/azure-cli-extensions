@@ -12,6 +12,8 @@ from azext_k8s_configuration._client_factory import (
 from .format import (
     fluxconfig_list_table_format,
     fluxconfig_show_table_format,
+    fluxconfig_kustomization_list_table_format,
+    fluxconfig_kustomization_show_table_format,
     sourcecontrol_list_table_format,
     sourcecontrol_show_table_format
 )
@@ -34,9 +36,13 @@ def load_command_table(self, _):
         g.custom_command('list', "flux_config_list", table_transformer=fluxconfig_list_table_format)
         g.custom_show_command('show', 'flux_config_show', table_transformer=fluxconfig_show_table_format)
         g.custom_command('delete', 'flux_config_delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('kustomization create', 'flux_config_create_kustomization', supports_no_wait=True)
-        g.custom_command('kustomization update', 'flux_config_update_kustomization', supports_no_wait=True)
-        g.custom_command('kustomization delete', 'flux_config_delete_kustomization', confirmation=True, supports_no_wait=True)
+    
+    with self.command_group('k8s-configuration flux kustomization', k8s_configuration_fluxconfig_sdk, client_factory=k8s_configuration_fluxconfig_client, is_experimental=True) as g:
+        g.custom_command('create', 'flux_config_create_kustomization', supports_no_wait=True)
+        g.custom_command('update', 'flux_config_update_kustomization', supports_no_wait=True)
+        g.custom_command('delete', 'flux_config_delete_kustomization', confirmation=True, supports_no_wait=True)
+        g.custom_command('list', 'flux_config_list_kustomization', table_transformer=fluxconfig_kustomization_list_table_format)
+        g.custom_command('show', 'flux_config_show_kustomization', table_transformer=fluxconfig_kustomization_show_table_format)
 
     with self.command_group('k8s-configuration', k8s_configuration_sourcecontrol_sdk, client_factory=k8s_configuration_sourcecontrol_client) as g:
         g.custom_command('create', 'sourcecontrol_create', deprecate_info=self.deprecate(redirect='k8s-configuration flux create'))

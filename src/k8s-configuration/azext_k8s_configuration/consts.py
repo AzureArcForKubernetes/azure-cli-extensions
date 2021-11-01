@@ -52,6 +52,18 @@ DUPLICATE_KUSTOMIZATION_NAME_HELP = "Ensure that all Kustomization names are uni
 KUSTOMIZATION_NAME_TOO_LONG_ERROR = "Error! Invalid Kustomization list. Flux configuration name '{0}' combined with kustomization name '{1}' cannot be greater than 62 characters"
 KUSTOMIZATION_NAME_TOO_LONG_HELP = "Shorten the flux configuration or the kustomization name and try again"
 
+CREATE_KUSTOMIZATION_EXIST_ERROR = "Error! Cannot create a kustomization that already exists. Kustomization name '{0}' already exists on configuration '{1}'"
+CREATE_KUSTOMIZATION_EXIST_HELP = "You can update an already created kustomization with 'az k8s-configuration flux kustomization update'"
+
+UPDATE_KUSTOMIZATION_NO_EXIST_ERROR = "Error! Cannot update a kustomization that doesn't exist. Kustomization name '{0}' does not exist on configuration '{1}'"
+UPDATE_KUSTOMIZATION_NO_EXIST_HELP = "You can add the kustomization to the configuration with 'az k8s-configuration flux kustomization create'"
+
+DELETE_KUSTOMIZATION_NO_EXIST_ERROR = "Error! Cannot delete a kustomization that doesn't exist."
+DELETE_KUSTOMIZATION_NO_EXIST_HELP = "You can view all kustomizations on a configuration with 'az k8s-configuration flux kustomization list'"
+
+SHOW_KUSTOMIZATION_NO_EXIST_ERROR = "Error! Kustomization with name '{0}' does not exist on configuration '{1}'."
+SHOW_KUSTOMIZATION_NO_EXIST_HELP = "You can view all kustomizations on a configuration with 'az k8s-configuration flux kustomization list'"
+
 SSH_PRIVATE_KEY_WITH_HTTP_URL_ERROR = "Error! An --ssh-private-key cannot be used with an http(s) url"
 SSH_PRIVATE_KEY_WITH_HTTP_URL_HELP = "Verify the url provided is a valid ssh url and not an http(s) url"
 

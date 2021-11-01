@@ -7,7 +7,7 @@
 
 import os
 
-from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError
+from azure.cli.core.azclierror import DeploymentError, ResourceNotFoundError, ValidationError
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -121,7 +121,7 @@ class FluxConfigurationProvider:
                                                                   known_hosts, known_hosts_file, local_auth_ref, True)
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
-            kustomization = {k.name : k._to_KustomizationDefinition() for k in kustomization}
+            kustomization = {k.name : k.to_KustomizationDefinition() for k in kustomization}
         else:
             logger.warning(consts.NO_KUSTOMIZATIONS_WARNING)
             kustomization = {
@@ -160,8 +160,6 @@ class FluxConfigurationProvider:
                known_hosts_file=None, suspend=None, kustomization=None, no_wait=False):
         # Determine the cluster RP
         cluster_rp = get_cluster_rp(cluster_type)
-
-        print(suspend)
 
         git_repository = None
         if any([url, branch, tag, semver, commit,
@@ -205,7 +203,10 @@ class FluxConfigurationProvider:
         cluster_rp = get_cluster_rp(cluster_type)
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name in current_config.kustomizations:
-            raise 
+            raise ValidationError(
+                consts.CREATE_KUSTOMIZATION_EXIST_ERROR,
+                consts.CREATE_KUSTOMIZATION_EXIST_HELP
+            )
 
         kustomization = {
             kustomization_name: KustomizationDefinition(
@@ -231,7 +232,10 @@ class FluxConfigurationProvider:
         cluster_rp = get_cluster_rp(cluster_type)
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
-            raise 
+            raise ValidationError(
+                consts.UPDATE_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.UPDATE_KUSTOMIZATION_NO_EXIST_HELP
+            ) 
 
         kustomization = {
             kustomization_name: KustomizationDefinition(
@@ -257,7 +261,10 @@ class FluxConfigurationProvider:
 
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
-            raise 
+            raise ValidationError(
+                consts.DELETE_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.DELETE_KUSTOMIZATION_NO_EXIST_HELP
+            ) 
 
         if current_config.kustomizations[kustomization_name].prune:
             logger.warning("Prune is enabled on one or more of your kustomizations. Deleting a Flux "
@@ -273,6 +280,23 @@ class FluxConfigurationProvider:
         )
         return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
                            cluster_type, cluster_name, name, flux_configuration_patch)
+    
+    def list_kustomization(self, resource_group_name, cluster_type, cluster_name, name):
+        # Determine ClusterRP
+        cluster_rp = get_cluster_rp(cluster_type)
+        current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
+        return current_config.kustomizations
+
+    def show_kustomization(self, resource_group_name, cluster_type, cluster_name, name, kustomization_name):
+        # Determine ClusterRP
+        cluster_rp = get_cluster_rp(cluster_type)
+        current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
+        if kustomization_name not in current_config.kustomizations:
+            raise ValidationError(
+                consts.SHOW_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.SHOW_KUSTOMIZATION_NO_EXIST_HELP
+            )
+        return {kustomization_name: current_config.kustomizations[kustomization_name]}
 
     def delete(self, resource_group_name, cluster_type, cluster_name, name, force, no_wait, yes):
         cluster_rp = get_cluster_rp(cluster_type)
