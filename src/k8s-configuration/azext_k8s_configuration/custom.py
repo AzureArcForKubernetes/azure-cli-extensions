@@ -90,7 +90,7 @@ def flux_config_create_kustomization(cmd, client, resource_group_name, cluster_t
 
 def flux_config_update_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
                                      kustomization_name, dependencies=None, timeout=None, sync_interval=None,
-                                     retry_interval=None, path='', prune=None, force=None, no_wait=False):
+                                     retry_interval=None, path=None, prune=None, force=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd)
     return provider.update_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name,

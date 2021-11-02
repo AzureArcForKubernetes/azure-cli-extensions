@@ -199,12 +199,17 @@ class FluxConfigurationProvider:
     def create_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
                             kustomization_name, dependencies=None, timeout=None, sync_interval=None,
                             retry_interval=None, path='', prune=False, force=False, no_wait=False):
+        # Pre-Validation
+        validate_duration("--timeout", timeout)
+        validate_duration("--sync-interval", sync_interval)
+        validate_duration("--retry-interval", retry_interval)
+
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name in current_config.kustomizations:
             raise ValidationError(
-                consts.CREATE_KUSTOMIZATION_EXIST_ERROR,
+                consts.CREATE_KUSTOMIZATION_EXIST_ERROR.format(kustomization_name, name),
                 consts.CREATE_KUSTOMIZATION_EXIST_HELP
             )
 
@@ -212,9 +217,9 @@ class FluxConfigurationProvider:
             kustomization_name: KustomizationDefinition(
                 path=path,
                 dependencies=dependencies,
-                timeout_in_seconds=timeout,
-                sync_interval_in_seconds=sync_interval,
-                retry_interval_in_seconds=retry_interval,
+                timeout_in_seconds=parse_duration(timeout),
+                sync_interval_in_seconds=parse_duration(sync_interval),
+                retry_interval_in_seconds=parse_duration(retry_interval),
                 prune=prune,
                 force=force
             )
@@ -227,13 +232,18 @@ class FluxConfigurationProvider:
 
     def update_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
                             kustomization_name, dependencies=None, timeout=None, sync_interval=None,
-                            retry_interval=None, path='', prune=False, force=False, no_wait=False):
+                            retry_interval=None, path=None, prune=False, force=False, no_wait=False):
+        # Pre-Validation
+        validate_duration("--timeout", timeout)
+        validate_duration("--sync-interval", sync_interval)
+        validate_duration("--retry-interval", retry_interval)
+
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
             raise ValidationError(
-                consts.UPDATE_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.UPDATE_KUSTOMIZATION_NO_EXIST_ERROR.format(kustomization_name, name),
                 consts.UPDATE_KUSTOMIZATION_NO_EXIST_HELP
             ) 
 
@@ -241,9 +251,9 @@ class FluxConfigurationProvider:
             kustomization_name: KustomizationDefinition(
                 path=path,
                 dependencies=dependencies,
-                timeout_in_seconds=timeout,
-                sync_interval_in_seconds=sync_interval,
-                retry_interval_in_seconds=retry_interval,
+                timeout_in_seconds=parse_duration(timeout),
+                sync_interval_in_seconds=parse_duration(sync_interval),
+                retry_interval_in_seconds=parse_duration(retry_interval),
                 prune=prune,
                 force=force
             )
@@ -262,7 +272,7 @@ class FluxConfigurationProvider:
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
             raise ValidationError(
-                consts.DELETE_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.DELETE_KUSTOMIZATION_NO_EXIST_ERROR.format(kustomization_name, name),
                 consts.DELETE_KUSTOMIZATION_NO_EXIST_HELP
             ) 
 
@@ -293,7 +303,7 @@ class FluxConfigurationProvider:
         current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
         if kustomization_name not in current_config.kustomizations:
             raise ValidationError(
-                consts.SHOW_KUSTOMIZATION_NO_EXIST_ERROR,
+                consts.SHOW_KUSTOMIZATION_NO_EXIST_ERROR.format(kustomization_name, name),
                 consts.SHOW_KUSTOMIZATION_NO_EXIST_HELP
             )
         return {kustomization_name: current_config.kustomizations[kustomization_name]}
