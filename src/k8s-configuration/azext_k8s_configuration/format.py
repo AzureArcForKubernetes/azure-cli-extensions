@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from .utils import format_duration
 
 
 def sourcecontrol_list_table_format(results):
@@ -57,7 +58,7 @@ def __get_fluxconfig_kustomization_table_row(key, value):
         ('name', key),
         ('path', value['path']),
         ('prune', value['prune']),
-        ('syncIntervalInSeconds', value['syncIntervalInSeconds']),
-        ('timeoutInSeconds', value['timeoutInSeconds']),
+        ('syncInterval', format_duration(value['syncIntervalInSeconds'])),
+        ('timeout', format_duration(value['timeoutInSeconds'])),
         ('force', value['force'])
     ])

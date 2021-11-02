@@ -9,7 +9,7 @@ from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageEr
 from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition, DependsOnDefinition
 from .validators import validate_kustomization
 from . import consts
-from .utils import parse_dependencies, get_duration
+from .utils import parse_dependencies, parse_duration
 
 
 class InternalKustomizationDefinition(KustomizationDefinition):
@@ -59,9 +59,9 @@ class KustomizationAddAction(argparse._AppendAction):
             namespace,
             InternalKustomizationDefinition(
                 depends_on=model_dependency,
-                sync_interval_in_seconds=get_duration(sync_interval),
-                retry_interval_in_seconds=get_duration(retry_interval),
-                timeout_in_seconds=get_duration(timeout),
+                sync_interval_in_seconds=parse_duration(sync_interval),
+                retry_interval_in_seconds=parse_duration(retry_interval),
+                timeout_in_seconds=parse_duration(timeout),
                 **kwargs
             ),
             option_string

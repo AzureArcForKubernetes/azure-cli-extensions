@@ -24,7 +24,7 @@ from ..utils import (
     get_parent_api_version,
     get_cluster_rp,
     get_data_from_key_or_file,
-    get_duration,
+    parse_duration,
     has_prune_enabled,
     to_base64,
     is_dogfood_cluster
@@ -408,8 +408,8 @@ class FluxConfigurationProvider:
 
         return GitRepositoryDefinition(
             url=url,
-            timeout_in_seconds=get_duration(timeout),
-            sync_interval_in_seconds=get_duration(sync_interval),
+            timeout_in_seconds=parse_duration(timeout),
+            sync_interval_in_seconds=parse_duration(sync_interval),
             repository_ref=repository_ref,
             ssh_known_hosts=knownhost_data,
             https_user=https_user,

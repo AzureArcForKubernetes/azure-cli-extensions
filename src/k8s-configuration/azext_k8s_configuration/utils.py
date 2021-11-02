@@ -72,7 +72,7 @@ def parse_dependencies(depends_on):
     return depends_on.split(',')
 
 
-def get_duration(duration):
+def parse_duration(duration):
     if not duration:
         return duration
     regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
@@ -83,6 +83,24 @@ def get_duration(duration):
         if param:
             time_params[name] = int(param)
     return int(timedelta(**time_params).total_seconds())
+
+
+def format_duration(seconds):
+    if seconds is None:
+        return None
+    seconds = int(seconds)
+    hours = seconds // 3600
+    seconds -= hours * 3600
+    minutes = seconds // 60
+    seconds -= minutes * 60
+    res = ''
+    if hours > 0:
+        res += '{}h'.format(hours)
+    if minutes > 0:
+        res += '{}m'.format(minutes)
+    if seconds > 0:
+        res += '{}s'.format(seconds)
+    return res
 
 
 def from_base64(base64_str):
