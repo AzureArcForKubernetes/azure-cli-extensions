@@ -14,7 +14,7 @@ from azext_k8s_extension.partner_extensions.OpenServiceMesh import _get_tested_d
 
 class TestOpenServiceMesh(unittest.TestCase):
     def test_bad_osm_arc_version(self):
-        version = "0.7.1"
+        version = "v0.7.1"
         err = "Invalid version \'" + str(version) + "\' for microsoft.openservicemesh"
         with self.assertRaises(InvalidArgumentValueError) as argError:
             _get_tested_distros(version)

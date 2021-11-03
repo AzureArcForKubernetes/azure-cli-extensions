@@ -73,6 +73,8 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
         'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
 
     logger.debug('Input version: %s', version)
+    tested_distros = _get_tested_distros(extension_version)
+
     if version.parse(str(extension_version)) <= version.parse("0.8.3"):
         logger.warning(field_unavailable_error)
         return
@@ -91,8 +93,6 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
                        'kubernetes distro: \"general\"')
         return
 
-    tested_distros = _get_tested_distros(extension_version)
-
     if tested_distros is None:
         logger.warning(field_unavailable_error)
     elif cluster_distro not in tested_distros.split():
@@ -103,7 +103,7 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
 def _get_tested_distros(chart_version):
 
     chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/' \
-        'v{0}/charts/osm-arc/values.yaml'.format(chart_version)
+        '{0}/charts/osm-arc/values.yaml'.format(chart_version)
     chart_request = requests.get(url=chart_url)
 
     if chart_request.status_code == 404:

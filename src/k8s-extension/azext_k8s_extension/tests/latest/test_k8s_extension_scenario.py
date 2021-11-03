@@ -23,7 +23,7 @@ class K8sExtensionScenarioTest(ScenarioTest):
             'cluster_type': 'connectedClusters',
             'extension_type': resource_type,
             'release_train': 'pilot',
-            'version': '0.9.2'
+            'version': 'v0.9.2'
         })
 
         self.cmd('k8s-extension create -g {rg} -n {name} -c {cluster_name} --cluster-type {cluster_type} '
