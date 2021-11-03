@@ -30,14 +30,14 @@ def load_command_table(self, _):
         client_factory=k8s_configuration_sourcecontrol_client
     )
 
-    with self.command_group('k8s-configuration flux', k8s_configuration_fluxconfig_sdk, client_factory=k8s_configuration_fluxconfig_client, is_experimental=True) as g:
+    with self.command_group('k8s-configuration flux', k8s_configuration_fluxconfig_sdk, client_factory=k8s_configuration_fluxconfig_client, is_preview=True) as g:
         g.custom_command('create', 'flux_config_create', supports_no_wait=True)
         g.custom_command('update', 'flux_config_update', supports_no_wait=True)
         g.custom_command('list', "flux_config_list", table_transformer=fluxconfig_list_table_format)
         g.custom_show_command('show', 'flux_config_show', table_transformer=fluxconfig_show_table_format)
         g.custom_command('delete', 'flux_config_delete', confirmation=True, supports_no_wait=True)
     
-    with self.command_group('k8s-configuration flux kustomization', k8s_configuration_fluxconfig_sdk, client_factory=k8s_configuration_fluxconfig_client, is_experimental=True) as g:
+    with self.command_group('k8s-configuration flux kustomization', k8s_configuration_fluxconfig_sdk, client_factory=k8s_configuration_fluxconfig_client, is_preview=True) as g:
         g.custom_command('create', 'flux_config_create_kustomization', supports_no_wait=True)
         g.custom_command('update', 'flux_config_update_kustomization', supports_no_wait=True)
         g.custom_command('delete', 'flux_config_delete_kustomization', confirmation=True, supports_no_wait=True)

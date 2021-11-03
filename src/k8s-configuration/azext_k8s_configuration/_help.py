@@ -67,10 +67,23 @@ helps['k8s-configuration flux create'] = """
     examples:
       - name: Create a Kubernetes v2 Flux Configuration
         text: |-
-          az k8s-configuration flux create --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters --name myconfig --scope cluster --namespace my-namespace \\
-          --kind git --url https://github.com/Azure/arc-k8s-demo --branch main --kustomization \\
-          name=my-kustomization
+          az k8s-configuration flux create --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters \\
+          --name myconfig --scope cluster --namespace my-namespace \\
+          --kind git --url https://github.com/Azure/arc-k8s-demo \\
+          --branch main --kustomization name=my-kustomization
+"""
+
+helps['k8s-configuration flux update'] = """
+    type: command
+    short-summary: Update a Kubernetes Flux v2 Configuration.
+    examples:
+      - name: Update a Kubernetes v2 Flux Configuration
+        text: |-
+          az k8s-configuration flux update --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
+          --url https://github.com/Azure/arc-k8s-demo --branch main \\
+          --kustomization name=my-kustomization path=./my/new-path
 """
 
 helps['k8s-configuration flux list'] = """
@@ -79,8 +92,8 @@ helps['k8s-configuration flux list'] = """
     examples:
       - name: List all Kubernetes Flux v2 Configurations on a cluster
         text: |-
-          az k8s-configuration flux list --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters
+          az k8s-configuration flux list --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters
 """
 
 helps['k8s-configuration flux show'] = """
@@ -89,8 +102,8 @@ helps['k8s-configuration flux show'] = """
     examples:
       - name: Show details of a Kubernetes Flux v2 Configuration
         text: |-
-          az k8s-configuration flux show --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters --name myconfig
+          az k8s-configuration flux show --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig
 """
 
 helps['k8s-configuration flux delete'] = """
@@ -99,6 +112,65 @@ helps['k8s-configuration flux delete'] = """
     examples:
       - name: Delete an existing Kubernetes Flux v2 Configuration
         text: |-
-          az k8s-configuration flux delete --resource-group my-resource-group --cluster-name mycluster \\
-          --cluster-type connectedClusters --name myconfig
+          az k8s-configuration flux delete --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig
+"""
+
+helps['k8s-configuration flux kustomization'] = """
+    type: group
+    short-summary: Commands to manage Kustomizations associated with Flux v2 Kubernetes configurations.
+"""
+
+helps['k8s-configuration flux kustomization create'] = """
+    type: command
+    short-summary: Create a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    examples:
+      - name: Create a Kustomization associated wiht a Kubernetes v2 Flux Configuration
+        text: |-
+          az k8s-configuration flux kustomization create --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
+          --kustomization-name my-kustomization-2 --path ./my/path --prune --force
+"""
+
+helps['k8s-configuration flux kustomization update'] = """
+    type: command
+    short-summary: Update a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    examples:
+      - name: Update a Kustomization associated with a Kubernetes v2 Flux Configuration
+        text: |-
+          az k8s-configuration flux kustomization update --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
+          --kustomization-name my-kustomization --path ./my/new-path --prune --force
+"""
+
+helps['k8s-configuration flux kustomization list'] = """
+    type: command
+    short-summary: List Kustomizations associated with a Kubernetes Flux v2 Configuration.
+    examples:
+      - name: List all Kustomizations associated with a Kubernetes Flux v2 Configuration on a cluster
+        text: |-
+          az k8s-configuration flux kustomization list --resource-group my-resource-group \\
+          --cluster-name mycluster --name myconfig --cluster-type connectedClusters
+"""
+
+helps['k8s-configuration flux kustomization show'] = """
+    type: command
+    short-summary: Show a Kustomization associated with a Flux v2 Configuration.
+    examples:
+      - name: Show details of a Kustomization associated with a Kubernetes Flux v2 Configuration
+        text: |-
+          az k8s-configuration flux kustomization show --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
+          --kustomization-name my-kustomization
+"""
+
+helps['k8s-configuration flux kustomization delete'] = """
+    type: command
+    short-summary: Delete a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    examples:
+      - name: Delete an existing Kustomization associated with a Kubernetes Flux v2 Configuration
+        text: |-
+          az k8s-configuration flux kustomization delete --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
+          --kustomization-name my-kustomization
 """

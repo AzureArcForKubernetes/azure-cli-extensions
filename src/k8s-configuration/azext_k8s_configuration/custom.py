@@ -55,13 +55,13 @@ def flux_config_list(cmd, client, resource_group_name, cluster_type, cluster_nam
 def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_name, name, url=None,
                        scope='cluster', namespace='default', kind=consts.GIT, timeout=None, sync_interval=None,
                        branch=None, tag=None, semver=None, commit=None, local_auth_ref=None, ssh_private_key=None,
-                       ssh_private_key_file=None, https_user=None, https_key=None, https_ca=None, https_ca_file=None,
+                       ssh_private_key_file=None, https_user=None, https_key=None, https_ca_cert=None, https_ca_cert_file=None,
                        known_hosts=None, known_hosts_file=None, suspend=False, kustomization=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd)
     return provider.create(resource_group_name, cluster_type, cluster_name, name, url, scope, namespace, kind,
                            timeout, sync_interval, branch, tag, semver, commit, local_auth_ref, ssh_private_key,
-                           ssh_private_key_file, https_user, https_key, https_ca, https_ca_file, known_hosts,
+                           ssh_private_key_file, https_user, https_key, https_ca_cert, https_ca_cert_file, known_hosts,
                            known_hosts_file, suspend, kustomization, no_wait)
 
 

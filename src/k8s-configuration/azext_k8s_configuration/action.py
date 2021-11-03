@@ -18,7 +18,7 @@ class InternalKustomizationDefinition(KustomizationDefinition):
         super(KustomizationDefinition, self).__init__(**kwargs)
 
     def to_KustomizationDefinition(self):
-        k_dict = self.__dict__
+        k_dict = dict(self.__dict__)
         del k_dict['name']
         del k_dict['additional_properties']
         return KustomizationDefinition(**k_dict)

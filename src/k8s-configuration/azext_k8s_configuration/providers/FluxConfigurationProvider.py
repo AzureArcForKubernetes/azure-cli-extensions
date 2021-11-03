@@ -119,6 +119,7 @@ class FluxConfigurationProvider:
                                                                   ssh_private_key_file, https_user,
                                                                   https_key, https_ca_cert, https_ca_cert_file,
                                                                   known_hosts, known_hosts_file, local_auth_ref, True)
+
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
             kustomization = {k.name : k.to_KustomizationDefinition() for k in kustomization}
