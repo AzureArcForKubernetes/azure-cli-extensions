@@ -60,7 +60,7 @@ def __get_fluxconfig_kustomization_table_row(key, value):
         for dep in model_deps:
             if dep and dep.get('kustomizationName'):
                 deps.append(dep['kustomizationName'])
-    
+
     return OrderedDict([
         ('name', key),
         ('path', value['path']),

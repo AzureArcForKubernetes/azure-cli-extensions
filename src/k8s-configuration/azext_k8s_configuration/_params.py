@@ -199,7 +199,7 @@ def load_arguments(self, _):
         c.argument('force',
                    arg_type=get_three_state_flag(),
                    help='Whether to re-create resources that cannot be updated on the cluster (i.e. jobs)')
-    
+
     with self.argument_context('k8s-configuration flux kustomization delete') as c:
         c.argument('yes',
                    options_list=['--yes', '-y'],

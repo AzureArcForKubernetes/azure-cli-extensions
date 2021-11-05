@@ -124,7 +124,7 @@ class FluxConfigurationProvider:
 
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
-            kustomization = {k.name : k.to_KustomizationDefinition() for k in kustomization}
+            kustomization = {k.name: k.to_KustomizationDefinition() for k in kustomization}
         else:
             logger.warning(consts.NO_KUSTOMIZATIONS_WARNING)
             kustomization = {
@@ -158,7 +158,7 @@ class FluxConfigurationProvider:
 
     def update(self, resource_group_name, cluster_type, cluster_name, name, url=None,
                timeout=None, sync_interval=None, branch=None, tag=None, semver=None,
-               commit=None, local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None, 
+               commit=None, local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None,
                https_user=None, https_key=None, https_ca_cert=None, https_ca_cert_file=None, known_hosts=None,
                known_hosts_file=None, suspend=None, kustomization=None, no_wait=False):
         # Determine the cluster RP
@@ -172,15 +172,15 @@ class FluxConfigurationProvider:
                 https_ca_cert_file, known_hosts,
                 known_hosts_file, local_auth_ref]):
             git_repository = self._validate_and_get_gitrepository(url, branch, tag, semver, commit,
-                                                                timeout, sync_interval,
-                                                                ssh_private_key, ssh_private_key_file,
-                                                                https_user, https_key, https_ca_cert,
-                                                                https_ca_cert_file, known_hosts,
-                                                                known_hosts_file, local_auth_ref, False)
+                                                                  timeout, sync_interval,
+                                                                  ssh_private_key, ssh_private_key_file,
+                                                                  https_user, https_key, https_ca_cert,
+                                                                  https_ca_cert_file, known_hosts,
+                                                                  known_hosts_file, local_auth_ref, False)
 
         if kustomization:
             # Convert the Internal List Representation of Kustomization to Dictionary
-            kustomization = {k.name : k.to_KustomizationDefinition() for k in kustomization}
+            kustomization = {k.name: k.to_KustomizationDefinition() for k in kustomization}
 
         # Get the protected settings and validate the private key value
         protected_settings = get_protected_settings(
@@ -200,8 +200,8 @@ class FluxConfigurationProvider:
                            cluster_type, cluster_name, name, flux_configuration)
 
     def create_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
-                            kustomization_name, dependencies=None, timeout=None, sync_interval=None,
-                            retry_interval=None, path='', prune=False, force=False, no_wait=False):
+                             kustomization_name, dependencies=None, timeout=None, sync_interval=None,
+                             retry_interval=None, path='', prune=False, force=False, no_wait=False):
         # Pre-Validation
         validate_duration("--timeout", timeout)
         validate_duration("--sync-interval", sync_interval)
@@ -215,7 +215,7 @@ class FluxConfigurationProvider:
                 consts.CREATE_KUSTOMIZATION_EXIST_ERROR.format(kustomization_name, name),
                 consts.CREATE_KUSTOMIZATION_EXIST_HELP
             )
-        
+
         # Add the dependencies in their model to the kustomization
         model_dependencies = None
         if dependencies:
@@ -245,8 +245,8 @@ class FluxConfigurationProvider:
                            cluster_type, cluster_name, name, flux_configuration_patch)
 
     def update_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
-                            kustomization_name, dependencies=None, timeout=None, sync_interval=None,
-                            retry_interval=None, path=None, prune=False, force=False, no_wait=False):
+                             kustomization_name, dependencies=None, timeout=None, sync_interval=None,
+                             retry_interval=None, path=None, prune=False, force=False, no_wait=False):
         # Pre-Validation
         validate_duration("--timeout", timeout)
         validate_duration("--sync-interval", sync_interval)
@@ -259,7 +259,7 @@ class FluxConfigurationProvider:
             raise ValidationError(
                 consts.UPDATE_KUSTOMIZATION_NO_EXIST_ERROR.format(kustomization_name, name),
                 consts.UPDATE_KUSTOMIZATION_NO_EXIST_HELP
-            ) 
+            )
 
         # Add the dependencies in their model to the kustomization
         model_dependencies = None
@@ -290,7 +290,7 @@ class FluxConfigurationProvider:
                            cluster_type, cluster_name, name, flux_configuration_patch)
 
     def delete_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
-                      kustomization_name, no_wait=False, yes=False):
+                             kustomization_name, no_wait=False, yes=False):
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
 
@@ -299,7 +299,7 @@ class FluxConfigurationProvider:
             raise ValidationError(
                 consts.DELETE_KUSTOMIZATION_NO_EXIST_ERROR.format(kustomization_name, name),
                 consts.DELETE_KUSTOMIZATION_NO_EXIST_HELP
-            ) 
+            )
 
         if current_config.kustomizations[kustomization_name].prune:
             logger.warning("Prune is enabled on one or more of your kustomizations. Deleting a Flux "
@@ -315,7 +315,7 @@ class FluxConfigurationProvider:
         )
         return sdk_no_wait(no_wait, self.client.begin_update, resource_group_name, cluster_rp,
                            cluster_type, cluster_name, name, flux_configuration_patch)
-    
+
     def list_kustomization(self, resource_group_name, cluster_type, cluster_name, name):
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
@@ -406,8 +406,8 @@ class FluxConfigurationProvider:
 
     def _validate_and_get_gitrepository(self, url, branch, tag, semver, commit, timeout, sync_interval,
                                         ssh_private_key, ssh_private_key_file, https_user, https_key,
-                                        https_ca_cert, https_ca_cert_file, known_hosts, known_hosts_file, local_auth_ref,
-                                        is_create):
+                                        https_ca_cert, https_ca_cert_file, known_hosts, known_hosts_file,
+                                        local_auth_ref, is_create):
         # Pre-Validation
         validate_duration("--timeout", timeout)
         validate_duration("--sync-interval", sync_interval)
@@ -425,7 +425,7 @@ class FluxConfigurationProvider:
         if is_create:
             validate_git_repository(url)
             validate_url_with_params(url, ssh_private_key, ssh_private_key_file,
-                                    known_hosts, known_hosts_file, https_user, https_key)
+                                     known_hosts, known_hosts_file, https_user, https_key)
             validate_repository_ref(branch, tag, semver, commit)
 
         repository_ref = None

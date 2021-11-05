@@ -55,8 +55,9 @@ def flux_config_list(cmd, client, resource_group_name, cluster_type, cluster_nam
 def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_name, name, url=None,
                        scope='cluster', namespace='default', kind=consts.GIT, timeout=None, sync_interval=None,
                        branch=None, tag=None, semver=None, commit=None, local_auth_ref=None, ssh_private_key=None,
-                       ssh_private_key_file=None, https_user=None, https_key=None, https_ca_cert=None, https_ca_cert_file=None,
-                       known_hosts=None, known_hosts_file=None, suspend=False, kustomization=None, no_wait=False):
+                       ssh_private_key_file=None, https_user=None, https_key=None, https_ca_cert=None,
+                       https_ca_cert_file=None, known_hosts=None, known_hosts_file=None, suspend=False,
+                       kustomization=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd)
     return provider.create(resource_group_name, cluster_type, cluster_name, name, url, scope, namespace, kind,
@@ -69,13 +70,14 @@ def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_n
 def flux_config_update(cmd, client, resource_group_name, cluster_type, cluster_name, name, url=None,
                        timeout=None, sync_interval=None, branch=None, tag=None, semver=None, commit=None,
                        local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None, https_user=None,
-                       https_key=None, https_ca_cert=None, https_ca_cert_file=None, known_hosts=None, known_hosts_file=None,
-                       suspend=None, kustomization=None, no_wait=False):
+                       https_key=None, https_ca_cert=None, https_ca_cert_file=None, known_hosts=None,
+                       known_hosts_file=None, suspend=None, kustomization=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd)
-    return provider.update(resource_group_name, cluster_type, cluster_name, name, url,timeout, sync_interval, branch, tag,
-                           semver, commit, local_auth_ref, ssh_private_key, ssh_private_key_file, https_user, https_key,
-                           https_ca_cert, https_ca_cert_file, known_hosts, known_hosts_file, suspend, kustomization, no_wait)
+    return provider.update(resource_group_name, cluster_type, cluster_name, name, url, timeout, sync_interval,
+                           branch, tag, semver, commit, local_auth_ref, ssh_private_key, ssh_private_key_file,
+                           https_user, https_key, https_ca_cert, https_ca_cert_file, known_hosts,
+                           known_hosts_file, suspend, kustomization, no_wait)
 
 
 def flux_config_create_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
@@ -84,8 +86,8 @@ def flux_config_create_kustomization(cmd, client, resource_group_name, cluster_t
 
     provider = FluxConfigurationProvider(cmd)
     return provider.create_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name,
-                                        dependencies, timeout, sync_interval, retry_interval, path, prune,
-                                        force, no_wait)
+                                         dependencies, timeout, sync_interval, retry_interval, path, prune,
+                                         force, no_wait)
 
 
 def flux_config_update_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
@@ -94,15 +96,16 @@ def flux_config_update_kustomization(cmd, client, resource_group_name, cluster_t
 
     provider = FluxConfigurationProvider(cmd)
     return provider.update_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name,
-                                        dependencies, timeout, sync_interval, retry_interval, path, prune,
-                                        force, no_wait)
+                                         dependencies, timeout, sync_interval, retry_interval, path, prune,
+                                         force, no_wait)
 
 
 def flux_config_delete_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
-                              kustomization_name, no_wait=False, yes=False):
+                                     kustomization_name, no_wait=False, yes=False):
 
     provider = FluxConfigurationProvider(cmd)
-    return provider.delete_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name, no_wait, yes)
+    return provider.delete_kustomization(resource_group_name, cluster_type, cluster_name,
+                                         name, kustomization_name, no_wait, yes)
 
 
 def flux_config_list_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name):
@@ -112,7 +115,7 @@ def flux_config_list_kustomization(cmd, client, resource_group_name, cluster_typ
 
 
 def flux_config_show_kustomization(cmd, client, resource_group_name, cluster_type, cluster_name, name,
-                              kustomization_name):
+                                   kustomization_name):
 
     provider = FluxConfigurationProvider(cmd)
     return provider.show_kustomization(resource_group_name, cluster_type, cluster_name, name, kustomization_name)

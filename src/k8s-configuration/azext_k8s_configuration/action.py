@@ -5,7 +5,7 @@
 # pylint: disable=protected-access
 
 import argparse
-from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition, DependsOnDefinition
 from .validators import validate_kustomization
 from . import consts
@@ -15,7 +15,7 @@ from .utils import parse_dependencies, parse_duration
 class InternalKustomizationDefinition(KustomizationDefinition):
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', "")
-        super(KustomizationDefinition, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     def to_KustomizationDefinition(self):
         k_dict = dict(self.__dict__)
