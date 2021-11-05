@@ -54,11 +54,19 @@ def fluxconfig_kustomization_show_table_format(results):
 
 
 def __get_fluxconfig_kustomization_table_row(key, value):
+    deps = []
+    model_deps = value.get('dependsOn')
+    if model_deps:
+        for dep in model_deps:
+            if dep and dep.get('kustomizationName'):
+                deps.append(dep['kustomizationName'])
+    
     return OrderedDict([
         ('name', key),
         ('path', value['path']),
-        ('prune', value['prune']),
+        ('dependsOn', ','.join(deps)),
         ('syncInterval', format_duration(value['syncIntervalInSeconds'])),
         ('timeout', format_duration(value['timeoutInSeconds'])),
+        ('prune', value['prune']),
         ('force', value['force'])
     ])

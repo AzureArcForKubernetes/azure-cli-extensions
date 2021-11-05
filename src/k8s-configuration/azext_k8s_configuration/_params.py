@@ -106,6 +106,7 @@ def load_arguments(self, _):
                    help='Suspend the reconciliation of the source and kustomizations associated with this configuration')
         c.argument('kustomization',
                    action=KustomizationAddAction,
+                   options_list=['--kustomization', '-k'],
                    help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force']",
                    nargs='+')
 
@@ -178,12 +179,13 @@ def load_arguments(self, _):
 
     with self.argument_context('k8s-configuration flux kustomization') as c:
         c.argument('kustomization_name',
+                   options_list=['--kustomization-name', '-k'],
                    help='Specify the name of the kustomization to target')
         c.argument('path',
                    help='Specify the path in the source that the kustomization should apply')
         c.argument('dependencies',
                    options_list=['--depends', '--dependencies', "--depends-on"],
-                   help='Specify the names of kustomization dependencies')
+                   help='Comma-separated list of kustomization dependencies')
         c.argument('timeout',
                    help='Maximum time to reconcile the kustomization before timing out')
         c.argument('sync_interval',

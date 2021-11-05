@@ -24,6 +24,7 @@ from ..utils import (
     get_parent_api_version,
     get_cluster_rp,
     get_data_from_key_or_file,
+    parse_dependencies,
     parse_duration,
     has_prune_enabled,
     to_base64,
@@ -45,6 +46,7 @@ from ..vendored_sdks.v2021_11_01_preview.models import (
     GitRepositoryDefinition,
     RepositoryRefDefinition,
     KustomizationDefinition,
+    DependsOnDefinition
 )
 from ..vendored_sdks.v2021_05_01_preview.models import (
     Extension,
@@ -213,11 +215,22 @@ class FluxConfigurationProvider:
                 consts.CREATE_KUSTOMIZATION_EXIST_ERROR.format(kustomization_name, name),
                 consts.CREATE_KUSTOMIZATION_EXIST_HELP
             )
+        
+        # Add the dependencies in their model to the kustomization
+        model_dependencies = None
+        if dependencies:
+            model_dependencies = []
+            for dep in parse_dependencies(dependencies):
+                model_dependencies.append(
+                    DependsOnDefinition(
+                        kustomization_name=dep
+                    )
+                )
 
         kustomization = {
             kustomization_name: KustomizationDefinition(
                 path=path,
-                dependencies=dependencies,
+                depends_on=model_dependencies,
                 timeout_in_seconds=parse_duration(timeout),
                 sync_interval_in_seconds=parse_duration(sync_interval),
                 retry_interval_in_seconds=parse_duration(retry_interval),
@@ -248,10 +261,21 @@ class FluxConfigurationProvider:
                 consts.UPDATE_KUSTOMIZATION_NO_EXIST_HELP
             ) 
 
+        # Add the dependencies in their model to the kustomization
+        model_dependencies = None
+        if dependencies:
+            model_dependencies = []
+            for dep in parse_dependencies(dependencies):
+                model_dependencies.append(
+                    DependsOnDefinition(
+                        kustomization_name=dep
+                    )
+                )
+
         kustomization = {
             kustomization_name: KustomizationDefinition(
                 path=path,
-                dependencies=dependencies,
+                depends_on=model_dependencies,
                 timeout_in_seconds=parse_duration(timeout),
                 sync_interval_in_seconds=parse_duration(sync_interval),
                 retry_interval_in_seconds=parse_duration(retry_interval),
