@@ -291,6 +291,9 @@ class FluxConfigurationProvider:
 
     def delete_kustomization(self, resource_group_name, cluster_type, cluster_name, name,
                              kustomization_name, no_wait=False, yes=False):
+        # Confirmation message for deletes
+        user_confirmation_factory(self.cmd, yes)
+
         # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
 
@@ -302,9 +305,9 @@ class FluxConfigurationProvider:
             )
 
         if current_config.kustomizations[kustomization_name].prune:
-            logger.warning("Prune is enabled on one or more of your kustomizations. Deleting a Flux "
-                           "configuration with prune enabled will also delete the Kubernetes objects "
-                           "deployed by the kustomization(s).")
+            logger.warning("Prune is enabled on this kustomization. Deleting a kustomization "
+                           "with prune enabled will also delete the Kubernetes objects "
+                           "deployed by the kustomization.")
             user_confirmation_factory(self.cmd, yes, "Do you want to continue?")
 
         kustomization = {
@@ -334,6 +337,10 @@ class FluxConfigurationProvider:
         return {kustomization_name: current_config.kustomizations[kustomization_name]}
 
     def delete(self, resource_group_name, cluster_type, cluster_name, name, force, no_wait, yes):
+        # Confirmation message for deletes
+        user_confirmation_factory(self.cmd, yes)
+
+        # Determine ClusterRP
         cluster_rp = get_cluster_rp(cluster_type)
 
         config = None

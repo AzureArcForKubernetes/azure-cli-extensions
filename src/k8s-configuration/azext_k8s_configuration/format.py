@@ -55,11 +55,9 @@ def fluxconfig_kustomization_show_table_format(results):
 
 def __get_fluxconfig_kustomization_table_row(key, value):
     deps = []
-    model_deps = value.get('dependsOn')
-    if model_deps:
-        for dep in model_deps:
-            if dep and dep.get('kustomizationName'):
-                deps.append(dep['kustomizationName'])
+    for dep in value.get('dependsOn') or []:
+        if dep.get('kustomizationName'):
+            deps.append(dep['kustomizationName'])
 
     return OrderedDict([
         ('name', key),

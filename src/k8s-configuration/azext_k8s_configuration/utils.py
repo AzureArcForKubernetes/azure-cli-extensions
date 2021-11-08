@@ -138,7 +138,8 @@ def is_dogfood_cluster(cmd):
 
 
 def has_prune_enabled(config):
-    for kustomization in config.kustomizations:
-        if kustomization.prune:
-            return True
+    if config.kustomizations:
+        for kustomization in config.kustomizations.values():
+            if kustomization.prune:
+                return True
     return False
