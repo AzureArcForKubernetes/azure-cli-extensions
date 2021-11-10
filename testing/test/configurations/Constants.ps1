@@ -6,4 +6,4 @@ $TMP_DIRECTORY = "$PSScriptRoot\..\..\tmp"
 $POD_RUNNING = "Running"
 $SUCCEEDED = "Succeeded"
 
-$MAX_RETRY_ATTEMPTS = 18
+$MAX_RETRY_ATTEMPTS = 24

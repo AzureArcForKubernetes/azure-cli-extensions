@@ -9,14 +9,17 @@ Describe 'Flux Configuration (HTTPS) Testing' {
     }
 
     It 'Creates a configuration with https user and https key on the cluster' {
-        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --https-user $dummyValue --https-key $dummyValue --namespace $configurationName --no-wait 
+        $output = az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u "https://github.com/Azure/arc-k8s-demo" -n $configurationName --scope cluster --https-user $dummyValue --https-key $dummyValue --namespace $configurationName --branch main --no-wait 
         $? | Should -BeTrue
 
         # Loop and retry until the configuration installs and helm pod comes up
         $n = 0
         do 
         {
-            if (Get-FluxConfigStatus $configurationName -eq $SUCCEEDED) {
+            $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+            $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            Write-Host "Provisioning State: $provisioningState"
+            if ($provisioningState -eq $SUCCEEDED) {
                 break
             }
             Start-Sleep -Seconds 10
@@ -40,7 +43,7 @@ Describe 'Flux Configuration (HTTPS) Testing' {
         $? | Should -BeTrue
 
         # Configuration should be removed from the resource model
-        az k8s-configuration show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+        az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
         $? | Should -BeFalse
     }
 

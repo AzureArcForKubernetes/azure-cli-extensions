@@ -26,7 +26,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
     It 'Creates a configuration with each type of ssh private key' {
         foreach($configData in $CONFIG_ARR) {
             Write-Host "Creating a configuration of type $($configData.Item1)"
-            az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --namespace $configData.Item1 --ssh-private-key-file $configData.Item2 --no-wait
+            az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $SSH_GIT_URL -n $configData.Item1 --scope cluster --namespace $configData.Item1 --ssh-private-key-file $configData.Item2 --branch main --no-wait
             $? | Should -BeTrue
         }
     
@@ -36,11 +36,14 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
         {
             $readyConfigs = 0
             foreach($configData in $CONFIG_ARR) {
-                # TODO: Change this to checking the success message after we merge in the bugfix into the agent
-                if (Get-FluxConfigStatus $configData.Item1 -eq $SUCCEEDED) {
+                $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $CONFIGdATA.Item1
+                $provisioningState = ($output | ConvertFrom-Json).provisioningState
+                Write-Host "Provisioning State: $provisioningState"
+                if ($provisioningState -eq $SUCCEEDED) {
                     $readyConfigs += 1
                 }
             }
+            Write-Host "$(kubectl get fc -A -o yaml)"
             Start-Sleep -Seconds 10
             $n += 1
         } while ($n -le 30 -And $readyConfigs -ne 3)
@@ -48,7 +51,7 @@ Describe 'Flux Configuration (SSH Configs) Testing' {
     }
 
     It 'Fails when trying to create a configuration with ssh url and https auth values' {
-        az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH --no-wait
+        az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH --branch main --no-wait
         $? | Should -BeFalse
     }
 
