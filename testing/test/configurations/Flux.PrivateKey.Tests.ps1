@@ -1,4 +1,4 @@
-Describe 'Source Control Configuration (SSH Configs) Testing' {
+Describe 'Flux Configuration (SSH Configs) Testing' {
     BeforeAll {
         . $PSScriptRoot/Constants.ps1
         . $PSScriptRoot/Helper.ps1
@@ -13,7 +13,7 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
             Write-Output "y" | ssh-keygen -t $keyTuple.Item1 -f $keyTuple.Item2 -P """"
         }
 
-        $SSH_GIT_URL = "git://github.com/anubhav929/flux-get-started.git"
+        $SSH_GIT_URL = "ssh://github.com/anubhav929/flux-get-started.git"
         $HTTP_GIT_URL = "https://github.com/Azure/arc-k8s-demo"
 
         $configDataRSA = [System.Tuple]::Create("rsa-config", $RSA_KEYPATH)
@@ -48,7 +48,7 @@ Describe 'Source Control Configuration (SSH Configs) Testing' {
     }
 
     It 'Fails when trying to create a configuration with ssh url and https auth values' {
-        az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH
+        az k8s-configuration flux create -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -u $HTTP_GIT_URL -n "config-should-fail" --scope cluster --namespace "config-should-fail" --ssh-private-key-file $RSA_KEYPATH --no-wait
         $? | Should -BeFalse
     }
 
