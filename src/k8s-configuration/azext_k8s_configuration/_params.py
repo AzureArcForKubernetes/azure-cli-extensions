@@ -113,7 +113,7 @@ def load_arguments(self, _):
     with self.argument_context('k8s-configuration flux delete') as c:
         c.argument('force',
                    arg_type=get_three_state_flag(),
-                   help='Specify whether to force delete the flux configuration from the cluster.')
+                   help='Force delete the flux configuration from the cluster.')
         c.argument('yes',
                    options_list=['--yes', '-y'],
                    help='Do not prompt for confirmation')
@@ -195,10 +195,10 @@ def load_arguments(self, _):
                    help='Time between reconciliations of the kustomization on the cluster on failures, defaults to --sync-interval')
         c.argument('prune',
                    arg_type=get_three_state_flag(),
-                   help='Whether to garbage collect resources deployed by the kustomization on the cluster')
+                   help='Garbage collect resources deployed by the kustomization on the cluster')
         c.argument('force',
                    arg_type=get_three_state_flag(),
-                   help='Whether to re-create resources that cannot be updated on the cluster (i.e. jobs)')
+                   help='Re-create resources that cannot be updated on the cluster (i.e. jobs)')
 
     with self.argument_context('k8s-configuration flux kustomization delete') as c:
         c.argument('yes',

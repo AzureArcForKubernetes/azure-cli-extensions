@@ -19,8 +19,8 @@ KUSTOMIZATION_REQUIRED_VALUES_MISSING_HELP = "Add the required values to the Kus
 REPOSITORY_REF_REQUIRED_VALUES_MISSING_ERROR = "Error! Repository reference is invalid"
 REPOSITORY_REF_REQUIRED_VALUES_MISSING_HELP = "Specifying one of [--branch, --tag, --semver, --commit] is required"
 
-REPOSITORY_REF_TOO_MAY_VALUES_ERROR = "Error! Repository reference is invalid"
-REPOSITORY_REF_TOO_MAY_VALUES_HELP = "Specifying more than one repository ref argument that isn't --branch and --commit is invalid"
+REPOSITORY_REF_TOO_MANY_VALUES_ERROR = "Error! Repository reference is invalid"
+REPOSITORY_REF_TOO_MANY_VALUES_HELP = "Specifying more than one repository ref argument is invalid"
 
 GIT_REPOSITORY_REQUIRED_VALUES_MISSING_ERROR = "Error! Required property '{}' was not specified for kind 'GitRepository'"
 GIT_REPOSITORY_REQUIRED_VALUES_MISSING_HELP = "Add missing required property and try again"
@@ -91,11 +91,14 @@ KEY_FILE_READ_HELP = "Verify that the filepath specified exists and contains val
 KEY_AND_FILE_TOGETHER_ERROR = "Error! Both textual key and key filepath cannot be provided"
 KEY_AND_FILE_TOGETHER_HELP = "Try providing the file parameter without providing the plaintext parameter"
 
-SCC_EXISTS_ON_CLUSTER_ERROR = "Error! SourceControlConfigurations with flux already exist on the cluster"
-SCC_EXISTS_ON_CLUSTER_HELP = "Try removing all sourceControlConfigurations from the cluster before attempting to add fluxConfigurations"
+SCC_EXISTS_ON_CLUSTER_ERROR = "Error! Flux v1 configurations already exist on the cluster"
+SCC_EXISTS_ON_CLUSTER_HELP = "Try removing all Flux v1 configurations from the cluster before attempting to add Flux v2 configurations"
 
-FLUX_EXTENSION_NOT_SUCCEEDED_ERROR = "Error! 'Microsoft.Flux' extension is installed but not in a succeeded state on the cluster. Unable to proceed with fluxConfiguration install."
-FLUX_EXTENSION_NOT_SUCCEEDED_HELP = "Try resolving the extension error on the cluster or removing and re-installing the extension."
+FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_ERROR = "Error! 'Microsoft.Flux' extension is installed but not in a succeeded state on the cluster. Unable to proceed with Flux v2 configuration install."
+FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_HELP = "Try resolving the extension error on the cluster or removing and re-installing the extension."
+
+FLUX_EXTENSION_CREATING_ERROR = "Error! 'Microsoft.Flux' extension is currently installing on the cluster. Unable to proceed with Flux v2 configuration install."
+FLUX_EXTENSION_CREATING_HELP = "Try again in a few minutes when the 'Microsoft.Flux' extension installation has completed."
 
 HTTP_URL_NO_AUTH_WARNING = "Warning! https url is being used without https auth params, ensure the repository url provided is not a private repo"
 
@@ -109,6 +112,7 @@ CC_REGISTRATION_LINK = "https://aka.ms/RegisterKubernetesConfigurationProvider"
 CC_REGISTRATION_ERROR = "Unable to fetch registration state of '{0}' provider. Failed to enable 'flux configuration' feature..."
 CC_PROVIDER_NAMESPACE = 'Microsoft.KubernetesConfiguration'
 REGISTERED = "Registered"
+CREATING = "Creating"
 SUCCEEDED = "Succeeded"
 
 FLUX_EXTENSION_TYPE = "microsoft.flux"

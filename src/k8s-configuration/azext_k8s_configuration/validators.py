@@ -79,11 +79,11 @@ def validate_repository_ref(branch: str, tag: str, semver: str, commit: str):
             consts.REPOSITORY_REF_REQUIRED_VALUES_MISSING_ERROR,
             consts.REPOSITORY_REF_REQUIRED_VALUES_MISSING_HELP
         )
-    if num_set_args == 1 or (num_set_args == 2 and (branch and commit)):
+    if num_set_args == 1:
         return
     raise MutuallyExclusiveArgumentError(
-        consts.REPOSITORY_REF_TOO_MAY_VALUES_ERROR,
-        consts.REPOSITORY_REF_TOO_MAY_VALUES_HELP
+        consts.REPOSITORY_REF_TOO_MANY_VALUES_ERROR,
+        consts.REPOSITORY_REF_TOO_MANY_VALUES_HELP
     )
 
 

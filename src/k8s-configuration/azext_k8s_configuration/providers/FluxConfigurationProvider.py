@@ -401,14 +401,21 @@ class FluxConfigurationProvider:
                                                 cluster_type,
                                                 cluster_name)
 
-            logger.info("Starting extension creation on the cluster. This might take a minute...")
+            logger.info("Starting extension creation on the cluster. This might take a few minutes...")
             sdk_no_wait(no_wait, self.extension_client.begin_create, resource_group_name, cluster_rp, cluster_type,
                         cluster_name, "flux", extension).result()
-            logger.warning("'Microsoft.Flux' extension was successfully installed on the cluster")
+            # Only show that we have received a success when we have --no-wait
+            if not no_wait:
+                logger.warning("'Microsoft.Flux' extension was successfully installed on the cluster")
+        elif flux_extension.provisioning_state == consts.CREATING:
+            raise DeploymentError(
+                consts.FLUX_EXTENSION_CREATING_ERROR,
+                consts.FLUX_EXTENSION_CREATING_HELP
+            )
         elif flux_extension.provisioning_state != consts.SUCCEEDED:
             raise DeploymentError(
-                consts.FLUX_EXTENSION_NOT_SUCCEEDED_ERROR,
-                consts.FLUX_EXTENSION_NOT_SUCCEEDED_HELP
+                consts.FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_ERROR,
+                consts.FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_HELP
             )
 
     def _validate_and_get_gitrepository(self, url, branch, tag, semver, commit, timeout, sync_interval,
