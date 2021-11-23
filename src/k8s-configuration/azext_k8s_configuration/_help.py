@@ -175,6 +175,11 @@ helps['k8s-configuration flux kustomization delete'] = """
           --kustomization-name my-kustomization
 """
 
+helps['k8s-configuration flux deployed-object'] = """
+    type: group
+    short-summary: Commands to see deployed objects associated with Flux v2 Kubernetes configurations.
+"""
+
 helps['k8s-configuration flux deployed-object list'] = """
     type: command
     short-summary: List deployed objects associated with a Kubernetes Flux v2 Configuration.

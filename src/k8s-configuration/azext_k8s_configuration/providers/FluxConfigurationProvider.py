@@ -433,6 +433,9 @@ class FluxConfigurationProvider:
                 consts.FLUX_EXTENSION_CREATING_HELP
             )
         elif flux_extension.provisioning_state != consts.SUCCEEDED:
+            # Print the error detail so the user know how to fix it
+            if flux_extension.error_detail:
+                logger.error('%s %s', flux_extension.error_detail.code, flux_extension.error_detail.message)
             raise DeploymentError(
                 consts.FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_ERROR,
                 consts.FLUX_EXTENSION_NOT_SUCCEEDED_OR_CREATING_HELP
