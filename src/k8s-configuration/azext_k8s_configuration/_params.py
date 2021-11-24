@@ -97,6 +97,9 @@ def load_arguments(self, _):
         c.argument('known_hosts_file',
                    arg_group="Auth",
                    help='File path to known_hosts contents containing public SSH keys required to access private Git instances')
+        c.argument('insecure',
+                   arg_type=get_three_state_flag(),
+                   help='Communicate with a bucket without TLS')
         c.argument('local_auth_ref',
                    options_list=['--local-auth-ref', '--local-ref'],
                    arg_group="Auth",

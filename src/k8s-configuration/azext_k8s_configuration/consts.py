@@ -126,16 +126,12 @@ HTTPS_KEY_KEY = "httpsKey"
 BUCKET_SECRET_KEY_KEY = "bucketSecretKey"
 
 GIT_REPO_REQUIRED_PARAMS = {"url"}
-GIT_REPO_INVALID_PARAMS = {"bucket_name", "access_key", "secret_key", "insecure"}
-GIT_REPO_VALID_PARAMS = ["url", "branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
+GIT_REPO_VALID_PARAMS = {"url", "branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
                          "https_user", "https_key", "https_ca_cert", "https_ca_cert_file", "known_hosts",
-                         "known_hosts_file", "local_auth_ref"]
+                         "known_hosts_file", "local_auth_ref"}
 
 BUCKET_REQUIRED_PARAMS = {"url", "bucket_name"}
-BUCKET_INVALID_PARAMS = {"branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
-                         "https_user", "https_key", "https_ca_cert", "https_ca_cert_file", "known_hosts",
-                         "known_hosts_file"}
-BUCKET_VALID_PARAMS = ["url", "bucket_name", "access_key", "secret_key", "insecure", "local_auth_ref"]
+BUCKET_VALID_PARAMS = {"url", "bucket_name", "access_key", "secret_key", "insecure", "local_auth_ref"}
 
 DEPENDENCY_KEYS = ["dependencies", "depends_on", "dependsOn", "depends"]
 SYNC_INTERVAL_KEYS = ["interval", "sync_interval", "syncInterval"]
