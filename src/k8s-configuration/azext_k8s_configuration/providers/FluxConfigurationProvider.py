@@ -113,7 +113,7 @@ class FluxConfigurationProvider:
     # pylint: disable=too-many-locals
     def create(self, **kwargs):
         factory = source_kind_generator_factory(**kwargs)
-        git_repository, bucket = factory.generate()
+        update_func = factory.generate_update_func()
 
         kustomizations = kwargs.get('kustomization')
         if kustomizations:
@@ -136,12 +136,11 @@ class FluxConfigurationProvider:
             scope=kwargs.get('scope'),
             namespace=kwargs.get('namespace'),
             source_kind=factory.get_rp_source_kind(),
-            git_repository=git_repository,
-            bucket=bucket,
             suspend=kwargs.get('suspend'),
             kustomizations=kustomizations,
             configuration_protected_settings=protected_settings,
         )
+        flux_configuration = update_func(flux_configuration)
 
         self._validate_source_control_config_not_installed()
         self._validate_extension_install()
@@ -158,7 +157,7 @@ class FluxConfigurationProvider:
         if not kind:
             kind = config.source_kind
         factory = source_kind_generator_factory(**kwargs)
-        git_repository, bucket = factory.generate_patch()
+        update_func = factory.generate_patch_update_func()
 
         kustomizations = kwargs.get('kustomization')
         if kustomizations:
@@ -174,11 +173,10 @@ class FluxConfigurationProvider:
 
         flux_configuration = FluxConfigurationPatch(
             suspend=kwargs.get('suspend'),
-            git_repository=git_repository,
-            bucket=bucket,
             kustomizations=kustomizations,
-            configuration_protected_settings=protected_settings,
+            configuration_protected_settings=protected_settings
         )
+        flux_configuration = update_func(flux_configuration)
 
         return sdk_no_wait(self.no_wait, self.client.begin_update, self.resource_group_name, self.cluster_rp,
                            self.cluster_type, self.cluster_name, self.name, flux_configuration)
@@ -430,9 +428,10 @@ def source_kind_generator_factory(kind=consts.GIT, **kwargs):
         return BucketGenerator(**kwargs)
 
 class SourceKindGenerator:
-    def __init__(self, kind, required_params, invalid_params):
+    def __init__(self, kind, required_params, valid_params, invalid_params):
         self.kind = kind
         self.invalid_params = invalid_params
+        self.valid_params = valid_params
         self.required_params = required_params
 
     def validate_required_params(self, **kwargs):
@@ -442,7 +441,7 @@ class SourceKindGenerator:
                 copied_required.discard(kwarg)
         if len(copied_required) > 0:
             raise RequiredArgumentMissingError(
-                consts.REQUIRED_VALUES_MISSING_ERROR.format(', '.join(copied_required), self.kind),
+                consts.REQUIRED_VALUES_MISSING_ERROR.format(','.join(map(self.pretty_parameter, copied_required)), self.kind),
                 consts.REQUIRED_VALUES_MISSING_HELP
             )
 
@@ -453,8 +452,8 @@ class SourceKindGenerator:
                 bad_args.append(kwarg)
         if len(bad_args) > 0:
             raise UnrecognizedArgumentError(
-                consts.EXTRA_VALUES_PROVIDED_ERROR.format(', '.join(bad_args), self.kind),
-                consts.EXTRA_VALUES_PROVIDED_HELP
+                consts.EXTRA_VALUES_PROVIDED_ERROR.format(','.join(map(self.pretty_parameter, bad_args)), self.kind),
+                consts.EXTRA_VALUES_PROVIDED_HELP.format(self.kind, ','.join(map(self.pretty_parameter, self.valid_params)))
             )
     
     def get_rp_source_kind(self):
@@ -463,11 +462,15 @@ class SourceKindGenerator:
         else:
             return consts.BUCKET
 
+    def pretty_parameter(self, parameter):
+        parameter = parameter.replace('_', '-')
+        return "'--" + parameter + "'"
+
+
 class GitRepositoryGenerator(SourceKindGenerator):
     def __init__(self, **kwargs):
         # Common Pre-Validation
-        super().__init__(consts.GIT, consts.GIT_REPO_REQUIRED_PARAMS, consts.GIT_REPO_INVALID_PARAMS)
-        super().validate_required_params(**kwargs)
+        super().__init__(consts.GIT, consts.GIT_REPO_REQUIRED_PARAMS, consts.GIT_REPO_VALID_PARAMS, consts.GIT_REPO_INVALID_PARAMS)
         super().validate_params(**kwargs)
 
         # Pre-Validation
@@ -504,29 +507,15 @@ class GitRepositoryGenerator(SourceKindGenerator):
     '''
     generate(self) generates the GitRepository object for the PUT case
     '''
-    def generate(self):
+    def generate_update_func(self):
+        super().validate_required_params(**self.kwargs)
         validate_git_url(self.url)
         validate_url_with_params(self.url, self.ssh_private_key, self.ssh_private_key_file,
                                  self.known_hosts, self.known_hosts_file, self.https_user, self.https_key)
         validate_repository_ref(self.repository_ref)
-        return GitRepositoryDefinition(
-            url=self.url,
-            timeout_in_seconds=parse_duration(self.timeout),
-            sync_interval_in_seconds=parse_duration(self.sync_interval),
-            repository_ref=self.repository_ref,
-            ssh_known_hosts=self.knownhost_data,
-            https_user=self.https_user,
-            local_auth_ref=self.local_auth_ref,
-            https_ca_file=self.https_ca_data
-        ), None
 
-    '''
-    generate_patch(self) generates the GitRepository object for the PATCH case
-    The patch only returns non-null values if the user has specified a value for the parameter
-    '''
-    def generate_patch(self):
-        if any(self.kwargs.values()):
-            return GitRepositoryPatchDefinition(
+        def git_repository_updater(config):
+            config.git_repository = GitRepositoryDefinition(
                 url=self.url,
                 timeout_in_seconds=parse_duration(self.timeout),
                 sync_interval_in_seconds=parse_duration(self.sync_interval),
@@ -535,14 +524,34 @@ class GitRepositoryGenerator(SourceKindGenerator):
                 https_user=self.https_user,
                 local_auth_ref=self.local_auth_ref,
                 https_ca_file=self.https_ca_data
-            ), None
-        return None, None
+            )
+            return config
+        return git_repository_updater
+
+    '''
+    generate_patch(self) generates the GitRepository object for the PATCH case
+    The patch only returns non-null values if the user has specified a value for the parameter
+    '''
+    def generate_patch_update_func(self):
+        def git_repository_updater(config):
+            if any(self.kwargs.values()):
+                config.git_repository = GitRepositoryPatchDefinition(
+                    url=self.url,
+                    timeout_in_seconds=parse_duration(self.timeout),
+                    sync_interval_in_seconds=parse_duration(self.sync_interval),
+                    repository_ref=self.repository_ref,
+                    ssh_known_hosts=self.knownhost_data,
+                    https_user=self.https_user,
+                    local_auth_ref=self.local_auth_ref,
+                    https_ca_file=self.https_ca_data
+                )
+            return config
+        return git_repository_updater
 
 class BucketGenerator(SourceKindGenerator):
     def __init__(self, **kwargs):
         # Common Pre-Validation
-        super().__init__(consts.BUCKET, consts.BUCKET_REQUIRED_PARAMS, consts.BUCKET_INVALID_PARAMS)
-        super().validate_required_params(**kwargs)
+        super().__init__(consts.BUCKET, consts.BUCKET_REQUIRED_PARAMS, consts.BUCKET_VALID_PARAMS, consts.BUCKET_INVALID_PARAMS)
         super().validate_params(**kwargs)
 
         # Pre-Validations
@@ -561,24 +570,10 @@ class BucketGenerator(SourceKindGenerator):
     '''
     generate(self) generates the Bucket object for the PUT case
     '''
-    def generate(self): 
-        return None, BucketDefinition(
-            url=self.url,
-            bucket_name=self.bucket_name,
-            timeout_in_seconds=parse_duration(self.timeout),
-            sync_interval_in_seconds=parse_duration(self.sync_interval),
-            access_key=self.access_key,
-            local_auth_ref=self.local_auth_ref,
-            insecure=self.insecure
-        )
-    
-    '''
-    generate_patch(self) generates the Bucket object for the PATCH case
-    The patch only returns non-null values if the user has specified a value for the parameter
-    '''
-    def generate_patch(self):
-        if any(self.kwargs.values()):
-            return None, BucketDefinition(
+    def generate_update_func(self):
+        super().validate_required_params(**self.kwargs)
+        def bucket_updater(config):
+            config.bucket = BucketDefinition(
                 url=self.url,
                 bucket_name=self.bucket_name,
                 timeout_in_seconds=parse_duration(self.timeout),
@@ -587,8 +582,26 @@ class BucketGenerator(SourceKindGenerator):
                 local_auth_ref=self.local_auth_ref,
                 insecure=self.insecure
             )
-        return None, None
-
+        return bucket_updater
+    
+    '''
+    generate_patch(self) generates the Bucket object for the PATCH case
+    The patch only returns non-null values if the user has specified a value for the parameter
+    '''
+    def generate_patch_update_func(self):
+        def bucket_patch_updater(config):
+            if any(self.kwargs.values()):
+                config.bucket = BucketDefinition(
+                    url=self.url,
+                    bucket_name=self.bucket_name,
+                    timeout_in_seconds=parse_duration(self.timeout),
+                    sync_interval_in_seconds=parse_duration(self.sync_interval),
+                    access_key=self.access_key,
+                    local_auth_ref=self.local_auth_ref,
+                    insecure=self.insecure
+                )
+            return config
+        return bucket_patch_updater
 
 def get_protected_settings(ssh_private_key, ssh_private_key_file, https_key, secret_key):
     protected_settings = {}

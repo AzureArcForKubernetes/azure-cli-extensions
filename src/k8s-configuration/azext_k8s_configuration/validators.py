@@ -89,7 +89,17 @@ def validate_repository_ref(repository_ref):
 
 
 def validate_duration(arg_name: str, duration: str):
-    if duration and not re.match(consts.VALID_DURATION_REGEX, duration):
+    if not duration:
+        return
+    regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+    parts = regex.match(duration)
+    if duration and not parts:
+        raise InvalidArgumentValueError(
+            consts.INVALID_DURATION_ERROR.format(arg_name),
+            consts.INVALID_DURATION_HELP
+        )
+    parts = parts.groupdict()
+    if not any(parts.values()):
         raise InvalidArgumentValueError(
             consts.INVALID_DURATION_ERROR.format(arg_name),
             consts.INVALID_DURATION_HELP

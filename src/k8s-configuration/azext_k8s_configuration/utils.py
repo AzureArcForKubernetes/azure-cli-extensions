@@ -78,6 +78,7 @@ def parse_duration(duration):
     regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
     parts = regex.match(duration)
     parts = parts.groupdict()
+    print(parts)
     time_params = {}
     for name, param in parts.items():
         if param:

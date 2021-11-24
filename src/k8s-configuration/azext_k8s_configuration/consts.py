@@ -22,17 +22,17 @@ REPOSITORY_REF_REQUIRED_VALUES_MISSING_HELP = "Specifying one of [--branch, --ta
 REPOSITORY_REF_TOO_MANY_VALUES_ERROR = "Error! Repository reference is invalid"
 REPOSITORY_REF_TOO_MANY_VALUES_HELP = "Specifying more than one repository ref argument is invalid"
 
-REQUIRED_VALUES_MISSING_ERROR = "Error! Required properties '{}' were not specified for kind '{}'"
+REQUIRED_VALUES_MISSING_ERROR = "Error! Required properties [{}] were not specified for kind '{}'"
 REQUIRED_VALUES_MISSING_HELP = "Add the missing required properties and try again"
 
-EXTRA_VALUES_PROVIDED_ERROR = "Error! Extra properties '{}' was specified for kind '{}'"
-EXTRA_VALUES_PROVIDED_HELP = "Remove the extra properties and try again"
+EXTRA_VALUES_PROVIDED_ERROR = "Error! Invalid properties [{}] were specified for kind '{}'"
+EXTRA_VALUES_PROVIDED_HELP = "Valid properties for kind '{}' include [{}]"
 
 INVALID_DURATION_ERROR = "Error! Invalid {0}."
-INVALID_DURATION_HELP = "Specify a valid ISO8601 duration and try again"
+INVALID_DURATION_HELP = "Specify a valid Go duration and try again (i.e. 1h2m5s)"
 
 INVALID_URL_ERROR = "Error! Invalid --url."
-INVALID_URL_HELP = "Url must beginwith one of ['http://', 'https://', 'git@', 'ssh://']"
+INVALID_URL_HELP = "Url must begin with one of ['http://', 'https://', 'git@', 'ssh://']"
 
 INVALID_KUBERNETES_NAME_LENGTH_ERROR = "Error! Invalid {0}"
 INVALID_KUBERNETES_NAME_LENGTH_HELP = "Parameter {0} can be a maximum of {1} characters. Specify a shorter name and try again."
@@ -127,11 +127,15 @@ BUCKET_SECRET_KEY_KEY = "bucketSecretKey"
 
 GIT_REPO_REQUIRED_PARAMS = {"url"}
 GIT_REPO_INVALID_PARAMS = {"bucket_name", "access_key", "secret_key", "insecure"}
+GIT_REPO_VALID_PARAMS = ["url", "branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
+                         "https_user", "https_key", "https_ca_cert", "https_ca_cert_file", "known_hosts",
+                         "known_hosts_file", "local_auth_ref"]
 
 BUCKET_REQUIRED_PARAMS = {"url", "bucket_name"}
 BUCKET_INVALID_PARAMS = {"branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
                          "https_user", "https_key", "https_ca_cert", "https_ca_cert_file", "known_hosts",
                          "known_hosts_file"}
+BUCKET_VALID_PARAMS = ["url", "bucket_name", "access_key", "secret_key", "insecure", "local_auth_ref"]
 
 DEPENDENCY_KEYS = ["dependencies", "depends_on", "dependsOn", "depends"]
 SYNC_INTERVAL_KEYS = ["interval", "sync_interval", "syncInterval"]

@@ -52,16 +52,17 @@ def flux_config_list(cmd, client, resource_group_name, cluster_type, cluster_nam
 
 
 # pylint: disable=too-many-locals
-def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_name, name, url=None,
+def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_name, name, url, bucket_name=None,
                        scope='cluster', namespace='default', kind=consts.GIT, timeout=None, sync_interval=None,
                        branch=None, tag=None, semver=None, commit=None, local_auth_ref=None, ssh_private_key=None,
                        ssh_private_key_file=None, https_user=None, https_key=None, https_ca_cert=None,
-                       https_ca_cert_file=None, known_hosts=None, known_hosts_file=None, suspend=False,
-                       kustomization=None, no_wait=False):
+                       https_ca_cert_file=None, known_hosts=None, known_hosts_file=None, access_key=None,
+                       secret_key=None, insecure=False, suspend=False, kustomization=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd, resource_group_name, cluster_type, cluster_name, name, no_wait)
     return provider.create(
         url=url,
+        bucket_name=bucket_name,
         scope=scope,
         namespace=namespace,
         kind=kind,
@@ -80,6 +81,9 @@ def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_n
         https_ca_cert_file=https_ca_cert_file,
         known_hosts=known_hosts,
         known_hosts_file=known_hosts_file,
+        access_key=access_key,
+        secret_key=secret_key,
+        insecure=insecure,
         suspend=suspend,
         kustomization=kustomization,
     )
@@ -87,14 +91,16 @@ def flux_config_create(cmd, client, resource_group_name, cluster_type, cluster_n
 
 # pylint: disable=too-many-locals
 def flux_config_update(cmd, client, resource_group_name, cluster_type, cluster_name, name, url=None,
-                       timeout=None, sync_interval=None, branch=None, tag=None, semver=None, commit=None,
-                       local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None, https_user=None,
-                       https_key=None, https_ca_cert=None, https_ca_cert_file=None, known_hosts=None,
-                       known_hosts_file=None, suspend=None, kustomization=None, no_wait=False):
+                       bucket_name=None, timeout=None, sync_interval=None, branch=None, tag=None, semver=None,
+                       commit=None, local_auth_ref=None, ssh_private_key=None, ssh_private_key_file=None,
+                       https_user=None, https_key=None, https_ca_cert=None, https_ca_cert_file=None,
+                       known_hosts=None, known_hosts_file=None, access_key=None, secret_key=None, insecure=False,
+                       suspend=None, kustomization=None, no_wait=False):
 
     provider = FluxConfigurationProvider(cmd, resource_group_name, cluster_type, cluster_name, name, no_wait)
     return provider.update(
         url=url,
+        bucket_name=bucket_name,
         timeout=timeout,
         sync_interval=sync_interval,
         branch=branch, 
@@ -110,6 +116,9 @@ def flux_config_update(cmd, client, resource_group_name, cluster_type, cluster_n
         https_ca_cert_file=https_ca_cert_file,
         known_hosts=known_hosts,
         known_hosts_file=known_hosts_file,
+        access_key=access_key,
+        secret_key=secret_key,
+        insecure=insecure,
         suspend=suspend, 
         kustomization=kustomization
     )
