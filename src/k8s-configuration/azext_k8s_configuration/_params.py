@@ -51,11 +51,11 @@ def load_arguments(self, _):
                    options_list=['--namespace', '--ns'],
                    validator=validate_namespace)
         c.argument('kind',
-                   arg_type=get_enum_type([consts.GIT]),
+                   arg_type=get_enum_type([consts.GIT, consts.BUCKET]),
                    help='Source kind to reconcile')
         c.argument('url',
                    options_list=['--url', '-u'],
-                   help='URL of the git repo source to reconcile')
+                   help='URL of the source to reconcile')
         c.argument('timeout',
                    help='Maximum time to reconcile the source before timing out')
         c.argument('sync_interval',

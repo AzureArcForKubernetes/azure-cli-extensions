@@ -22,8 +22,11 @@ REPOSITORY_REF_REQUIRED_VALUES_MISSING_HELP = "Specifying one of [--branch, --ta
 REPOSITORY_REF_TOO_MANY_VALUES_ERROR = "Error! Repository reference is invalid"
 REPOSITORY_REF_TOO_MANY_VALUES_HELP = "Specifying more than one repository ref argument is invalid"
 
-GIT_REPOSITORY_REQUIRED_VALUES_MISSING_ERROR = "Error! Required property '{}' was not specified for kind 'GitRepository'"
-GIT_REPOSITORY_REQUIRED_VALUES_MISSING_HELP = "Add missing required property and try again"
+REQUIRED_VALUES_MISSING_ERROR = "Error! Required properties '{}' were not specified for kind '{}'"
+REQUIRED_VALUES_MISSING_HELP = "Add the missing required properties and try again"
+
+EXTRA_VALUES_PROVIDED_ERROR = "Error! Extra properties '{}' was specified for kind '{}'"
+EXTRA_VALUES_PROVIDED_HELP = "Remove the extra properties and try again"
 
 INVALID_DURATION_ERROR = "Error! Invalid {0}."
 INVALID_DURATION_HELP = "Specify a valid ISO8601 duration and try again"
@@ -120,6 +123,15 @@ FLUX_EXTENSION_TYPE = "microsoft.flux"
 SSH_PRIVATE_KEY_KEY = "sshPrivateKey"
 HTTPS_USER_KEY = "httpsUser"
 HTTPS_KEY_KEY = "httpsKey"
+BUCKET_SECRET_KEY_KEY = "bucketSecretKey"
+
+GIT_REPO_REQUIRED_PARAMS = {"url"}
+GIT_REPO_INVALID_PARAMS = {"bucket_name", "access_key", "secret_key", "insecure"}
+
+BUCKET_REQUIRED_PARAMS = {"url", "bucket_name"}
+BUCKET_INVALID_PARAMS = {"branch", "tag", "semver", "commit", "ssh_private_key", "ssh_private_key_file",
+                         "https_user", "https_key", "https_ca_cert", "https_ca_cert_file", "known_hosts",
+                         "known_hosts_file"}
 
 DEPENDENCY_KEYS = ["dependencies", "depends_on", "dependsOn", "depends"]
 SYNC_INTERVAL_KEYS = ["interval", "sync_interval", "syncInterval"]
@@ -134,6 +146,7 @@ VALID_KUBERNETES_DNS_SUBDOMAIN_NAME_REGEX = r"^[a-z0-9]([\.\-a-z0-9]*[a-z0-9])?$
 VALID_KUBERNETES_DNS_NAME_REGEX = r"^[a-z0-9]([\-a-z0-9]*[a-z0-9])?$"
 
 GIT = "git"
+BUCKET = "bucket"
 GIT_REPOSITORY = "GitRepository"
 
 CONNECTED_CLUSTERS = "connectedclusters"

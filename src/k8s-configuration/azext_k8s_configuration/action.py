@@ -6,7 +6,11 @@
 
 import argparse
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from .vendored_sdks.v2021_11_01_preview.models import KustomizationDefinition, DependsOnDefinition
+from .vendored_sdks.v2022_01_01_preview.models import (
+    KustomizationDefinition,
+    KustomizationPatchDefinition,
+    DependsOnDefinition    
+) 
 from .validators import validate_kustomization
 from . import consts
 from .utils import parse_dependencies, parse_duration
@@ -22,6 +26,12 @@ class InternalKustomizationDefinition(KustomizationDefinition):
         del k_dict['name']
         del k_dict['additional_properties']
         return KustomizationDefinition(**k_dict)
+
+    def to_KustomizationPatchDefinition(self):
+        k_dict = dict(self.__dict__)
+        del k_dict['name']
+        del k_dict['additional_properties']
+        return KustomizationPatchDefinition(**k_dict)
 
 
 class KustomizationAddAction(argparse._AppendAction):

@@ -69,11 +69,12 @@ def validate_kustomization(values):
         )
 
 
-def validate_repository_ref(branch: str, tag: str, semver: str, commit: str):
+def validate_repository_ref(repository_ref):
     num_set_args = 0
-    for elem in [branch, tag, semver, commit]:
-        if elem:
-            num_set_args += 1
+    if repository_ref:
+        for elem in [repository_ref.branch, repository_ref.tag, repository_ref.semver, repository_ref.commit]:
+            if elem:
+                num_set_args += 1
     if num_set_args == 0:
         raise RequiredArgumentMissingError(
             consts.REPOSITORY_REF_REQUIRED_VALUES_MISSING_ERROR,
@@ -93,15 +94,6 @@ def validate_duration(arg_name: str, duration: str):
             consts.INVALID_DURATION_ERROR.format(arg_name),
             consts.INVALID_DURATION_HELP
         )
-
-
-def validate_git_repository(url: str):
-    if not url:
-        raise RequiredArgumentMissingError(
-            consts.GIT_REPOSITORY_REQUIRED_VALUES_MISSING_ERROR.format("--url"),
-            consts.GIT_REPOSITORY_REQUIRED_VALUES_MISSING_HELP
-        )
-    validate_git_url(url)
 
 
 def validate_git_url(url: str):
