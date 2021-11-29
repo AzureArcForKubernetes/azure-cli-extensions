@@ -399,6 +399,26 @@ def show_kustomization(cmd, client, resource_group_name, cluster_type, cluster_n
         )
     return {kustomization_name: current_config.kustomizations[kustomization_name]}
 
+def list_deployed_object(self, resource_group_name, cluster_type, cluster_name, name):
+        # Determine ClusterRP
+        cluster_rp = get_cluster_rp(cluster_type)
+        current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
+        return current_config.statuses
+
+def show_deployed_object(self, resource_group_name, cluster_type, cluster_name, name,
+                            object_name, object_namespace, object_kind):
+    # Determine ClusterRP
+    cluster_rp = get_cluster_rp(cluster_type)
+    current_config = self.client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
+
+    for status in current_config.statuses:
+        if status.name == object_name and status.namespace == object_namespace and status.kind == object_kind:
+            return status
+    raise ValidationError(
+        consts.SHOW_DEPLOYED_OBJECT_NO_EXIST_ERROR.format(object_name, object_namespace, object_kind, name),
+        consts.SHOW_DEPLOYED_OBJECT_NO_EXIST_HELP
+    )
+
 def delete(cmd, client, resource_group_name, cluster_type,
                        cluster_name, name, force=False, no_wait=False, yes=False):
 
@@ -554,7 +574,6 @@ class SourceKindGenerator:
     def pretty_parameter(self, parameter):
         parameter = parameter.replace('_', '-')
         return "'--" + parameter + "'"
-
 
 class GitRepositoryGenerator(SourceKindGenerator):
     def __init__(self, **kwargs):

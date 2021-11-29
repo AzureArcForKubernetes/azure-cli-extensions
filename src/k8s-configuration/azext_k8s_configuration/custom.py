@@ -178,6 +178,20 @@ def flux_config_show_kustomization(cmd, client, resource_group_name, cluster_typ
     return provider.show_kustomization(kustomization_name)
 
 
+def flux_config_list_deployed_object(cmd, client, resource_group_name, cluster_type, cluster_name, name):
+
+    provider = FluxConfigurationProvider(cmd)
+    return provider.list_deployed_object(resource_group_name, cluster_type, cluster_name, name)
+
+
+def flux_config_show_deployed_object(cmd, client, resource_group_name, cluster_type, cluster_name, name,
+                                     object_name, object_namespace, object_kind):
+
+    provider = FluxConfigurationProvider(cmd)
+    return provider.show_deployed_object(resource_group_name, cluster_type, cluster_name, name,
+                                         object_name, object_namespace, object_kind)
+
+
 def flux_config_delete(cmd, client, resource_group_name, cluster_type,
                        cluster_name, name, force=False, no_wait=False, yes=False):
     provider = FluxConfigurationProvider(cmd, resource_group_name, cluster_type, cluster_name, name, no_wait, yes)
