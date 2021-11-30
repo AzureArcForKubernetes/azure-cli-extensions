@@ -194,7 +194,7 @@ GIT_REPO_VALID_PARAMS = {
     "local_auth_ref",
 }
 
-BUCKET_REQUIRED_PARAMS = {"url", "bucket_name"}
+BUCKET_REQUIRED_PARAMS = {"url", "bucket_name", "access_key", "secret_key"}
 BUCKET_VALID_PARAMS = {
     "url",
     "bucket_name",

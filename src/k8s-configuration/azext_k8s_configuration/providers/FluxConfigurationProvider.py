@@ -238,7 +238,7 @@ def update_config(
     cluster_type,
     cluster_name,
     name,
-    kind=consts.GIT,
+    kind=None,
     url=None,
     bucket_name=None,
     timeout=None,

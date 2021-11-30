@@ -6,12 +6,16 @@
 
 from knack.help_files import helps  # pylint: disable=unused-import
 
-helps['k8s-configuration'] = """
+helps[
+    "k8s-configuration"
+] = """
     type: group
     short-summary: Commands to manage resources from Microsoft.KubernetesConfiguration.
 """
 
-helps['k8s-configuration create'] = """
+helps[
+    "k8s-configuration create"
+] = """
     type: command
     short-summary: Create a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux create").
     examples:
@@ -26,7 +30,9 @@ helps['k8s-configuration create'] = """
             --ssh-known-hosts '' --ssh-known-hosts-file ''
 """
 
-helps['k8s-configuration list'] = """
+helps[
+    "k8s-configuration list"
+] = """
     type: command
     short-summary: List Flux v1 Kubernetes configurations (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux list").
     examples:
@@ -36,7 +42,9 @@ helps['k8s-configuration list'] = """
             --cluster-type connectedClusters
 """
 
-helps['k8s-configuration delete'] = """
+helps[
+    "k8s-configuration delete"
+] = """
     type: command
     short-summary: Delete a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux delete").
     examples:
@@ -46,7 +54,9 @@ helps['k8s-configuration delete'] = """
             --cluster-type connectedClusters --name MyConfigurationName
 """
 
-helps['k8s-configuration show'] = """
+helps[
+    "k8s-configuration show"
+] = """
     type: command
     short-summary: Show details of a Flux v1 Kubernetes configuration (This command is for Flux v1, to use the newer Flux v2, run "az k8s-configuration flux show").
     examples:
@@ -56,12 +66,16 @@ helps['k8s-configuration show'] = """
             --cluster-type connectedClusters --name MyConfigurationName
 """
 
-helps['k8s-configuration flux'] = """
+helps[
+    "k8s-configuration flux"
+] = """
     type: group
     short-summary: Commands to manage Flux v2 Kubernetes configurations.
 """
 
-helps['k8s-configuration flux create'] = """
+helps[
+    "k8s-configuration flux create"
+] = """
     type: command
     short-summary: Create a Kubernetes Flux v2 Configuration.
     examples:
@@ -72,9 +86,19 @@ helps['k8s-configuration flux create'] = """
           --name myconfig --scope cluster --namespace my-namespace \\
           --kind git --url https://github.com/Azure/arc-k8s-demo \\
           --branch main --kustomization name=my-kustomization
+      - name: Create a Kubernetes v2 Flux Configuration with Bucket Source Kind
+        text: |-
+          az k8s-configuration flux create --resource-group my-resource-group \\
+          --cluster-name mycluster --cluster-type connectedClusters \\
+          --name myconfig --scope cluster --namespace my-namespace \\
+          --kind bucket --url https://bucket-provider.minio.io \\
+          --bucket-name my-bucket --kustomization name=my-kustomization \\
+          --access-key my-access-key --secret-key my-secret-key
 """
 
-helps['k8s-configuration flux update'] = """
+helps[
+    "k8s-configuration flux update"
+] = """
     type: command
     short-summary: Update a Kubernetes Flux v2 Configuration.
     examples:
@@ -86,7 +110,9 @@ helps['k8s-configuration flux update'] = """
           --kustomization name=my-kustomization path=./my/new-path
 """
 
-helps['k8s-configuration flux list'] = """
+helps[
+    "k8s-configuration flux list"
+] = """
     type: command
     short-summary: List Kubernetes Flux v2 Configurations.
     examples:
@@ -96,7 +122,9 @@ helps['k8s-configuration flux list'] = """
           --cluster-name mycluster --cluster-type connectedClusters
 """
 
-helps['k8s-configuration flux show'] = """
+helps[
+    "k8s-configuration flux show"
+] = """
     type: command
     short-summary: Show a Kubernetes Flux v2 Configuration.
     examples:
@@ -106,7 +134,9 @@ helps['k8s-configuration flux show'] = """
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig
 """
 
-helps['k8s-configuration flux delete'] = """
+helps[
+    "k8s-configuration flux delete"
+] = """
     type: command
     short-summary: Delete a Kubernetes Flux v2 Configuration.
     examples:
@@ -116,23 +146,29 @@ helps['k8s-configuration flux delete'] = """
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig
 """
 
-helps['k8s-configuration flux kustomization'] = """
+helps[
+    "k8s-configuration flux kustomization"
+] = """
     type: group
     short-summary: Commands to manage Kustomizations associated with Flux v2 Kubernetes configurations.
 """
 
-helps['k8s-configuration flux kustomization create'] = """
+helps[
+    "k8s-configuration flux kustomization create"
+] = """
     type: command
     short-summary: Create a Kustomization associated with a Kubernetes Flux v2 Configuration.
     examples:
-      - name: Create a Kustomization associated wiht a Kubernetes v2 Flux Configuration
+      - name: Create a Kustomization associated with a Kubernetes v2 Flux Configuration
         text: |-
           az k8s-configuration flux kustomization create --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
           --kustomization-name my-kustomization-2 --path ./my/path --prune --force
 """
 
-helps['k8s-configuration flux kustomization update'] = """
+helps[
+    "k8s-configuration flux kustomization update"
+] = """
     type: command
     short-summary: Update a Kustomization associated with a Kubernetes Flux v2 Configuration.
     examples:
@@ -143,7 +179,9 @@ helps['k8s-configuration flux kustomization update'] = """
           --kustomization-name my-kustomization --path ./my/new-path --prune --force
 """
 
-helps['k8s-configuration flux kustomization list'] = """
+helps[
+    "k8s-configuration flux kustomization list"
+] = """
     type: command
     short-summary: List Kustomizations associated with a Kubernetes Flux v2 Configuration.
     examples:
@@ -153,7 +191,9 @@ helps['k8s-configuration flux kustomization list'] = """
           --cluster-name mycluster --name myconfig --cluster-type connectedClusters
 """
 
-helps['k8s-configuration flux kustomization show'] = """
+helps[
+    "k8s-configuration flux kustomization show"
+] = """
     type: command
     short-summary: Show a Kustomization associated with a Flux v2 Configuration.
     examples:
@@ -164,7 +204,9 @@ helps['k8s-configuration flux kustomization show'] = """
           --kustomization-name my-kustomization
 """
 
-helps['k8s-configuration flux kustomization delete'] = """
+helps[
+    "k8s-configuration flux kustomization delete"
+] = """
     type: command
     short-summary: Delete a Kustomization associated with a Kubernetes Flux v2 Configuration.
     examples:
@@ -175,12 +217,16 @@ helps['k8s-configuration flux kustomization delete'] = """
           --kustomization-name my-kustomization
 """
 
-helps['k8s-configuration flux deployed-object'] = """
+helps[
+    "k8s-configuration flux deployed-object"
+] = """
     type: group
     short-summary: Commands to see deployed objects associated with Flux v2 Kubernetes configurations.
 """
 
-helps['k8s-configuration flux deployed-object list'] = """
+helps[
+    "k8s-configuration flux deployed-object list"
+] = """
     type: command
     short-summary: List deployed objects associated with a Kubernetes Flux v2 Configuration.
     examples:
@@ -190,7 +236,9 @@ helps['k8s-configuration flux deployed-object list'] = """
           --cluster-name mycluster --name myconfig --cluster-type connectedClusters
 """
 
-helps['k8s-configuration flux deployed-object show'] = """
+helps[
+    "k8s-configuration flux deployed-object show"
+] = """
     type: command
     short-summary: Show a deployed object associated with a Flux v2 Configuration.
     examples:
