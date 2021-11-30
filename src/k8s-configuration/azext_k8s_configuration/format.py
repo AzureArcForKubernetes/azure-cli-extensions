@@ -39,8 +39,8 @@ def fluxconfig_show_table_format(result):
 def __get_fluxconfig_table_row(result):
     return OrderedDict(
         [
-            ("name", result["name"]),
             ("namespace", result["namespace"]),
+            ("name", result["name"]),
             ("scope", result["scope"]),
             ("provisioningState", result["provisioningState"]),
             ("complianceState", result["complianceState"]),
@@ -85,15 +85,19 @@ def fluxconfig_deployed_object_show_table_format(result):
 
 
 def __get_fluxconfig_deployed_object_table_row(result):
-    applied_by = "None"
-    if result["appliedBy"]:
-        applied_by = result["appliedBy"]["namespace"] + result["appliedBy"]["name"]
+    message = "None"
+    for condition in result.get("statusConditions") or []:
+        if condition.get("type") == "Ready":
+            message = condition.get("message")
+            if len(message) > 60:
+                message = message[:60] + "..."
+            break
     return OrderedDict(
         [
             ("kind", result["kind"]),
-            ("name", result["name"]),
             ("namespace", result["namespace"]),
+            ("name", result["name"]),
             ("complianceState", result["complianceState"]),
-            ("appliedBy", applied_by),
+            ("message", message),
         ]
     )
