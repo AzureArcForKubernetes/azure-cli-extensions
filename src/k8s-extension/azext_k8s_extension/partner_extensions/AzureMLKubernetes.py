@@ -83,7 +83,7 @@ class AzureMLKubernetes(DefaultExtension):
 
         # constants for existing AKS to AMLARC migration
         self.IS_AKS_MIGRATION = 'isAKSMigration'
-        
+
         # constants for others in Spec
         self.installNvidiaDevicePlugin = 'installNvidiaDevicePlugin'
 
@@ -171,7 +171,7 @@ class AzureMLKubernetes(DefaultExtension):
                configuration_protected_settings, yes=False):
         self.__normalize_config(configuration_settings, configuration_protected_settings)
 
-        # Prompt message to ask customer to confirm again               
+        # Prompt message to ask customer to confirm again
         if len(configuration_settings) > 0:
             impactScenario = ""
             messageBody = ""
@@ -211,7 +211,7 @@ class AzureMLKubernetes(DefaultExtension):
             if privateEndpointNodeport is not None:
                 hasPrivateEndpointNodeport = True
                 messageBody = messageBody + "privateEndpointNodeport\n"
-               
+
             privateEndpointILB = _get_value_from_config_protected_config(self.privateEndpointILB, configuration_settings, configuration_protected_settings)
             if privateEndpointILB is not None:
                 hasPrivateEndpointILB = True
