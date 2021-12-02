@@ -237,8 +237,8 @@ class AzureMLKubernetes(DefaultExtension):
                     impactScenario = impactScenario + ", online endpoints and deployments"
 
             if impactScenario != "":
-                message = "\nThe following configuration update will IMPACT your active Machine Learning " + impactScenario + \
-                      ". It will be the safe update if the cluster doesn't have active Machine Learning " + impactScenario + ".\n\n" + messageBody + "\nProceed?"
+                message = ("\nThe following configuration update will IMPACT your active Machine Learning " + impactScenario +
+                           ". It will be the safe update if the cluster doesn't have active Machine Learning " + impactScenario + ".\n\n" + messageBody + "\nProceed?")
                 user_confirmation_factory(cmd, yes, message=message)
             else:
                 if enableLogAnalyticsWS:
@@ -635,6 +635,7 @@ def _get_cluster_rp_api_version(cluster_type) -> Tuple[str, str]:
     else:
         raise InvalidArgumentValueError("Error! Cluster type '{}' is not supported".format(cluster_type))
     return rp, parent_api_version
+
 
 def _check_nodeselector_existed(configuration_settings, configuration_protected_settings):
     config_keys = configuration_settings.keys()
