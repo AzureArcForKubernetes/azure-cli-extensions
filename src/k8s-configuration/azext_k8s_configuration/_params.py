@@ -174,6 +174,11 @@ def load_arguments(self, _):
             nargs="+",
         )
 
+    with self.argument_context("k8s-configuration flux update") as c:
+        c.argument(
+            "yes", options_list=["--yes", "-y"], help="Do not prompt for confirmation"
+        )
+
     with self.argument_context("k8s-configuration flux delete") as c:
         c.argument(
             "force",

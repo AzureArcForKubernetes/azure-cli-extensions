@@ -77,9 +77,9 @@ helps[
     "k8s-configuration flux create"
 ] = """
     type: command
-    short-summary: Create a Kubernetes Flux v2 Configuration.
+    short-summary: Create a Flux v2 Kubernetes configuration.
     examples:
-      - name: Create a Kubernetes v2 Flux Configuration
+      - name: Create a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux create --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters \\
@@ -100,9 +100,9 @@ helps[
     "k8s-configuration flux update"
 ] = """
     type: command
-    short-summary: Update a Kubernetes Flux v2 Configuration.
+    short-summary: Update a Flux v2 Kubernetes configuration.
     examples:
-      - name: Update a Kubernetes v2 Flux Configuration
+      - name: Update a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux update --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
@@ -114,9 +114,9 @@ helps[
     "k8s-configuration flux list"
 ] = """
     type: command
-    short-summary: List Kubernetes Flux v2 Configurations.
+    short-summary: List all Flux v2 Kubernetes configurations.
     examples:
-      - name: List all Kubernetes Flux v2 Configurations on a cluster
+      - name: List Flux v2 Kubernetes configurations on a cluster
         text: |-
           az k8s-configuration flux list --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters
@@ -126,9 +126,9 @@ helps[
     "k8s-configuration flux show"
 ] = """
     type: command
-    short-summary: Show a Kubernetes Flux v2 Configuration.
+    short-summary: Show a Flux v2 Kubernetes configuration.
     examples:
-      - name: Show details of a Kubernetes Flux v2 Configuration
+      - name: Show details of a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux show --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig
@@ -138,9 +138,9 @@ helps[
     "k8s-configuration flux delete"
 ] = """
     type: command
-    short-summary: Delete a Kubernetes Flux v2 Configuration.
+    short-summary: Delete a Flux v2 Kubernetes configuration.
     examples:
-      - name: Delete an existing Kubernetes Flux v2 Configuration
+      - name: Delete an existing Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux delete --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig
@@ -157,9 +157,9 @@ helps[
     "k8s-configuration flux kustomization create"
 ] = """
     type: command
-    short-summary: Create a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    short-summary: Create a Kustomization associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: Create a Kustomization associated with a Kubernetes v2 Flux Configuration
+      - name: Create a Kustomization associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux kustomization create --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
@@ -170,9 +170,9 @@ helps[
     "k8s-configuration flux kustomization update"
 ] = """
     type: command
-    short-summary: Update a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    short-summary: Update a Kustomization associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: Update a Kustomization associated with a Kubernetes v2 Flux Configuration
+      - name: Update a Kustomization associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux kustomization update --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
@@ -183,9 +183,9 @@ helps[
     "k8s-configuration flux kustomization list"
 ] = """
     type: command
-    short-summary: List Kustomizations associated with a Kubernetes Flux v2 Configuration.
+    short-summary: List Kustomizations associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: List all Kustomizations associated with a Kubernetes Flux v2 Configuration on a cluster
+      - name: List all Kustomizations associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux kustomization list --resource-group my-resource-group \\
           --cluster-name mycluster --name myconfig --cluster-type connectedClusters
@@ -195,9 +195,9 @@ helps[
     "k8s-configuration flux kustomization show"
 ] = """
     type: command
-    short-summary: Show a Kustomization associated with a Flux v2 Configuration.
+    short-summary: Show a Kustomization associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: Show details of a Kustomization associated with a Kubernetes Flux v2 Configuration
+      - name: Show details of a Kustomization associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux kustomization show --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
@@ -208,9 +208,9 @@ helps[
     "k8s-configuration flux kustomization delete"
 ] = """
     type: command
-    short-summary: Delete a Kustomization associated with a Kubernetes Flux v2 Configuration.
+    short-summary: Delete a Kustomization associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: Delete an existing Kustomization associated with a Kubernetes Flux v2 Configuration
+      - name: Delete an existing Kustomization associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux kustomization delete --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
@@ -228,9 +228,9 @@ helps[
     "k8s-configuration flux deployed-object list"
 ] = """
     type: command
-    short-summary: List deployed objects associated with a Kubernetes Flux v2 Configuration.
+    short-summary: List deployed objects associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: List all deployed objects associated with a Kubernetes Flux v2 Configuration on a cluster
+      - name: List all deployed objects associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux deployed-object list --resource-group my-resource-group \\
           --cluster-name mycluster --name myconfig --cluster-type connectedClusters
@@ -240,9 +240,9 @@ helps[
     "k8s-configuration flux deployed-object show"
 ] = """
     type: command
-    short-summary: Show a deployed object associated with a Flux v2 Configuration.
+    short-summary: Show a deployed object associated with a Flux v2 Kubernetes configuration.
     examples:
-      - name: Show details of a deployed object associated with a Kubernetes Flux v2 Configuration
+      - name: Show details of a deployed object associated with a Flux v2 Kubernetes configuration
         text: |-
           az k8s-configuration flux deployed-object show --resource-group my-resource-group \\
           --cluster-name mycluster --cluster-type connectedClusters --name myconfig \\
