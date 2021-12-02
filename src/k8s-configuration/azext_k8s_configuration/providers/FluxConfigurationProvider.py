@@ -56,6 +56,7 @@ from ..vendored_sdks.v2022_01_01_preview.models import (
     KustomizationDefinition,
     KustomizationPatchDefinition,
     DependsOnDefinition,
+    SourceKindType,
 )
 from ..vendored_sdks.v2021_09_01.models import Extension, Identity
 
@@ -200,7 +201,6 @@ def create_config(
     flux_configuration = FluxConfiguration(
         scope=scope,
         namespace=namespace,
-        source_kind=factory.get_rp_source_kind(),
         suspend=suspend,
         kustomizations=kustomization,
         configuration_protected_settings=protected_settings,
@@ -311,8 +311,9 @@ def update_config(
         user_confirmation_factory(
             cmd,
             yes,
-            f"You are choosing to migrate from source kind {convert_to_cli_source_kind(config.source_kind).lower()} "
-            + f" to source kind {kind.lower()}. Are you sure you want to change kinds?",
+            f"You are choosing to migrate from source kind '{convert_to_cli_source_kind(config.source_kind).lower()}' "
+            + f"to source kind '{kind.lower()}'. Changing your source repository may also require you to change your "
+            + "kustomizations. Are you sure you want to change kinds?",
         )
 
     if kustomization:
@@ -815,11 +816,6 @@ class SourceKindGenerator:
                 ),
             )
 
-    def get_rp_source_kind(self):
-        if self.kind == consts.GIT:
-            return consts.GIT_REPOSITORY
-        return consts.BUCKET
-
 
 def pretty_parameter(parameter):
     parameter = parameter.replace("_", "-")
@@ -881,11 +877,7 @@ class GitRepositoryGenerator(SourceKindGenerator):
                 commit=kwargs.get("commit"),
             )
 
-    def generate_update_func(self):
-        """
-        generate_update_func(self) generates a function to add a GitRepository
-        object to the flux configuration for the PUT case
-        """
+    def validate(self):
         super().validate_required_params(**self.kwargs)
         validate_git_url(self.url)
         validate_url_with_params(
@@ -899,6 +891,13 @@ class GitRepositoryGenerator(SourceKindGenerator):
         )
         validate_repository_ref(self.repository_ref)
 
+    def generate_update_func(self):
+        """
+        generate_update_func(self) generates a function to add a GitRepository
+        object to the flux configuration for the PUT case
+        """
+        self.validate()
+
         def updater(config):
             config.git_repository = GitRepositoryDefinition(
                 url=self.url,
@@ -910,6 +909,7 @@ class GitRepositoryGenerator(SourceKindGenerator):
                 local_auth_ref=self.local_auth_ref,
                 https_ca_file=self.https_ca_data,
             )
+            config.source_kind = SourceKindType.GIT_REPOSITORY
             return config
 
         return updater
@@ -922,7 +922,7 @@ class GitRepositoryGenerator(SourceKindGenerator):
         """
 
         def git_repository_updater(config):
-            if any(self.kwargs.values()):
+            if any(kwarg is not None for kwarg in self.kwargs.values()):
                 config.git_repository = GitRepositoryPatchDefinition(
                     url=self.url,
                     timeout_in_seconds=parse_duration(self.timeout),
@@ -933,8 +933,17 @@ class GitRepositoryGenerator(SourceKindGenerator):
                     local_auth_ref=self.local_auth_ref,
                     https_ca_file=self.https_ca_data,
                 )
-                if swapped_kind:
-                    config.bucket = BucketDefinition()
+            if swapped_kind:
+                self.validate()
+                config.source_kind = SourceKindType.GIT_REPOSITORY
+
+                # Have to set these things to none otherwise the patch will fail
+                # due to default values
+                config.bucket = BucketDefinition(
+                    insecure=None,
+                    timeout_in_seconds=None,
+                    sync_interval_in_seconds=None,
+                )
             return config
 
         return git_repository_updater
@@ -958,15 +967,24 @@ class BucketGenerator(SourceKindGenerator):
         self.timeout = kwargs.get("timeout")
         self.sync_interval = kwargs.get("sync_interval")
         self.access_key = kwargs.get("access_key")
+        self.secret_key = kwargs.get("secret_key")
         self.local_auth_ref = kwargs.get("local_auth_ref")
         self.insecure = kwargs.get("insecure")
+
+    def validate(self):
+        super().validate_required_params(**self.kwargs)
+        if not ((self.access_key and self.secret_key) or self.local_auth_ref):
+            raise RequiredArgumentMissingError(
+                consts.REQUIRED_BUCKET_VALUES_MISSING_ERROR,
+                consts.REQUIRED_BUCKET_VALUES_MISSING_HELP,
+            )
 
     def generate_update_func(self):
         """
         generate_update_func(self) generates a function to add a Bucket
         object to the flux configuration for the PUT case
         """
-        super().validate_required_params(**self.kwargs)
+        self.validate()
 
         def bucket_updater(config):
             config.bucket = BucketDefinition(
@@ -978,6 +996,8 @@ class BucketGenerator(SourceKindGenerator):
                 local_auth_ref=self.local_auth_ref,
                 insecure=self.insecure,
             )
+            config.source_kind = SourceKindType.BUCKET
+            return config
 
         return bucket_updater
 
@@ -989,7 +1009,7 @@ class BucketGenerator(SourceKindGenerator):
         """
 
         def bucket_patch_updater(config):
-            if any(self.kwargs.values()):
+            if any(kwarg is not None for kwarg in self.kwargs.values()):
                 config.bucket = BucketDefinition(
                     url=self.url,
                     bucket_name=self.bucket_name,
@@ -1000,6 +1020,8 @@ class BucketGenerator(SourceKindGenerator):
                     insecure=self.insecure,
                 )
                 if swapped_kind:
+                    self.validate()
+                    config.source_kind = SourceKindType.BUCKET
                     config.git_repository = GitRepositoryPatchDefinition()
             return config
 

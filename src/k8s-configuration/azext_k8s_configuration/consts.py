@@ -8,7 +8,7 @@
 # API VERSIONS -----------------------------------------
 
 SOURCE_CONTROL_API_VERSION = "2021-03-01"
-FLUXCONFIG_API_VERSION = "2021-11-01-preview"
+FLUXCONFIG_API_VERSION = "2022-01-01-preview"
 EXTENSION_API_VERSION = "2021-09-01"
 
 # ERROR/HELP TEXT DEFINITIONS -----------------------------------------
@@ -34,6 +34,13 @@ REQUIRED_VALUES_MISSING_ERROR = (
     "Error! Required properties [{}] were not specified for kind '{}'"
 )
 REQUIRED_VALUES_MISSING_HELP = "Add the missing required properties and try again"
+
+REQUIRED_BUCKET_VALUES_MISSING_ERROR = (
+    "Error! Auth properties must be specified for kind 'bucket'"
+)
+REQUIRED_BUCKET_VALUES_MISSING_HELP = (
+    "Provide either both of '--secret-key' and '--access-key' or '--local-auth-ref'"
+)
 
 EXTRA_VALUES_PROVIDED_ERROR = (
     "Error! Invalid properties [{}] were specified for kind '{}'"
@@ -183,6 +190,8 @@ GIT_REPO_VALID_PARAMS = {
     "tag",
     "semver",
     "commit",
+    "sync_interval",
+    "timeout",
     "ssh_private_key",
     "ssh_private_key_file",
     "https_user",
@@ -194,10 +203,12 @@ GIT_REPO_VALID_PARAMS = {
     "local_auth_ref",
 }
 
-BUCKET_REQUIRED_PARAMS = {"url", "bucket_name", "access_key", "secret_key"}
+BUCKET_REQUIRED_PARAMS = {"url", "bucket_name"}
 BUCKET_VALID_PARAMS = {
     "url",
     "bucket_name",
+    "sync_interval",
+    "timeout",
     "access_key",
     "secret_key",
     "insecure",
