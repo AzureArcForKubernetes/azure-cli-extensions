@@ -186,20 +186,20 @@ class AzureMLKubernetes(DefaultExtension):
             
             enableTraining = _get_value_from_config_protected_config(self.ENABLE_TRAINING, configuration_settings, configuration_protected_settings)
             if enableTraining is not None:
-               disableTraining = str(enableTraining).lower() == 'false'
-               if disableTraining:
+                disableTraining = str(enableTraining).lower() == 'false'
+                if disableTraining:
                    messageBody = messageBody + "enableTraining from True to False,\n"
                
             enableInference = _get_value_from_config_protected_config(self.ENABLE_INFERENCE, configuration_settings, configuration_protected_settings)
             if enableInference is not None:
-               disableInference = str(enableInference).lower() == 'false'
-               if disableInference:
+                disableInference = str(enableInference).lower() == 'false'
+                if disableInference:
                    messageBody = messageBody + "enableInference from True to False,\n"
                    
             installNvidiaDevicePlugin = _get_value_from_config_protected_config(self.installNvidiaDevicePlugin, configuration_settings, configuration_protected_settings)
             if installNvidiaDevicePlugin is not None:
-               disableNvidiaDevicePlugin = str(installNvidiaDevicePlugin).lower() == 'false'
-               if disableNvidiaDevicePlugin:
+                disableNvidiaDevicePlugin = str(installNvidiaDevicePlugin).lower() == 'false'
+                if disableNvidiaDevicePlugin:
                    messageBody = messageBody + "installNvidiaDevicePlugin from True to False if Nvidia GPU is used,\n"
                
             allowInsecureConnections = _get_value_from_config_protected_config(self.allowInsecureConnections, configuration_settings, configuration_protected_settings)
@@ -223,8 +223,8 @@ class AzureMLKubernetes(DefaultExtension):
                
             logAnalyticsWS = _get_value_from_config_protected_config(self.LOG_ANALYTICS_WS_ENABLED, configuration_settings, configuration_protected_settings)
             if logAnalyticsWS is not None:
-               enableLogAnalyticsWS = str(logAnalyticsWS).lower() == 'true'
-               if enableLogAnalyticsWS:
+                enableLogAnalyticsWS = str(logAnalyticsWS).lower() == 'true'
+                if enableLogAnalyticsWS:
                    messageBody = messageBody + "To update logAnalyticsWS from False to True, please provide all original configurationProtectedSettings. Otherwise, those settings would be considered obsolete and deleted.\n"
                                  
             if disableTraining or disableNvidiaDevicePlugin or hasNodeSelector:
