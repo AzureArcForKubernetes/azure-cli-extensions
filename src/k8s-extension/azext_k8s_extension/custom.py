@@ -245,7 +245,7 @@ def __create_identity(cmd, resource_group_name, cluster_name, cluster_type, clus
     if cluster_rp == 'Microsoft.Kubernetes':
         parent_api_version = '2020-01-01-preview'
     elif cluster_rp == 'Microsoft.ResourceConnector':
-        parent_api_version = '2020-09-15-privatepreview'
+        parent_api_version = '2021-10-31-preview'
     elif cluster_rp == 'Microsoft.ContainerService':
         return None, None
     else:
