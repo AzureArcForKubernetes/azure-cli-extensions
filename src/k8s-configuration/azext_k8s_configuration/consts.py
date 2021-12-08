@@ -222,7 +222,8 @@ TIMEOUT_KEYS = ["timeout"]
 REQUIRED_KUSTOMIZATION_KEYS = {"name"}
 
 VALID_DURATION_REGEX = r"((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?"
-VALID_URL_REGEX = r"^(((http|https|ssh)://)|(git@))"
+VALID_GIT_URL_REGEX = r"^(((http|https|ssh)://)|(git@))"
+VALID_BUCKET_URL_REGEX = r"^(((http|https)://))"
 
 VALID_KUBERNETES_DNS_SUBDOMAIN_NAME_REGEX = r"^[a-z0-9]([\.\-a-z0-9]*[a-z0-9])?$"
 VALID_KUBERNETES_DNS_NAME_REGEX = r"^[a-z0-9]([\-a-z0-9]*[a-z0-9])?$"
@@ -231,13 +232,17 @@ GIT = "git"
 BUCKET = "bucket"
 GIT_REPOSITORY = "GitRepository"
 
-CONNECTED_CLUSTERS = "connectedclusters"
-MANAGED_CLUSTERS = "managedclusters"
-APPLIANCES = "appliances"
+CONNECTED_CLUSTER_TYPE = "connectedclusters"
+MANAGED_CLUSTER_TYPE = "managedclusters"
+APPLIANCE_TYPE = "appliances"
 
-MANAGED_RP_NAMESPACE = "Microsoft.ContainerService"
-CONNECTED_RP_NAMESPACE = "Microsoft.Kubernetes"
-APPLIANCE_RP_NAMESPACE = "Microsoft.ResourceConnector"
+MANAGED_CLUSTER_RP = "Microsoft.ContainerService"
+CONNECTED_CLUSTER_RP = "Microsoft.Kubernetes"
+APPLIANCE_RP = "Microsoft.ResourceConnector"
+
+CONNECTED_CLUSTER_API_VERSION = "2021-10-01"
+MANAGED_CLUSTER_API_VERSION = "2021-10-01"
+APPLIANCE_API_VERSION = "2021-10-31-preview"
 
 KUBERNETES_MAX_NAME_SIZE = 63
 

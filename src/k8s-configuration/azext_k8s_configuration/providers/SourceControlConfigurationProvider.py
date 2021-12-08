@@ -9,7 +9,7 @@ from knack.log import get_logger
 
 from ..utils import (
     fix_compliance_state,
-    get_cluster_rp,
+    get_cluster_rp_api_version,
     get_data_from_key_or_file,
     to_base64,
 )
@@ -33,7 +33,7 @@ def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, na
     validate_cc_registration(cmd)
 
     # Determine ClusterRP
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     try:
         extension = client.get(
             resource_group_name, cluster_rp, cluster_type, cluster_name, name
@@ -68,7 +68,7 @@ def list_configs(cmd, client, resource_group_name, cluster_type, cluster_name):
     # Validate that the subscription is registered to Microsoft.KubernetesConfiguration
     validate_cc_registration(cmd)
 
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     return client.list(resource_group_name, cluster_rp, cluster_type, cluster_name)
 
 
@@ -76,7 +76,7 @@ def delete_config(cmd, client, resource_group_name, cluster_type, cluster_name, 
     # Validate that the subscription is registered to Microsoft.KubernetesConfiguration
     validate_cc_registration(cmd)
 
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     return client.begin_delete(
         resource_group_name, cluster_rp, cluster_type, cluster_name, name
     )
@@ -109,7 +109,7 @@ def create_config(
 
     """Create a new Kubernetes Source Control Configuration."""
     # Determine ClusterRP
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
 
     # Determine operatorInstanceName
     if operator_instance_name is None:

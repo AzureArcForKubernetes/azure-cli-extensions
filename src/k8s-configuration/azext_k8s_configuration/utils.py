@@ -7,6 +7,7 @@ import base64
 import json
 import re
 from datetime import timedelta
+from typing import Tuple
 from azure.cli.core.azclierror import (
     MutuallyExclusiveArgumentError,
     InvalidArgumentValueError,
@@ -14,13 +15,16 @@ from azure.cli.core.azclierror import (
 from . import consts
 
 
-def get_cluster_rp(cluster_type):
-    if cluster_type.lower() == consts.CONNECTED_CLUSTERS:
-        return consts.CONNECTED_RP_NAMESPACE
-    if cluster_type.lower() == consts.APPLIANCES:
-        return consts.APPLIANCE_RP_NAMESPACE
-    if cluster_type.lower() == "" or cluster_type.lower() == "managedclusters":
-        return consts.MANAGED_RP_NAMESPACE
+def get_cluster_rp_api_version(cluster_type) -> Tuple[str, str]:
+    if cluster_type.lower() == consts.CONNECTED_CLUSTER_TYPE:
+        return consts.CONNECTED_CLUSTER_RP, consts.CONNECTED_CLUSTER_API_VERSION
+    if cluster_type.lower() == consts.APPLIANCE_TYPE:
+        return consts.APPLIANCE_RP, consts.APPLIANCE_API_VERSION
+    if (
+        cluster_type.lower() == ""
+        or cluster_type.lower() == consts.MANAGED_CLUSTER_TYPE
+    ):
+        return consts.MANAGED_CLUSTER_RP, consts.MANAGED_CLUSTER_API_VERSION
     raise InvalidArgumentValueError(
         "Error! Cluster type '{}' is not supported".format(cluster_type)
     )
@@ -122,19 +126,6 @@ def fix_compliance_state(config):
         config.compliance_status.compliance_state = "Installed"
 
     return config
-
-
-def get_parent_api_version(cluster_rp):
-    if cluster_rp == "Microsoft.Kubernetes":
-        return "2020-01-01-preview"
-    if cluster_rp == "Microsoft.ResourceConnector":
-        return "2020-09-15-privatepreview"
-    if cluster_rp == "Microsoft.ContainerService":
-        return "2017-07-01"
-    raise InvalidArgumentValueError(
-        "Error! Cluster RP '{}' is not supported"
-        " for extension identity".format(cluster_rp)
-    )
 
 
 def is_dogfood_cluster(cmd):

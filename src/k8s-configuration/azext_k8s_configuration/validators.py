@@ -112,7 +112,14 @@ def validate_duration(arg_name: str, duration: str):
 
 
 def validate_git_url(url: str):
-    if not re.match(consts.VALID_URL_REGEX, url):
+    if not re.match(consts.VALID_GIT_URL_REGEX, url):
+        raise InvalidArgumentValueError(
+            consts.INVALID_URL_ERROR, consts.INVALID_URL_HELP
+        )
+
+
+def validate_bucket_url(url: str):
+    if not re.match(consts.VALID_BUCKET_URL_REGEX, url):
         raise InvalidArgumentValueError(
             consts.INVALID_URL_ERROR, consts.INVALID_URL_HELP
         )

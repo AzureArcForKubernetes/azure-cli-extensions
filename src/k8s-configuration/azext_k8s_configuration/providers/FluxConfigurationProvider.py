@@ -27,8 +27,7 @@ from .._client_factory import (
     k8s_configuration_sourcecontrol_client,
 )
 from ..utils import (
-    get_parent_api_version,
-    get_cluster_rp,
+    get_cluster_rp_api_version,
     get_data_from_key_or_file,
     parse_dependencies,
     parse_duration,
@@ -37,6 +36,7 @@ from ..utils import (
     is_dogfood_cluster,
 )
 from ..validators import (
+    validate_bucket_url,
     validate_cc_registration,
     validate_git_url,
     validate_known_hosts,
@@ -67,7 +67,7 @@ def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, na
     """Get an existing Kubernetes Source Control Configuration."""
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
     try:
         config = client.get(
@@ -110,7 +110,7 @@ def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, na
 
 def list_configs(cmd, client, resource_group_name, cluster_type, cluster_name):
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     return client.list(resource_group_name, cluster_rp, cluster_type, cluster_name)
@@ -153,7 +153,7 @@ def create_config(
 ):
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     factory = source_kind_generator_factory(
@@ -266,7 +266,7 @@ def update_config(
 ):
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     config = show_config(
@@ -367,7 +367,7 @@ def create_kustomization(
 ):
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     # Pre-Validation
@@ -434,7 +434,7 @@ def update_kustomization(
 ):
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     # Pre-Validation
@@ -495,7 +495,7 @@ def delete_kustomization(
 ):
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     # Confirmation message for deletes
@@ -624,7 +624,7 @@ def delete_config(
     user_confirmation_factory(cmd, yes)
 
     # Get Resource Provider to call
-    cluster_rp = get_cluster_rp(cluster_type)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
     validate_cc_registration(cmd)
 
     config = None
@@ -749,15 +749,17 @@ def __add_identity(
     subscription_id = get_subscription_id(cmd.cli_ctx)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
+    if cluster_type.lower() == consts.MANAGED_CLUSTER_TYPE:
+        return extension_instance
+
+    cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_type)
+
     cluster_resource_id = (
         "/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}".format(
             subscription_id, resource_group_name, cluster_rp, cluster_type, cluster_name
         )
     )
 
-    if cluster_rp == consts.MANAGED_RP_NAMESPACE:
-        return extension_instance
-    parent_api_version = get_parent_api_version(cluster_rp)
     try:
         resource = resources.get_by_id(cluster_resource_id, parent_api_version)
         location = str(resource.location.lower())
@@ -907,7 +909,7 @@ class GitRepositoryGenerator(SourceKindGenerator):
                 ssh_known_hosts=self.knownhost_data,
                 https_user=self.https_user,
                 local_auth_ref=self.local_auth_ref,
-                https_ca_file=self.https_ca_data,
+                https_ca_cert=self.https_ca_data,
             )
             config.source_kind = SourceKindType.GIT_REPOSITORY
             return config
@@ -931,7 +933,7 @@ class GitRepositoryGenerator(SourceKindGenerator):
                     ssh_known_hosts=self.knownhost_data,
                     https_user=self.https_user,
                     local_auth_ref=self.local_auth_ref,
-                    https_ca_file=self.https_ca_data,
+                    https_ca_cert=self.https_ca_data,
                 )
             if swapped_kind:
                 self.validate()
@@ -973,6 +975,7 @@ class BucketGenerator(SourceKindGenerator):
 
     def validate(self):
         super().validate_required_params(**self.kwargs)
+        validate_bucket_url(self.url)
         if not ((self.access_key and self.secret_key) or self.local_auth_ref):
             raise RequiredArgumentMissingError(
                 consts.REQUIRED_BUCKET_VALUES_MISSING_ERROR,
