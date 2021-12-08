@@ -13,17 +13,16 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 def get_cluster_rp_api_version(cluster_type) -> Tuple[str, str]:
     if cluster_type.lower() == consts.CONNECTED_CLUSTER_TYPE:
         return consts.CONNECTED_CLUSTER_RP, consts.CONNECTED_CLUSTER_API_VERSION
-    elif cluster_type.lower() == consts.APPLIANCE_TYPE:
+    if cluster_type.lower() == consts.APPLIANCE_TYPE:
         return consts.APPLIANCE_RP, consts.APPLIANCE_API_VERSION
-    elif (
+    if (
         cluster_type.lower() == ""
         or cluster_type.lower() == consts.MANAGED_CLUSTER_TYPE
     ):
         return consts.MANAGED_CLUSTER_RP, consts.MANAGED_CLUSTER_API_VERSION
-    else:
-        raise InvalidArgumentValueError(
-            "Error! Cluster type '{}' is not supported".format(cluster_type)
-        )
+    raise InvalidArgumentValueError(
+        "Error! Cluster type '{}' is not supported".format(cluster_type)
+    )
 
 
 def read_config_settings_file(file_path):

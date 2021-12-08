@@ -7,6 +7,7 @@
 
 from azext_k8s_extension.utils import (
     get_cluster_rp_api_version,
+    is_dogfood_cluster,
     read_config_settings_file,
 )
 from knack.log import get_logger
@@ -130,7 +131,7 @@ def create_k8s_extension(
     config_protected_settings = {}
     # Get Configuration Settings from file
     if configuration_settings_file is not None:
-        config_settings = __read_config_settings_file(configuration_settings_file)
+        config_settings = read_config_settings_file(configuration_settings_file)
 
     if configuration_settings is not None:
         for dicts in configuration_settings:
@@ -139,7 +140,7 @@ def create_k8s_extension(
 
     # Get Configuration Protected Settings from file
     if configuration_protected_settings_file is not None:
-        config_protected_settings = __read_config_settings_file(
+        config_protected_settings = read_config_settings_file(
             configuration_protected_settings_file
         )
 
@@ -192,7 +193,7 @@ def create_k8s_extension(
     # We don't create the identity if we are in DF
     if create_identity and not is_dogfood_cluster(cmd):
         identity_object, location = __create_identity(
-            cmd, resource_group_name, cluster_name, cluster_type, cluster_rp
+            cmd, resource_group_name, cluster_name, cluster_type
         )
         if identity_object is not None and location is not None:
             extension_instance.identity, extension_instance.location = (
@@ -294,7 +295,7 @@ def update_k8s_extension(
         version,
         config_settings,
         config_protected_settings,
-        yes
+        yes,
     )
 
     return sdk_no_wait(
