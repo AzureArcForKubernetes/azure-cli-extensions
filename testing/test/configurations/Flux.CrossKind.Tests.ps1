@@ -1,6 +1,6 @@
 Describe 'Bucket Flux Configuration Testing' {
     BeforeAll {
-        $configurationName = "bucket-config"
+        $configurationName = "cross-kind-config"
         . $PSScriptRoot/Constants.ps1
         . $PSScriptRoot/Helper.ps1
     }
@@ -27,6 +27,26 @@ Describe 'Bucket Flux Configuration Testing' {
     It "Performs a show on the configuration" {
         $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName
         $? | Should -BeTrue
+        $output | Should -Not -BeNullOrEmpty
+    }
+
+    It "Performs an update on the configuration changing the kind from Bucket to Git" {
+        $output = az k8s-configuration flux update -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type "connectedClusters" -n $configurationName --kind git -u "https://github.com/Azure/arc-k8s-demo" --branch main --no-wait
+        $? | Should -BeTrue
+
+        # Loop and retry until the configuration installs
+        $n = 0
+        do {
+            $output = az k8s-configuration flux show -c $ENVCONFIG.arcClusterName -g $ENVCONFIG.resourceGroup --cluster-type connectedClusters -n $configurationName
+            $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            Write-Host "Provisioning State: $provisioningState"
+            if ($provisioningState -eq $SUCCEEDED) {
+                break
+            }
+            Start-Sleep -Seconds 10
+            $n += 1
+        } while ($n -le $MAX_RETRY_ATTEMPTS)
+        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
         $output | Should -Not -BeNullOrEmpty
     }
 
