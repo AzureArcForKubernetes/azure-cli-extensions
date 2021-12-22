@@ -286,7 +286,7 @@ class AzureMLKubernetes(DefaultExtension):
             if self.sslKeyPemFile in configuration_protected_settings and \
                     self.sslCertPemFile in configuration_protected_settings:
                 logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, update ssl key.")
-                self.__set_inference_ssl_from_file(configuration_protected_settings)
+                self.__set_inference_ssl_from_file(configuration_protected_settings, self.sslCertPemFile, self.sslKeyPemFile)
 
         return PatchExtension(auto_upgrade_minor_version=auto_upgrade_minor_version,
                               release_train=release_train,
