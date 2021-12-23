@@ -344,8 +344,8 @@ class AzureMLKubernetes(DefaultExtension):
             self.__set_up_inference_ssl(configuration_settings, configuration_protected_settings)
         elif not (enable_training or enable_inference):
             raise InvalidArgumentValueError(
-                "Please create Microsoft.AzureML.Kubernetes extension, either "
-                "for Machine Learning training or inference by specifying "
+                "To create Microsoft.AzureML.Kubernetes extension, either "
+                "enable Machine Learning training or inference by specifying "
                 f"'--configuration-settings {self.ENABLE_TRAINING}=true' or '--configuration-settings {self.ENABLE_INFERENCE}=true'")
 
         configuration_settings[self.ENABLE_TRAINING] = configuration_settings.get(self.ENABLE_TRAINING, enable_training)
@@ -378,11 +378,10 @@ class AzureMLKubernetes(DefaultExtension):
         sslEnabled = (feSslCertFile and feSslKeyFile) or sslSecret
         if not sslEnabled and not allowInsecureConnections:
             raise InvalidArgumentValueError(
-                "Please create Microsoft.AzureML.Kubernetes extension, either "
-                "provide ssl certificate and key,"
-                f"or explicitly specify sslSecret which contains cert.pem and key.pem in namespace {release_namespace},"
-                "or explicitly allow insecure connection by specifying "
-                "'--configuration-settings allowInsecureConnections=true'")
+                "To enable HTTPs endpoint, "
+                "either provide sslCertPemFile and sslKeyPemFile to config protected settings, "
+                f"or provide sslSecret (kubernetes secret name) containing both ssl cert and ssl key under {release_namespace} namespace. "
+                "Otherwise, to enable HTTP endpoint, explicitly set allowInsecureConnections=true.")
 
         feIsNodePort = _get_value_from_config_protected_config(
             self.privateEndpointNodeport, configuration_settings, configuration_protected_settings)
