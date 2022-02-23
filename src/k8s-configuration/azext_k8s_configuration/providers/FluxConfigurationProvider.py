@@ -52,6 +52,7 @@ from ..vendored_sdks.v2022_03_01.models import (
     GitRepositoryDefinition,
     GitRepositoryPatchDefinition,
     BucketDefinition,
+    BucketPatchDefinition,
     RepositoryRefDefinition,
     KustomizationDefinition,
     KustomizationPatchDefinition,
@@ -1000,7 +1001,7 @@ class BucketGenerator(SourceKindGenerator):
 
         def bucket_patch_updater(config):
             if any(kwarg is not None for kwarg in self.kwargs.values()):
-                config.bucket = BucketDefinition(
+                config.bucket = BucketPatchDefinition(
                     url=self.url,
                     bucket_name=self.bucket_name,
                     timeout_in_seconds=parse_duration(self.timeout),
