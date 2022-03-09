@@ -6,7 +6,7 @@
 
 import argparse
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from .vendored_sdks.v2022_01_01_preview.models import (
+from .vendored_sdks.v2022_03_01.models import (
     KustomizationDefinition,
     KustomizationPatchDefinition,
 )
@@ -17,18 +17,19 @@ from .utils import parse_dependencies, parse_duration
 
 class InternalKustomizationDefinition(KustomizationDefinition):
     def __init__(self, **kwargs):
-        self.name = kwargs.get("name", "")
         super().__init__(**kwargs)
+
+        # This call is after the call to super() to override the init method
+        # making the self.name field null
+        self.name = kwargs.get("name", "")
 
     def to_KustomizationDefinition(self):
         k_dict = dict(self.__dict__)
-        del k_dict["name"]
         del k_dict["additional_properties"]
         return KustomizationDefinition(**k_dict)
 
     def to_KustomizationPatchDefinition(self):
         k_dict = dict(self.__dict__)
-        del k_dict["name"]
         del k_dict["additional_properties"]
         return KustomizationPatchDefinition(**k_dict)
 

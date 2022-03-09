@@ -63,7 +63,7 @@ def __get_fluxconfig_kustomization_table_row(key, value):
         [
             ("name", key),
             ("path", value["path"]),
-            ("dependsOn", ",".join(value.get("dependsOn", []))),
+            ("dependsOn", ",".join(value.get("dependsOn") or [])),
             ("syncInterval", format_duration(value["syncIntervalInSeconds"])),
             ("timeout", format_duration(value["timeoutInSeconds"])),
             ("prune", value["prune"]),
