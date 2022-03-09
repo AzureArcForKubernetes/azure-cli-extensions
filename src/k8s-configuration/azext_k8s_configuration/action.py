@@ -9,7 +9,6 @@ from azure.cli.core.azclierror import InvalidArgumentValueError
 from .vendored_sdks.v2022_01_01_preview.models import (
     KustomizationDefinition,
     KustomizationPatchDefinition,
-    DependsOnDefinition,
 )
 from .validators import validate_kustomization
 from . import consts
@@ -37,7 +36,7 @@ class InternalKustomizationDefinition(KustomizationDefinition):
 class KustomizationAddAction(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         validate_kustomization(values)
-        model_dependency = []
+        dependencies = None
         sync_interval = None
         retry_interval = None
         timeout = None
@@ -47,10 +46,6 @@ class KustomizationAddAction(argparse._AppendAction):
                 key, value = item.split("=", 1)
                 if key in consts.DEPENDENCY_KEYS:
                     dependencies = parse_dependencies(value)
-                    for dep in dependencies:
-                        model_dependency.append(
-                            DependsOnDefinition(kustomization_name=dep)
-                        )
                 elif key in consts.SYNC_INTERVAL_KEYS:
                     sync_interval = value
                 elif key in consts.RETRY_INTERVAL_KEYS:
@@ -67,7 +62,7 @@ class KustomizationAddAction(argparse._AppendAction):
             parser,
             namespace,
             InternalKustomizationDefinition(
-                depends_on=model_dependency,
+                depends_on=dependencies,
                 sync_interval_in_seconds=parse_duration(sync_interval),
                 retry_interval_in_seconds=parse_duration(retry_interval),
                 timeout_in_seconds=parse_duration(timeout),
