@@ -10,6 +10,7 @@
 import copy
 from hashlib import md5
 from typing import Any, Dict, List, Tuple
+from ..utils import get_cluster_rp_api_version
 
 import azure.mgmt.relay
 import azure.mgmt.relay.models
@@ -80,6 +81,7 @@ class AzureMLKubernetes(DefaultExtension):
         self.privateEndpointILB = 'privateEndpointILB'
         self.privateEndpointNodeport = 'privateEndpointNodeport'
         self.inferenceLoadBalancerHA = 'inferenceLoadBalancerHA'
+        self.SSL_SECRET = 'sslSecret'
 
         # constants for existing AKS to AMLARC migration
         self.IS_AKS_MIGRATION = 'isAKSMigration'
@@ -107,11 +109,11 @@ class AzureMLKubernetes(DefaultExtension):
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
 
         # validate the config
-        self.__validate_config(configuration_settings, configuration_protected_settings)
+        self.__validate_config(configuration_settings, configuration_protected_settings, release_namespace)
 
         # get the arc's location
         subscription_id = get_subscription_id(cmd.cli_ctx)
-        cluster_rp, parent_api_version = _get_cluster_rp_api_version(cluster_type)
+        cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_type)
         cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}' \
             '/{3}/{4}'.format(subscription_id, resource_group_name, cluster_rp, cluster_type, cluster_name)
         cluster_location = ''
@@ -284,7 +286,7 @@ class AzureMLKubernetes(DefaultExtension):
             if self.sslKeyPemFile in configuration_protected_settings and \
                     self.sslCertPemFile in configuration_protected_settings:
                 logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, update ssl key.")
-                self.__set_inference_ssl_from_file(configuration_protected_settings)
+                self.__set_inference_ssl_from_file(configuration_protected_settings, self.sslCertPemFile, self.sslKeyPemFile)
 
         return PatchExtension(auto_upgrade_minor_version=auto_upgrade_minor_version,
                               release_train=release_train,
@@ -317,7 +319,7 @@ class AzureMLKubernetes(DefaultExtension):
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
 
-    def __validate_config(self, configuration_settings, configuration_protected_settings):
+    def __validate_config(self, configuration_settings, configuration_protected_settings, release_namespace):
         # perform basic validation of the input config
         config_keys = configuration_settings.keys()
         config_protected_keys = configuration_protected_settings.keys()
@@ -337,13 +339,12 @@ class AzureMLKubernetes(DefaultExtension):
         enable_inference = str(enable_inference).lower() == 'true'
 
         if enable_inference:
-            logger.warning("The installed AzureML extension for AML inference is experimental and not covered by customer support. Please use with discretion.")
-            self.__validate_scoring_fe_settings(configuration_settings, configuration_protected_settings)
+            self.__validate_scoring_fe_settings(configuration_settings, configuration_protected_settings, release_namespace)
             self.__set_up_inference_ssl(configuration_settings, configuration_protected_settings)
         elif not (enable_training or enable_inference):
             raise InvalidArgumentValueError(
-                "Please create Microsoft.AzureML.Kubernetes extension, either "
-                "for Machine Learning training or inference by specifying "
+                "To create Microsoft.AzureML.Kubernetes extension, either "
+                "enable Machine Learning training or inference by specifying "
                 f"'--configuration-settings {self.ENABLE_TRAINING}=true' or '--configuration-settings {self.ENABLE_INFERENCE}=true'")
 
         configuration_settings[self.ENABLE_TRAINING] = configuration_settings.get(self.ENABLE_TRAINING, enable_training)
@@ -352,7 +353,7 @@ class AzureMLKubernetes(DefaultExtension):
         configuration_protected_settings.pop(self.ENABLE_TRAINING, None)
         configuration_protected_settings.pop(self.ENABLE_INFERENCE, None)
 
-    def __validate_scoring_fe_settings(self, configuration_settings, configuration_protected_settings):
+    def __validate_scoring_fe_settings(self, configuration_settings, configuration_protected_settings, release_namespace):
         isTestCluster = _get_value_from_config_protected_config(
             self.inferenceLoadBalancerHA, configuration_settings, configuration_protected_settings)
         isTestCluster = str(isTestCluster).lower() == 'false'
@@ -366,16 +367,20 @@ class AzureMLKubernetes(DefaultExtension):
         if isAKSMigration:
             configuration_settings['scoringFe.namespace'] = "default"
             configuration_settings[self.IS_AKS_MIGRATION] = "true"
+        sslSecret = _get_value_from_config_protected_config(
+            self.SSL_SECRET, configuration_settings, configuration_protected_settings)
         feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
         feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
         allowInsecureConnections = _get_value_from_config_protected_config(
             self.allowInsecureConnections, configuration_settings, configuration_protected_settings)
         allowInsecureConnections = str(allowInsecureConnections).lower() == 'true'
-        if (not feSslCertFile or not feSslKeyFile) and not allowInsecureConnections:
+        sslEnabled = (feSslCertFile and feSslKeyFile) or sslSecret
+        if not sslEnabled and not allowInsecureConnections:
             raise InvalidArgumentValueError(
-                "Provide ssl certificate and key. "
-                "Otherwise explicitly allow insecure connection by specifying "
-                "'--configuration-settings allowInsecureConnections=true'")
+                "To enable HTTPs endpoint, "
+                "either provide sslCertPemFile and sslKeyPemFile to config protected settings, "
+                f"or provide sslSecret (kubernetes secret name) containing both ssl cert and ssl key under {release_namespace} namespace. "
+                "Otherwise, to enable HTTP endpoint, explicitly set allowInsecureConnections=true.")
 
         feIsNodePort = _get_value_from_config_protected_config(
             self.privateEndpointNodeport, configuration_settings, configuration_protected_settings)
@@ -394,16 +399,17 @@ class AzureMLKubernetes(DefaultExtension):
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
 
-    def __set_inference_ssl_from_file(self, configuration_protected_settings):
+    def __set_inference_ssl_from_secret(self, configuration_settings, fe_ssl_secret):
+        configuration_settings['scoringFe.sslSecret'] = fe_ssl_secret
+
+    def __set_inference_ssl_from_file(self, configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file):
         import base64
-        feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
-        feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
-        with open(feSslCertFile) as f:
+        with open(fe_ssl_cert_file) as f:
             cert_data = f.read()
             cert_data_bytes = cert_data.encode("ascii")
             ssl_cert = base64.b64encode(cert_data_bytes).decode()
             configuration_protected_settings['scoringFe.sslCert'] = ssl_cert
-        with open(feSslKeyFile) as f:
+        with open(fe_ssl_key_file) as f:
             key_data = f.read()
             key_data_bytes = key_data.encode("ascii")
             ssl_key = base64.b64encode(key_data_bytes).decode()
@@ -414,7 +420,16 @@ class AzureMLKubernetes(DefaultExtension):
             self.allowInsecureConnections, configuration_settings, configuration_protected_settings)
         allowInsecureConnections = str(allowInsecureConnections).lower() == 'true'
         if not allowInsecureConnections:
-            self.__set_inference_ssl_from_file(configuration_protected_settings)
+            fe_ssl_secret = _get_value_from_config_protected_config(
+                self.SSL_SECRET, configuration_settings, configuration_protected_settings)
+            fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
+            fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
+
+            # always take ssl key/cert first, then secret if key/cert file is not provided
+            if fe_ssl_cert_file and fe_ssl_key_file:
+                self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
+            else:
+                self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
         else:
             logger.warning(
                 'SSL is not enabled. Allowing insecure connections to the deployed services.')
@@ -618,23 +633,6 @@ def _get_value_from_config_protected_config(key, config, protected_config):
     if key in config:
         return config[key]
     return protected_config.get(key)
-
-
-def _get_cluster_rp_api_version(cluster_type) -> Tuple[str, str]:
-    rp = ''
-    parent_api_version = ''
-    if cluster_type.lower() == 'connectedclusters':
-        rp = 'Microsoft.Kubernetes'
-        parent_api_version = '2020-01-01-preview'
-    elif cluster_type.lower() == 'appliances':
-        rp = 'Microsoft.ResourceConnector'
-        parent_api_version = '2020-09-15-privatepreview'
-    elif cluster_type.lower() == '' or cluster_type.lower() == 'managedclusters':
-        rp = 'Microsoft.ContainerService'
-        parent_api_version = '2021-05-01'
-    else:
-        raise InvalidArgumentValueError("Error! Cluster type '{}' is not supported".format(cluster_type))
-    return rp, parent_api_version
 
 
 def _check_nodeselector_existed(configuration_settings, configuration_protected_settings):

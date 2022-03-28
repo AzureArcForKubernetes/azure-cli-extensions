@@ -10,6 +10,11 @@
     "URL": "https://docs.microsoft.com/azure/container-registry/"
   },
   {
+    "Command": "az ad",
+    "AzureServiceName": "Azure Active Directory",
+    "URL": "https://docs.microsoft.com/en-us/azure/active-directory/"
+  },
+  {
     "Command": "az ai-examples",
     "AzureServiceName": "Microsoft AI",
     "URL": "https://docs.microsoft.com/archive/msdn-magazine/2017/connect/artificial-intelligence-getting-started-with-microsoft-ai"
@@ -75,6 +80,11 @@
     "URL": "https://docs.microsoft.com/azure/communication-services/"
   },
   {
+    "Command": "az confidentialledger",
+    "AzureServiceName": "Microsoft Confidential Ledger",
+    "URL": "https://docs.microsoft.com/en-us/azure/confidential-ledger/"
+  },
+  {
     "Command": "az confluent",
     "AzureServiceName": "Microsoft Partner Services",
     "URL": ""
@@ -125,6 +135,11 @@
     "URL": "https://docs.microsoft.com/azure/data-factory/"
   },
   {
+    "Command": "az datamigration",
+    "AzureServiceName": "Azure Database Migration Service",
+    "URL": "https://docs.microsoft.com/en-us/azure/dms/"
+  },
+  {
     "Command": "az datashare",
     "AzureServiceName": "Azure Data Share",
     "URL": "https://docs.microsoft.com/azure/data-share/"
@@ -158,6 +173,11 @@
     "Command": "az dt",
     "AzureServiceName": "Azure Digital Twins",
     "URL": "https://azure.microsoft.com/en-us/services/digital-twins/"
+  },
+  {
+    "Command": "az edgeorder",
+    "AzureServiceName": "Azure Edge Order",
+    "URL": "https://review.docs.microsoft.com/en-us/azure/azure-edge-hardware-center"
   },
   {
     "Command": "az elastic",
@@ -223,6 +243,11 @@
     "Command": "az import-export",
     "AzureServiceName": "Azure Storage",
     "URL": "https://docs.microsoft.com/azure/storage/common/storage-import-export-service?toc=/azure/storage/blobs/toc.json"
+  },
+  {
+    "Command": "az init",
+    "AzureServiceName": "Azure CLI",
+    "URL": ""
   },
   {
     "Command": "az interactive",
@@ -410,6 +435,11 @@
     "URL": "https://docs.microsoft.com/azure-stack/hci/"
   },
   {
+    "Command": "az staticwebapp",
+    "AzureServiceName": "Azure Static Web Apps",
+    "URL": "https://azure.microsoft.com/en-us/services/app-service/static/"
+  },
+  {
     "Command": "az storage",
     "AzureServiceName": "Azure Storage",
     "URL": "https://docs.microsoft.com/azure/storage/files/storage-sync-files-planning"
@@ -486,7 +516,7 @@
   },
   {
     "Command": "az vm-repair",
-    "AzureServiceName": "Azure CLI VM Repair Extension",
+    "AzureServiceName": "Azure Virtual Machines",
     "URL": "https://docs.microsoft.com/en-us/cli/azure/vm/repair?view=azure-cli-latest"
   },
   {
@@ -521,7 +551,7 @@
   },
   {
     "Command": "az devops",
-    "AzureServiceName": "Azure Devops",
+    "AzureServiceName": "Azure DevOps",
     "URL": "https://docs.microsoft.com/en-us/azure/devops/"
   },
   {
@@ -537,6 +567,11 @@
   {
     "Command": "az azurestackhci",
     "AzureServiceName": "Azure Stack HCI",
-    "URL": "https://docs.microsoft.com/en-us/cli/azure/stack-hci?view=azure-cli-latest"
+    "URL": "https://docs.microsoft.com/en-us/cli/azure/azurestackhci?view=azure-cli-latest"
+  },
+    {
+    "Command": "az quota",
+    "AzureServiceName": "Reserved VM Instances",
+    "URL": "https://docs.microsoft.com/en-us/rest/api/reserved-vm-instances/quotaapi"
   }
 ]
