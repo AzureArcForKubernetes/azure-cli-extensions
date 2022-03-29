@@ -103,7 +103,7 @@ class AzureMLKubernetes(DefaultExtension):
                release_namespace, configuration_settings, configuration_protected_settings,
                configuration_settings_file, configuration_protected_settings_file):
         if scope == 'namespace':
-            raise InvalidArgumentValueError("Invalid scope '{}'.  This extension can be installed "
+            raise InvalidArgumentValueError("Invalid scope '{}'.  This extension can't be installed "
                                             "only at 'cluster' scope.".format(scope))
         if not release_namespace:
             release_namespace = self.DEFAULT_RELEASE_NAMESPACE
