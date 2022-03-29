@@ -78,10 +78,12 @@ class AzureMLKubernetes(DefaultExtension):
         self.sslKeyPemFile = 'sslKeyPemFile'
         self.sslCertPemFile = 'sslCertPemFile'
         self.allowInsecureConnections = 'allowInsecureConnections'
-        self.privateEndpointILB = 'privateEndpointILB'
-        self.privateEndpointNodeport = 'privateEndpointNodeport'
-        self.inferenceLoadBalancerHA = 'inferenceLoadBalancerHA'
         self.SSL_SECRET = 'sslSecret'
+        self.SSL_Cname = 'sslCname'
+        
+        self.inferenceRouterServiceType = 'inferenceRouterServiceType'
+        self.internalLoadBalancerProvider = 'internalLoadBalancerProvider'
+        self.inferenceLoadBalancerHA = 'inferenceLoadBalancerHA'
 
         # constants for existing AKS to AMLARC migration
         self.IS_AKS_MIGRATION = 'isAKSMigration'
@@ -181,8 +183,9 @@ class AzureMLKubernetes(DefaultExtension):
             disableInference = False
             disableNvidiaDevicePlugin = False
             hasAllowInsecureConnections = False
-            hasPrivateEndpointNodeport = False
-            hasPrivateEndpointILB = False
+            hasInferenceRouterServiceType = False
+            hasInternalLoadBalancerProvider = False
+            hasSslCname = False
             hasNodeSelector = False
             enableLogAnalyticsWS = False
 
@@ -209,15 +212,20 @@ class AzureMLKubernetes(DefaultExtension):
                 hasAllowInsecureConnections = True
                 messageBody = messageBody + "allowInsecureConnections\n"
 
-            privateEndpointNodeport = _get_value_from_config_protected_config(self.privateEndpointNodeport, configuration_settings, configuration_protected_settings)
-            if privateEndpointNodeport is not None:
-                hasPrivateEndpointNodeport = True
-                messageBody = messageBody + "privateEndpointNodeport\n"
+            inferenceRouterServiceType = _get_value_from_config_protected_config(self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
+            if inferenceRouterServiceType is not None:
+                hasInferenceRouterServiceType = True
+                messageBody = messageBody + "inferenceRouterServiceType\n"
 
-            privateEndpointILB = _get_value_from_config_protected_config(self.privateEndpointILB, configuration_settings, configuration_protected_settings)
-            if privateEndpointILB is not None:
-                hasPrivateEndpointILB = True
-                messageBody = messageBody + "privateEndpointILB\n"
+            internalLoadBalancerProvider = _get_value_from_config_protected_config(self.internalLoadBalancerProvider, configuration_settings, configuration_protected_settings)
+            if internalLoadBalancerProvider is not None:
+                hasInternalLoadBalancerProvider = True
+                messageBody = messageBody + "internalLoadBalancerProvider\n"
+                
+            sslCname = _get_value_from_config_protected_config(self.SSL_Cname, configuration_settings, configuration_protected_settings)
+            if sslCname is not None:
+                hasSslCname = True
+                messageBody = messageBody + "sslCname\n"
 
             hasNodeSelector = _check_nodeselector_existed(configuration_settings, configuration_protected_settings)
             if hasNodeSelector:
@@ -232,7 +240,7 @@ class AzureMLKubernetes(DefaultExtension):
             if disableTraining or disableNvidiaDevicePlugin or hasNodeSelector:
                 impactScenario = "jobs"
 
-            if disableInference or disableNvidiaDevicePlugin or hasAllowInsecureConnections or hasPrivateEndpointNodeport or hasPrivateEndpointILB or hasNodeSelector:
+            if disableInference or disableNvidiaDevicePlugin or hasAllowInsecureConnections or hasInferenceRouterServiceType or hasInternalLoadBalancerProvider or hasNodeSelector or hasSslCname:
                 if impactScenario == "":
                     impactScenario = "online endpoints and deployments"
                 else:
@@ -304,17 +312,22 @@ class AzureMLKubernetes(DefaultExtension):
                 configuration_settings['clusterPurpose'] = 'DevTest'
             else:
                 configuration_settings['clusterPurpose'] = 'FastProd'
-
-        feIsNodePort = _get_value_from_config_protected_config(
-            self.privateEndpointNodeport, configuration_settings, configuration_protected_settings)
-        if feIsNodePort is not None:
-            feIsNodePort = str(feIsNodePort).lower() == 'true'
+                
+        inferenceRouterServiceType = _get_value_from_config_protected_config(
+            self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
+        if inferenceRouterServiceType:
+            if inferenceRouterServiceType.lower() != 'nodeport' and inferenceRouterServiceType.lower() != 'loadbalancer':
+                raise InvalidArgumentValueError(
+                "inferenceRouterServiceType only supports nodePort or loadBalancer."
+                "Check https://aka.ms/arcmltsg for more information.")  
+                
+            feIsNodePort = str(inferenceRouterServiceType).lower() == 'nodeport'
             configuration_settings['scoringFe.serviceType.nodePort'] = feIsNodePort
-
-        feIsInternalLoadBalancer = _get_value_from_config_protected_config(
-            self.privateEndpointILB, configuration_settings, configuration_protected_settings)
-        if feIsInternalLoadBalancer is not None:
-            feIsInternalLoadBalancer = str(feIsInternalLoadBalancer).lower() == 'true'
+        
+        internalLoadBalancerProvider = _get_value_from_config_protected_config(
+            self.internalLoadBalancerProvider, configuration_settings, configuration_protected_settings)
+        if internalLoadBalancerProvider:
+            feIsInternalLoadBalancer = str(internalLoadBalancerProvider).lower() == 'azure'
             configuration_settings['scoringFe.serviceType.internalLoadBalancer'] = feIsInternalLoadBalancer
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
@@ -345,7 +358,8 @@ class AzureMLKubernetes(DefaultExtension):
             raise InvalidArgumentValueError(
                 "To create Microsoft.AzureML.Kubernetes extension, either "
                 "enable Machine Learning training or inference by specifying "
-                f"'--configuration-settings {self.ENABLE_TRAINING}=true' or '--configuration-settings {self.ENABLE_INFERENCE}=true'")
+                f"'--configuration-settings {self.ENABLE_TRAINING}=true' or '--configuration-settings {self.ENABLE_INFERENCE}=true'."
+                "Please check https://aka.ms/arcmltsg for more information.")
 
         configuration_settings[self.ENABLE_TRAINING] = configuration_settings.get(self.ENABLE_TRAINING, enable_training)
         configuration_settings[self.ENABLE_INFERENCE] = configuration_settings.get(
@@ -378,20 +392,34 @@ class AzureMLKubernetes(DefaultExtension):
         if not sslEnabled and not allowInsecureConnections:
             raise InvalidArgumentValueError(
                 "To enable HTTPs endpoint, "
-                "either provide sslCertPemFile and sslKeyPemFile to config protected settings, "
+                "either provide sslCertPemFile and sslKeyPemFile to --configuration-protected-settings, "
                 f"or provide sslSecret (kubernetes secret name) containing both ssl cert and ssl key under {release_namespace} namespace. "
                 "Otherwise, to enable HTTP endpoint, explicitly set allowInsecureConnections=true.")
-
-        feIsNodePort = _get_value_from_config_protected_config(
-            self.privateEndpointNodeport, configuration_settings, configuration_protected_settings)
-        feIsNodePort = str(feIsNodePort).lower() == 'true'
-        feIsInternalLoadBalancer = _get_value_from_config_protected_config(
-            self.privateEndpointILB, configuration_settings, configuration_protected_settings)
-        feIsInternalLoadBalancer = str(feIsInternalLoadBalancer).lower() == 'true'
+            
+        if sslEnabled:
+            sslCname = _get_value_from_config_protected_config(
+                self.SSL_Cname, configuration_settings, configuration_protected_settings)
+            if not sslCname:
+                raise InvalidArgumentValueError(
+                "To enable HTTPs endpoint, "
+                "please specify sslCname parameter. Check https://aka.ms/arcmltsg for more information.")
+            
+        inferenceRouterServiceType = _get_value_from_config_protected_config(
+            self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
+        if not inferenceRouterServiceType or (inferenceRouterServiceType.lower() != 'nodeport' and inferenceRouterServiceType.lower() != 'loadbalancer'):
+            raise InvalidArgumentValueError(
+                "To use inference, "
+                "please specify inferenceRouterServiceType=nodePort or inferenceRouterServiceType=loadBalancer in --configuration-settings and also set internalLoadBalancerProvider=azure if your aks only supports internal load balancer."
+                "Check https://aka.ms/arcmltsg for more information.")  
+            
+        feIsNodePort = str(inferenceRouterServiceType).lower() == 'nodeport'
+        internalLoadBalancerProvider = _get_value_from_config_protected_config(
+            self.internalLoadBalancerProvider, configuration_settings, configuration_protected_settings)
+        feIsInternalLoadBalancer = str(internalLoadBalancerProvider).lower() == 'azure'
 
         if feIsNodePort and feIsInternalLoadBalancer:
             raise MutuallyExclusiveArgumentError(
-                "Specify either privateEndpointNodeport=true or privateEndpointILB=true, but not both.")
+                "When using nodePort as inferenceRouterServiceType, no need to specify internalLoadBalancerProvider.")
         if feIsNodePort:
             configuration_settings['scoringFe.serviceType.nodePort'] = feIsNodePort
         elif feIsInternalLoadBalancer:
