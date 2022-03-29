@@ -393,7 +393,7 @@ class AzureMLKubernetes(DefaultExtension):
             raise InvalidArgumentValueError(
                 "To enable HTTPs endpoint, "
                 "either provide sslCertPemFile and sslKeyPemFile to --configuration-protected-settings, "
-                f"or provide sslSecret (kubernetes secret name) containing both ssl cert and ssl key under {release_namespace} namespace. "
+                f"or provide sslSecret(kubernetes secret name) in --configuration-settings containing both ssl cert and ssl key under {release_namespace} namespace. "
                 "Otherwise, to enable HTTP endpoint, explicitly set allowInsecureConnections=true.")
             
         if sslEnabled:
@@ -402,7 +402,7 @@ class AzureMLKubernetes(DefaultExtension):
             if not sslCname:
                 raise InvalidArgumentValueError(
                 "To enable HTTPs endpoint, "
-                "please specify sslCname parameter. Check https://aka.ms/arcmltsg for more information.")
+                "please specify sslCname parameter in --configuration-settings. Check https://aka.ms/arcmltsg for more information.")
             
         inferenceRouterServiceType = _get_value_from_config_protected_config(
             self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
