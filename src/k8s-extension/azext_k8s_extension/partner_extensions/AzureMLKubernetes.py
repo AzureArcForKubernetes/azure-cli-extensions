@@ -66,6 +66,10 @@ class AzureMLKubernetes(DefaultExtension):
         self.RELAY_SERVER_CONNECTION_STRING = 'relayServerConnectionString'  # create relay connection string if None
         self.SERVICE_BUS_CONNECTION_STRING = 'serviceBusConnectionString'  # create service bus if None
         self.LOG_ANALYTICS_WS_ENABLED = 'logAnalyticsWS'  # create log analytics workspace if true
+        # default to false when creating the extension
+        self.SERVICE_BUS_ENABLED = 'servicebus.enabled'
+        # default to false if cluster is AKS when creating the extension
+        self.RELAY_SERVER_ENABLED = 'relayserver.enabled'
 
         # constants for azure resources creation
         self.RELAY_HC_AUTH_NAME = 'azureml_rw'
@@ -107,8 +111,8 @@ class AzureMLKubernetes(DefaultExtension):
         if scope == 'namespace':
             raise InvalidArgumentValueError("Invalid scope '{}'.  This extension can't be installed "
                                             "only at 'cluster' scope.".format(scope))
-        if not release_namespace:
-            release_namespace = self.DEFAULT_RELEASE_NAMESPACE
+        # set release name explicitly to azureml
+        release_namespace = self.DEFAULT_RELEASE_NAMESPACE
         scope_cluster = ScopeCluster(release_namespace=release_namespace)
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
 
@@ -126,9 +130,17 @@ class AzureMLKubernetes(DefaultExtension):
             resource = resources.get_by_id(
                 cluster_resource_id, parent_api_version)
             cluster_location = resource.location.lower()
-            if resource.properties['totalNodeCount'] == 1 or resource.properties['totalNodeCount'] == 2:
-                configuration_settings['clusterPurpose'] = 'DevTest'
-            if resource.properties['distribution'].lower() == "openshift":
+            # TODO(do not merge): for testing purpose only, do not merge it.
+            if cluster_type == "connectedClusters":
+                if resource.properties.get('totalNodeCount', 0) < 3:
+                    configuration_settings['clusterPurpose'] = 'DevTest'
+            else:
+                total_node_count = 0
+                for agent_pool in resource.properties.get('agentPoolProfiles', []):
+                    total_node_count += agent_pool.get('count', 0)
+                if total_node_count < 3:
+                    configuration_settings['clusterPurpose'] = 'DevTest'
+            if resource.properties.get('distribution', '').lower() == "openshift":
                 configuration_settings[self.OPEN_SHIFT] = "true"
         except CloudError as ex:
             raise ex
@@ -142,6 +154,16 @@ class AzureMLKubernetes(DefaultExtension):
             self.JOB_SCHEDULER_LOCATION_KEY, cluster_location)
         configuration_settings[self.CLUSTER_NAME_FRIENDLY_KEY] = configuration_settings.get(
             self.CLUSTER_NAME_FRIENDLY_KEY, cluster_name)
+        # do not enable service bus by default
+        configuration_settings[self.SERVICE_BUS_ENABLED] = configuration_settings.get(self.SERVICE_BUS_ENABLED, 'false')
+
+        # do not enable relay for managed cluster(AKS) by default
+        if cluster_type == "managedClusters":
+            configuration_settings[self.RELAY_SERVER_ENABLED] = configuration_settings.get(self.RELAY_SERVER_ENABLED,
+                                                                                           'false')
+        else:
+            configuration_settings[self.RELAY_SERVER_ENABLED] = configuration_settings.get(self.RELAY_SERVER_ENABLED,
+                                                                                           'true')
 
         # create Azure resources need by the extension based on the config.
         self.__create_required_resource(
@@ -178,7 +200,7 @@ class AzureMLKubernetes(DefaultExtension):
         user_confirmation_factory(cmd, yes)
 
     def Update(self, cmd, resource_group_name, cluster_name, auto_upgrade_minor_version, release_train, version, configuration_settings,
-               configuration_protected_settings, yes=False):
+               configuration_protected_settings, original_extension, yes=False):
         self.__normalize_config(configuration_settings, configuration_protected_settings)
 
         # Prompt message to ask customer to confirm again
@@ -273,7 +295,8 @@ class AzureMLKubernetes(DefaultExtension):
                 except azure.core.exceptions.HttpResponseError:
                     logger.info("Failed to get log analytics connection string.")
 
-            if self.RELAY_SERVER_CONNECTION_STRING not in configuration_protected_settings:
+            if original_extension.configuration_settings.get(self.RELAY_SERVER_ENABLED).lower() != 'false' \
+                    and self.RELAY_SERVER_CONNECTION_STRING not in configuration_protected_settings:
                 try:
                     relay_connection_string, _, _ = _get_relay_connection_str(
                         cmd, subscription_id, resource_group_name, cluster_name, '', self.RELAY_HC_AUTH_NAME, True)
@@ -284,7 +307,8 @@ class AzureMLKubernetes(DefaultExtension):
                         raise ResourceNotFoundError("Relay server not found.") from ex
                     raise AzureResponseError("Failed to get relay connection string.") from ex
 
-            if self.SERVICE_BUS_CONNECTION_STRING not in configuration_protected_settings:
+            if original_extension.configuration_settings.get(self.SERVICE_BUS_ENABLED).lower() != 'false' \
+                    and self.SERVICE_BUS_CONNECTION_STRING not in configuration_protected_settings:
                 try:
                     service_bus_connection_string, _ = _get_service_bus_connection_string(
                         cmd, subscription_id, resource_group_name, cluster_name, '', {}, True)
@@ -486,7 +510,8 @@ class AzureMLKubernetes(DefaultExtension):
             configuration_settings[self.AZURE_LOG_ANALYTICS_CUSTOMER_ID_KEY] = ws_costumer_id
             configuration_protected_settings[self.AZURE_LOG_ANALYTICS_CONNECTION_STRING] = shared_key
 
-        if not configuration_settings.get(self.RELAY_SERVER_CONNECTION_STRING) and \
+        if str(configuration_settings.get(self.RELAY_SERVER_ENABLED)).lower() != 'false' and \
+                not configuration_settings.get(self.RELAY_SERVER_CONNECTION_STRING) and \
                 not configuration_protected_settings.get(self.RELAY_SERVER_CONNECTION_STRING):
             logger.info('==== BEGIN RELAY CREATION ====')
             relay_connection_string, hc_resource_id, hc_name = _get_relay_connection_str(
@@ -496,7 +521,8 @@ class AzureMLKubernetes(DefaultExtension):
             configuration_settings[self.HC_RESOURCE_ID_KEY] = hc_resource_id
             configuration_settings[self.RELAY_HC_NAME_KEY] = hc_name
 
-        if not configuration_settings.get(self.SERVICE_BUS_CONNECTION_STRING) and \
+        if str(configuration_settings.get(self.SERVICE_BUS_ENABLED)).lower() != 'false' and \
+                not configuration_settings.get(self.SERVICE_BUS_CONNECTION_STRING) and \
                 not configuration_protected_settings.get(self.SERVICE_BUS_CONNECTION_STRING):
             logger.info('==== BEGIN SERVICE BUS CREATION ====')
             topic_sub_mapping = {

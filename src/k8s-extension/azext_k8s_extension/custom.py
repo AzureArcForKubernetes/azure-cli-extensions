@@ -296,6 +296,7 @@ def update_k8s_extension(
         version,
         config_settings,
         config_protected_settings,
+        extension,
         yes,
     )
 
