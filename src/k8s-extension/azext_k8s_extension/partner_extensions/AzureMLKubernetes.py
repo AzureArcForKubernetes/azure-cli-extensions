@@ -130,8 +130,6 @@ class AzureMLKubernetes(DefaultExtension):
                 if cluster_type.lower() == 'connectedclusters':
                     if resource.properties['totalNodeCount'] < 3:
                         configuration_settings['clusterPurpose'] = 'DevTest'
-                    if resource.properties['distribution'].lower() == "openshift":
-                        configuration_settings[self.OPEN_SHIFT] = "true"
                 if cluster_type.lower() == 'managedclusters':
                     nodeCount = 0
                     for agent in resource.properties['agentPoolProfiles']:
