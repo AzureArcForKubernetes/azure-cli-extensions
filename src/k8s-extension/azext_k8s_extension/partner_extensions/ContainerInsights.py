@@ -484,7 +484,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
 
     if is_ci_extension_type:
         if not _is_container_insights_solution_exists(cmd, workspace_resource_id):
-            logger.info("creating containerinsights solution resource since it doesnt exists")
+            logger.info("creating containerinsights solution resource since it doesnt exist")
             _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
         if useAADAuth:
             logger.info("creating data collection rule and association")
