@@ -691,10 +691,9 @@ def _check_nodeselector_existed(configuration_settings, configuration_protected_
                 return True
     return False
 
+
 def _is_valid_service_type(service_type):
     if service_type:
-        return service_type.lower() == 'nodeport' \
-               or service_type.lower() == 'loadbalancer' \
-               or service_type.lower() == 'clusterip'
+        return service_type.lower() == 'nodeport' or service_type.lower() == 'loadbalancer' or service_type.lower() == 'clusterip'
     else:
         return False
