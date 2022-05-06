@@ -47,7 +47,6 @@ def ExtensionFactory(extension_name):
         "microsoft.openservicemesh": OpenServiceMesh,
         "microsoft.azureml.kubernetes": AzureMLKubernetes,
         "microsoft.dapr": Dapr,
-        "microsoft.azurebackup.backupagent": DefaultExtension,
     }
 
     # Return the extension if we find it in the map, else return the default
@@ -227,9 +226,9 @@ def update_k8s_extension(
     cluster_name,
     name,
     cluster_type,
-    auto_upgrade_minor_version="",
-    release_train="",
-    version="",
+    auto_upgrade_minor_version=None,
+    release_train=None,
+    version=None,
     configuration_settings=None,
     configuration_protected_settings=None,
     configuration_settings_file=None,
@@ -262,13 +261,14 @@ def update_k8s_extension(
     )
     extension_type_lower = extension.extension_type.lower()
 
-    config_settings = {}
-    config_protected_settings = {}
+    config_settings = None
+    config_protected_settings = None
     # Get Configuration Settings from file
     if configuration_settings_file is not None:
         config_settings = read_config_settings_file(configuration_settings_file)
 
     if configuration_settings is not None:
+        config_settings = {}
         for dicts in configuration_settings:
             for key, value in dicts.items():
                 config_settings[key] = value
@@ -280,6 +280,7 @@ def update_k8s_extension(
         )
 
     if configuration_protected_settings is not None:
+        config_protected_settings = {}
         for dicts in configuration_protected_settings:
             for key, value in dicts.items():
                 config_protected_settings[key] = value

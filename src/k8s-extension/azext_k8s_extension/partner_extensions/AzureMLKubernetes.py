@@ -130,18 +130,18 @@ class AzureMLKubernetes(DefaultExtension):
             resource = resources.get_by_id(
                 cluster_resource_id, parent_api_version)
             cluster_location = resource.location.lower()
-            # TODO(do not merge): for testing purpose only, do not merge it.
-            if cluster_type == "connectedClusters":
-                if resource.properties.get('totalNodeCount', 0) < 3:
-                    configuration_settings['clusterPurpose'] = 'DevTest'
-            else:
-                total_node_count = 0
-                for agent_pool in resource.properties.get('agentPoolProfiles', []):
-                    total_node_count += agent_pool.get('count', 0)
-                if total_node_count < 3:
-                    configuration_settings['clusterPurpose'] = 'DevTest'
-            if resource.properties.get('distribution', '').lower() == "openshift":
-                configuration_settings[self.OPEN_SHIFT] = "true"
+            try:
+                if cluster_type.lower() == 'connectedclusters':
+                    if resource.properties['totalNodeCount'] < 3:
+                        configuration_settings['clusterPurpose'] = 'DevTest'
+                if cluster_type.lower() == 'managedclusters':
+                    nodeCount = 0
+                    for agent in resource.properties['agentPoolProfiles']:
+                        nodeCount += agent['count']
+                    if nodeCount < 3:
+                        configuration_settings['clusterPurpose'] = 'DevTest'
+            except:
+                pass
         except CloudError as ex:
             raise ex
 
@@ -350,9 +350,9 @@ class AzureMLKubernetes(DefaultExtension):
         inferenceRouterServiceType = _get_value_from_config_protected_config(
             self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
         if inferenceRouterServiceType:
-            if inferenceRouterServiceType.lower() != 'nodeport' and inferenceRouterServiceType.lower() != 'loadbalancer':
+            if not _is_valid_service_type(inferenceRouterServiceType):
                 raise InvalidArgumentValueError(
-                    "inferenceRouterServiceType only supports nodePort or loadBalancer."
+                    "inferenceRouterServiceType only supports NodePort or LoadBalancer or ClusterIP."
                     "Check https://aka.ms/arcmltsg for more information.")
 
             feIsNodePort = str(inferenceRouterServiceType).lower() == 'nodeport'
@@ -440,10 +440,10 @@ class AzureMLKubernetes(DefaultExtension):
 
         inferenceRouterServiceType = _get_value_from_config_protected_config(
             self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
-        if not inferenceRouterServiceType or (inferenceRouterServiceType.lower() != 'nodeport' and inferenceRouterServiceType.lower() != 'loadbalancer'):
+        if not _is_valid_service_type(inferenceRouterServiceType):
             raise InvalidArgumentValueError(
                 "To use inference, "
-                "please specify inferenceRouterServiceType=nodePort or inferenceRouterServiceType=loadBalancer in --configuration-settings and also set internalLoadBalancerProvider=azure if your aks only supports internal load balancer."
+                "please specify inferenceRouterServiceType=ClusterIP or inferenceRouterServiceType=NodePort or inferenceRouterServiceType=LoadBalancer in --configuration-settings and also set internalLoadBalancerProvider=azure if your aks only supports internal load balancer."
                 "Check https://aka.ms/arcmltsg for more information.")
 
         feIsNodePort = str(inferenceRouterServiceType).lower() == 'nodeport'
@@ -708,3 +708,10 @@ def _check_nodeselector_existed(configuration_settings, configuration_protected_
             if "nodeSelector" in key:
                 return True
     return False
+
+
+def _is_valid_service_type(service_type):
+    if service_type:
+        return service_type.lower() == 'nodeport' or service_type.lower() == 'loadbalancer' or service_type.lower() == 'clusterip'
+    else:
+        return False
