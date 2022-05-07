@@ -321,7 +321,6 @@ class AzureMLKubernetes(DefaultExtension):
                               configuration_protected_settings=configuration_protected_settings)
 
     def __normalize_config(self, configuration_settings, configuration_protected_settings):
-        # inference
         inferenceRouterHA = _get_value_from_config_protected_config(
             self.inferenceRouterHA, configuration_settings, configuration_protected_settings)
         isTestCluster = True if inferenceRouterHA is not None and str(inferenceRouterHA).lower() == 'false' else False
