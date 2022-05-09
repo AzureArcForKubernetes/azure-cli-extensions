@@ -58,11 +58,8 @@ Describe 'AzureML Kubernetes Testing' {
     It "Deletes the extension from the cluster with inference enabled" {
         # cleanup the relay and servicebus
         $relayResourceID = Get-ExtensionConfigurationSettings $extensionName $relayResourceIDKey
-        $serviceBusResourceID = Get-ExtensionConfigurationSettings $extensionName $serviceBusResourceIDKey
         $relayNamespaceName = $relayResourceID.split("/")[8]
-        $serviceBusNamespaceName = $serviceBusResourceID.split("/")[8]
         az relay namespace delete --resource-group $ENVCONFIG.resourceGroup --name $relayNamespaceName
-        az servicebus namespace delete --resource-group $ENVCONFIG.resourceGroup --name $serviceBusNamespaceName
 
         $output = az $Env:K8sExtensionName delete -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --force
         $? | Should -BeTrue
