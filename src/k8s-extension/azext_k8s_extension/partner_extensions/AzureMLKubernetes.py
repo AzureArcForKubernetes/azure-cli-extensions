@@ -57,6 +57,7 @@ class AzureMLKubernetes(DefaultExtension):
         self.AZURE_LOG_ANALYTICS_CONNECTION_STRING = 'azure_log_analytics.connection_string'
         self.JOB_SCHEDULER_LOCATION_KEY = 'jobSchedulerLocation'
         self.CLUSTER_NAME_FRIENDLY_KEY = 'cluster_name_friendly'
+        self.NGINX_INGRESS_ENABLED_KEY = 'nginxIngress.enabled'
 
         # component flag
         self.ENABLE_TRAINING = 'enableTraining'
@@ -134,12 +135,16 @@ class AzureMLKubernetes(DefaultExtension):
                 if cluster_type.lower() == 'connectedclusters':
                     if resource.properties['totalNodeCount'] < 3:
                         configuration_settings['clusterPurpose'] = 'DevTest'
+                    configuration_settings[self.NGINX_INGRESS_ENABLED_KEY] = configuration_settings.get(
+                        self.NGINX_INGRESS_ENABLED_KEY, 'false')
                 if cluster_type.lower() == 'managedclusters':
                     nodeCount = 0
                     for agent in resource.properties['agentPoolProfiles']:
                         nodeCount += agent['count']
                     if nodeCount < 3:
                         configuration_settings['clusterPurpose'] = 'DevTest'
+                if resource.properties.get('distribution', '').lower() == self.OPEN_SHIFT:
+                    configuration_settings[self.OPEN_SHIFT] = 'true'
             except:
                 pass
         except CloudError as ex:
