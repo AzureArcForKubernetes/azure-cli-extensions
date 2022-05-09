@@ -135,8 +135,6 @@ class AzureMLKubernetes(DefaultExtension):
                 if cluster_type.lower() == 'connectedclusters':
                     if resource.properties['totalNodeCount'] < 3:
                         configuration_settings['clusterPurpose'] = 'DevTest'
-                    configuration_settings[self.NGINX_INGRESS_ENABLED_KEY] = configuration_settings.get(
-                        self.NGINX_INGRESS_ENABLED_KEY, 'false')
                 if cluster_type.lower() == 'managedclusters':
                     nodeCount = 0
                     for agent in resource.properties['agentPoolProfiles']:
@@ -162,13 +160,17 @@ class AzureMLKubernetes(DefaultExtension):
         # do not enable service bus by default
         configuration_settings[self.SERVICE_BUS_ENABLED] = configuration_settings.get(self.SERVICE_BUS_ENABLED, 'false')
 
-        # do not enable relay for managed cluster(AKS) by default
+        # do not enable relay for managed cluster(AKS) by default, do not enable nginx for ARC by default
         if cluster_type == "managedClusters":
             configuration_settings[self.RELAY_SERVER_ENABLED] = configuration_settings.get(self.RELAY_SERVER_ENABLED,
                                                                                            'false')
+            configuration_settings[self.NGINX_INGRESS_ENABLED_KEY] = configuration_settings.get(
+                self.NGINX_INGRESS_ENABLED_KEY, 'true')
         else:
             configuration_settings[self.RELAY_SERVER_ENABLED] = configuration_settings.get(self.RELAY_SERVER_ENABLED,
                                                                                            'true')
+            configuration_settings[self.NGINX_INGRESS_ENABLED_KEY] = configuration_settings.get(
+                self.NGINX_INGRESS_ENABLED_KEY, 'false')
 
         # create Azure resources need by the extension based on the config.
         self.__create_required_resource(
