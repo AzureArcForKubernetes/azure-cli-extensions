@@ -208,6 +208,13 @@ class AzureMLKubernetes(DefaultExtension):
 
     def Update(self, cmd, resource_group_name, cluster_name, auto_upgrade_minor_version, release_train, version, configuration_settings,
                configuration_protected_settings, original_extension, yes=False):
+        input_configuration_settings = copy.deepcopy(configuration_settings)
+        input_configuration_protected_settings = copy.deepcopy(configuration_protected_settings)
+        # configuration_settings and configuration_protected_settings can be none, so need to set them to empty dict
+        if configuration_settings is None:
+            configuration_settings = {}
+        if configuration_protected_settings is None:
+            configuration_protected_settings = {}
         self.__normalize_config(configuration_settings, configuration_protected_settings)
 
         # Prompt message to ask customer to confirm again
@@ -336,6 +343,13 @@ class AzureMLKubernetes(DefaultExtension):
 
                 if fe_ssl_cert_file and fe_ssl_key_file:
                     self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
+
+        # if no entries are existed in configuration_protected_settings, configuration_settings, return whatever passed
+        #  in the Update function(empty dict or None).
+        if len(configuration_settings) == 0:
+            configuration_settings = input_configuration_settings
+        if len(configuration_protected_settings) == 0:
+            configuration_protected_settings = input_configuration_protected_settings
 
         return PatchExtension(auto_upgrade_minor_version=auto_upgrade_minor_version,
                               release_train=release_train,
@@ -701,9 +715,11 @@ def _dereference(ref_mapping_dict: Dict[str, List], output_dict: Dict[str, Any])
 
 
 def _get_value_from_config_protected_config(key, config, protected_config):
-    if key in config:
+    if config is not None and key in config:
         return config[key]
-    return protected_config.get(key)
+    if protected_config is not None:
+        return protected_config.get(key)
+    return None
 
 
 def _check_nodeselector_existed(configuration_settings, configuration_protected_settings):
