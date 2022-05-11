@@ -309,7 +309,10 @@ class AzureMLKubernetes(DefaultExtension):
                 except azure.core.exceptions.HttpResponseError:
                     logger.info("Failed to get log analytics connection string.")
 
-            if original_extension.configuration_settings.get(self.RELAY_SERVER_ENABLED).lower() != 'false' \
+            original_extension_config_settings = original_extension.configuration_settings
+            if original_extension_config_settings is None:
+                original_extension_config_settings = {}
+            if original_extension_config_settings.get(self.RELAY_SERVER_ENABLED).lower() != 'false' \
                     and self.RELAY_SERVER_CONNECTION_STRING not in configuration_protected_settings:
                 try:
                     relay_connection_string, _, _ = _get_relay_connection_str(
@@ -321,7 +324,7 @@ class AzureMLKubernetes(DefaultExtension):
                         raise ResourceNotFoundError("Relay server not found.") from ex
                     raise AzureResponseError("Failed to get relay connection string.") from ex
 
-            if original_extension.configuration_settings.get(self.SERVICE_BUS_ENABLED).lower() != 'false' \
+            if original_extension_config_settings.get(self.SERVICE_BUS_ENABLED).lower() != 'false' \
                     and self.SERVICE_BUS_CONNECTION_STRING not in configuration_protected_settings:
                 try:
                     service_bus_connection_string, _ = _get_service_bus_connection_string(
