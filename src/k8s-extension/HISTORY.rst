@@ -10,7 +10,7 @@ Release History
 1.2.1
 ++++++++++++++++++
 * Provide no default values for Patch of Extension
-* microsoft.azureml.kubernetes: clusterip, disable service bus by default, do not create relay for managed clusters.
+* microsoft.azureml.kubernetes: clusterip
 
 1.2.0
 ++++++++++++++++++
