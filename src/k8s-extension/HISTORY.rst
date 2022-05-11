@@ -6,7 +6,7 @@ Release History
 1.2.1
 ++++++++++++++++++
 * Provide no default values for Patch of Extension
-* microsoft.azureml.kubernetes: clusterip
+* microsoft.azureml.kubernetes: clusterip, disable service bus by default, do not create relay for managed clusters.
 
 1.2.0
 ++++++++++++++++++
@@ -18,7 +18,7 @@ Release History
 1.1.0
 ++++++++++++++++++
 * Migrate Extensions api-version to 2022-03-01
-* microsoft.azureml.kubernetes: Remove inference private review warning message, disable service bus by default
+* microsoft.azureml.kubernetes: Remove inference private review warning message
 * microsoft.openservicemesh: Enable System-assigned identity
 
 1.0.4
