@@ -111,7 +111,8 @@ class AzureMLKubernetes(DefaultExtension):
                configuration_settings_file, configuration_protected_settings_file):
         if scope == 'namespace':
             raise InvalidArgumentValueError("Invalid scope '{}'.  This extension can't be installed "
-                                            "only at 'cluster' scope.".format(scope))
+                                            "only at 'cluster' scope. "
+                                            "Check https://aka.ms/arcmltsg for more information.".format(scope))
         # set release name explicitly to azureml
         release_namespace = self.DEFAULT_RELEASE_NAMESPACE
         scope_cluster = ScopeCluster(release_namespace=release_namespace)
@@ -321,8 +322,10 @@ class AzureMLKubernetes(DefaultExtension):
                     logger.info("Get relay connection string succeeded.")
                 except azure.mgmt.relay.models.ErrorResponseException as ex:
                     if ex.response.status_code == 404:
-                        raise ResourceNotFoundError("Relay server not found.") from ex
-                    raise AzureResponseError("Failed to get relay connection string.") from ex
+                        raise ResourceNotFoundError("Relay server not found. "
+                                                    "Check https://aka.ms/arcmltsg for more information.") from ex
+                    raise AzureResponseError("Failed to get relay connection string."
+                                             "Check https://aka.ms/arcmltsg for more information.") from ex
 
             if original_extension_config_settings.get(self.SERVICE_BUS_ENABLED).lower() != 'false' \
                     and self.SERVICE_BUS_CONNECTION_STRING not in configuration_protected_settings:
@@ -333,8 +336,10 @@ class AzureMLKubernetes(DefaultExtension):
                     logger.info("Get service bus connection string succeeded.")
                 except azure.core.exceptions.HttpResponseError as ex:
                     if ex.response.status_code == 404:
-                        raise ResourceNotFoundError("Service bus not found.") from ex
-                    raise AzureResponseError("Failed to get service bus connection string.") from ex
+                        raise ResourceNotFoundError("Service bus not found."
+                                                    "Check https://aka.ms/arcmltsg for more information.") from ex
+                    raise AzureResponseError("Failed to get service bus connection string."
+                                             "Check https://aka.ms/arcmltsg for more information.") from ex
 
             configuration_protected_settings = _dereference(self.reference_mapping, configuration_protected_settings)
 
@@ -399,7 +404,8 @@ class AzureMLKubernetes(DefaultExtension):
             for key in dup_keys:
                 logger.warning(
                     'Duplicate keys found in both configuration settings and configuration protected setttings: %s', key)
-            raise InvalidArgumentValueError("Duplicate keys found.")
+            raise InvalidArgumentValueError("Duplicate keys found."
+                                            "Check https://aka.ms/arcmltsg for more information.")
 
         enable_training = _get_value_from_config_protected_config(
             self.ENABLE_TRAINING, configuration_settings, configuration_protected_settings)
@@ -477,7 +483,8 @@ class AzureMLKubernetes(DefaultExtension):
 
         if feIsNodePort and feIsInternalLoadBalancer:
             raise MutuallyExclusiveArgumentError(
-                "When using nodePort as inferenceRouterServiceType, no need to specify internalLoadBalancerProvider.")
+                "When using nodePort as inferenceRouterServiceType, no need to specify internalLoadBalancerProvider."
+                "Check https://aka.ms/arcmltsg for more information.")
         if feIsNodePort:
             configuration_settings['scoringFe.serviceType.nodePort'] = feIsNodePort
         elif feIsInternalLoadBalancer:
