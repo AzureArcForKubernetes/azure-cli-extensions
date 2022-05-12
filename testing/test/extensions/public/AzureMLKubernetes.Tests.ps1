@@ -62,7 +62,12 @@ Describe 'AzureML Kubernetes Testing' {
         $n = 0
         do 
         {
-            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+
+            $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+            $? | Should -BeTrue
+
+            $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            if ($provisioningState -eq "Succeeded") {
                 break
             }
             Start-Sleep -Seconds 10
@@ -79,7 +84,12 @@ Describe 'AzureML Kubernetes Testing' {
         $n = 0
         do 
         {
-            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+
+            $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+            $? | Should -BeTrue
+
+            $provisioningState = ($output | ConvertFrom-Json).provisioningState
+            if ($provisioningState -eq "Succeeded") {
                 break
             }
             Start-Sleep -Seconds 10
