@@ -57,6 +57,20 @@ Describe 'AzureML Kubernetes Testing' {
         $extensionExists | Should -Not -BeNullOrEmpty
     }
 
+    It "Wait for the extension to be ready" {
+        # Loop and retry until the extension installed
+        $n = 0
+        do 
+        {
+            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+                break
+            }
+            Start-Sleep -Seconds 10
+            $n += 1
+        } while ($n -le $MAX_RETRY_ATTEMPTS)
+        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+    }
+
     It "Perform Update extension" {
         az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config enableInference=false enableTraining=true "$($mockUpdateKey)=true" --config-protected "$($mockProtectedUpdateKey)=true" --no-wait
         $? | Should -BeTrue        
