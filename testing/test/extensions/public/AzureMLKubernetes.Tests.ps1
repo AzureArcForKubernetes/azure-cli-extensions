@@ -5,6 +5,8 @@ Describe 'AzureML Kubernetes Testing' {
         $extensionAgentNamespace = "azureml"
         $relayResourceIDKey = "relayserver.hybridConnectionResourceID"
         $serviceBusResourceIDKey = "servicebus.resourceID"
+        $mockUpdateKey = "mockTest"
+        $mockProtectedUpdateKey = "mockProtectedTest"
 
         . $PSScriptRoot/../../helper/Constants.ps1
         . $PSScriptRoot/../../helper/Helper.ps1
@@ -53,6 +55,26 @@ Describe 'AzureML Kubernetes Testing' {
         $output | Should -Not -BeNullOrEmpty
         $extensionExists = $output | ConvertFrom-Json | Where-Object { $_.extensionType -eq $extensionType }
         $extensionExists | Should -Not -BeNullOrEmpty
+    }
+
+    It "Perform Update extension" {
+        az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config enableInference=false enableTraining=true $($mockUpdateKey)=true --config-protected $($mockProtectedUpdateKey)=true --no-wait
+        $? | Should -BeTrue        
+
+        # Loop and retry until the extension updated
+        $n = 0
+        do 
+        {
+            if (Get-ExtensionStatus $extensionName -eq $SUCCESS_MESSAGE) {
+                break
+            }
+            Start-Sleep -Seconds 10
+            $n += 1
+        } while ($n -le $MAX_RETRY_ATTEMPTS)
+        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+
+        $mockedUpdateData = Get-ExtensionConfigurationSettings $extensionName $mockUpdateKey
+        $mockedUpdateData | Should -Not -BeNullOrEmpty
     }
 
     It "Deletes the extension from the cluster with inference enabled" {
