@@ -369,11 +369,12 @@ class AzureMLKubernetes(DefaultExtension):
         # inference
         inferenceRouterHA = _get_value_from_config_protected_config(
             self.inferenceRouterHA, configuration_settings, configuration_protected_settings)
-        isTestCluster = True if inferenceRouterHA is not None and str(inferenceRouterHA).lower() == 'false' else False
-        if isTestCluster:
-            configuration_settings['clusterPurpose'] = 'DevTest'
-        else:
-            configuration_settings['clusterPurpose'] = 'FastProd'
+        if inferenceRouterHA is not None:
+            isTestCluster = str(inferenceRouterHA).lower() == 'false'
+            if isTestCluster:
+                configuration_settings['clusterPurpose'] = 'DevTest'
+            else:
+                configuration_settings['clusterPurpose'] = 'FastProd'
 
         inferenceRouterServiceType = _get_value_from_config_protected_config(
             self.inferenceRouterServiceType, configuration_settings, configuration_protected_settings)
