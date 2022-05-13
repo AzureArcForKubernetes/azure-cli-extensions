@@ -78,7 +78,7 @@ Describe 'AzureML Kubernetes Testing' {
     }
 
     It "Perform Update extension" {
-        az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config enableInference=false enableTraining=true "$($mockUpdateKey)=true" --config-protected "$($mockProtectedUpdateKey)=true" --no-wait
+        az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config "$($mockUpdateKey)=true" --config-protected "$($mockProtectedUpdateKey)=true" --no-wait
         $? | Should -BeTrue        
 
         # Loop and retry until the extension updated
