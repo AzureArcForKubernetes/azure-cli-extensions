@@ -7,6 +7,7 @@ Release History
 ++++++++++++++++++
 * microsoft.azureml.kubernetes: Disable service bus by default, do not create relay for managed clusters.
 * microsoft.azureml.kubernetes: Rename inferenceLoadBalancerHA to inferenceRouterHA and unify related logic.
+* microsoft.azureml.kubernetes: Added private arguments for directly passing ssl key/cert base64 string
 
 1.2.1
 ++++++++++++++++++
