@@ -85,6 +85,8 @@ class AzureMLKubernetes(DefaultExtension):
         self.allowInsecureConnections = 'allowInsecureConnections'
         self.SSL_SECRET = 'sslSecret'
         self.SSL_Cname = 'sslCname'
+        self.sslKeySetting = 'scoringFe.sslKey'
+        self.sslCertSetting = 'scoringFe.sslCert'
 
         self.inferenceRouterServiceType = 'inferenceRouterServiceType'
         self.internalLoadBalancerProvider = 'internalLoadBalancerProvider'
@@ -449,10 +451,12 @@ class AzureMLKubernetes(DefaultExtension):
             self.SSL_SECRET, configuration_settings, configuration_protected_settings)
         feSslCertFile = configuration_protected_settings.get(self.sslCertPemFile)
         feSslKeyFile = configuration_protected_settings.get(self.sslKeyPemFile)
+        feSslCertSetting = configuration_protected_settings.get(self.sslCertSetting)
+        feSslKeySetting = configuration_protected_settings.get(self.sslKeySetting)
         allowInsecureConnections = _get_value_from_config_protected_config(
             self.allowInsecureConnections, configuration_settings, configuration_protected_settings)
         allowInsecureConnections = str(allowInsecureConnections).lower() == 'true'
-        sslEnabled = (feSslCertFile and feSslKeyFile) or sslSecret
+        sslEnabled = (feSslCertFile and feSslKeyFile) or sslSecret or (feSslCertSetting and feSslKeySetting)
         if not sslEnabled and not allowInsecureConnections:
             raise InvalidArgumentValueError(
                 "To enable HTTPs endpoint, "
@@ -501,12 +505,12 @@ class AzureMLKubernetes(DefaultExtension):
             cert_data = f.read()
             cert_data_bytes = cert_data.encode("ascii")
             ssl_cert = base64.b64encode(cert_data_bytes).decode()
-            configuration_protected_settings['scoringFe.sslCert'] = ssl_cert
+            configuration_protected_settings[self.sslCertSetting] = ssl_cert
         with open(fe_ssl_key_file) as f:
             key_data = f.read()
             key_data_bytes = key_data.encode("ascii")
             ssl_key = base64.b64encode(key_data_bytes).decode()
-            configuration_protected_settings['scoringFe.sslKey'] = ssl_key
+            configuration_protected_settings[self.sslKeySetting] = ssl_key
 
     def __set_up_inference_ssl(self, configuration_settings, configuration_protected_settings):
         allowInsecureConnections = _get_value_from_config_protected_config(
@@ -517,12 +521,16 @@ class AzureMLKubernetes(DefaultExtension):
                 self.SSL_SECRET, configuration_settings, configuration_protected_settings)
             fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
             fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
-
+            fe_ssl_cert_setting = configuration_protected_settings.get(self.sslCertSetting)
+            fe_ssl_key_setting = configuration_protected_settings.get(self.sslKeySetting)
             # always take ssl key/cert first, then secret if key/cert file is not provided
             if fe_ssl_cert_file and fe_ssl_key_file:
                 self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
-            else:
+            elif fe_ssl_secret:
                 self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
+            elif fe_ssl_cert_setting and fe_ssl_key_setting:
+                # this is not an explicit setting for customer
+                pass
         else:
             logger.warning(
                 'SSL is not enabled. Allowing insecure connections to the deployed services.')
