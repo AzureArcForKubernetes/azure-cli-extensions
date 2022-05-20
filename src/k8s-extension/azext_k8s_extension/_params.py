@@ -72,6 +72,8 @@ def load_arguments(self, _):
         c.argument('target_namespace',
                    help='Specify the target namespace to install to for the extension instance. This'
                    ' parameter is required if extension scope is set to \'namespace\'')
+        c.argument('accept_eula',
+                   help='Accept the end-user license agreement without prompting.')
 
     with self.argument_context(f"{consts.EXTENSION_NAME} update") as c:
         c.argument('yes',

@@ -11,7 +11,7 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -n -c --cluster-type --extension-type --release-train --version --no-wait
+      - -g -n -c --cluster-type --extension-type --release-train --version --no-wait --accept_eula
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-resource/20.0.0 Python/3.9.6 (Windows-10-10.0.22000-SP0)
     method: GET
@@ -72,7 +72,7 @@ interactions:
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -n -c --cluster-type --extension-type --release-train --version --no-wait
+      - -g -n -c --cluster-type --extension-type --release-train --version --no-wait --accept_eula
       User-Agent:
       - AZURECLI/2.34.1 azsdk-python-azure-mgmt-kubernetesconfiguration/1.0.0 Python/3.9.6
         (Windows-10-10.0.22000-SP0)

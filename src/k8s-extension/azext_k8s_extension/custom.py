@@ -38,6 +38,15 @@ from ._client_factory import cf_resources
 
 logger = get_logger(__name__)
 
+EULA_AGREEMENT = '''
+
+MICROSOFT SOFTWARE LICENSE TERMS 
+
+MICROSOFT Azure Arc-enabled Kubernetes 
+
+This software is licensed to you as part of your or your company's subscription license for Microsoft Azure Services. You may only use the software with Microsoft Azure Services and subject to the terms and conditions of the agreement under which you obtained Microsoft Azure Services. If you do not have an active subscription license for Microsoft Azure Services, you may not use the software. Microsoft Azure Legal Information: https://azure.microsoft.com/en-us/support/legal/ 
+
+'''
 
 # A factory method to return the correct extension class based off of the extension name
 def ExtensionFactory(extension_name):
@@ -106,9 +115,17 @@ def create_k8s_extension(
     configuration_settings_file=None,
     configuration_protected_settings_file=None,
     no_wait=False,
+    accept_eula=False,
 ):
     """Create a new Extension Instance."""
 
+    from knack.prompting import prompt_y_n
+    if not accept_eula:
+        print(EULA_AGREEMENT)
+        msg = 'Do you agree to the above additional terms for k8s-extension?'
+        if not prompt_y_n(msg, default="n"):
+            return
+    
     extension_type_lower = extension_type.lower()
     cluster_rp, _ = get_cluster_rp_api_version(cluster_type)
 
