@@ -134,18 +134,18 @@ class AzureMLKubernetes(DefaultExtension):
                 cluster_resource_id, parent_api_version)
             cluster_location = resource.location.lower()
             try:
-                isSmallScale = False
+                isDevScale = False
                 if cluster_type.lower() == 'connectedclusters':
                     if resource.properties['totalNodeCount'] < 3:
-                        isSmallScale = True
+                        isDevScale = True
                 if cluster_type.lower() == 'managedclusters':
                     nodeCount = 0
                     for agent in resource.properties['agentPoolProfiles']:
                         nodeCount += agent['count']
                     if nodeCount < 3:
-                        isSmallScale = True
+                        isDevScale = True
 
-                if isSmallScale:
+                if isDevScale:
                     clusterPurpose = _get_value_from_config_protected_config(
                         self.clusterPurpose, configuration_settings, configuration_protected_settings)
                     if clusterPurpose is None:
