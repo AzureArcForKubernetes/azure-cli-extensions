@@ -694,7 +694,6 @@ def _get_service_bus_connection_string(cmd, subscription_id, resource_group_name
             service_bus_client.subscriptions.create_or_update(
                 resource_group_name, service_bus_namespace_name, topic_name, service_bus_subscription_name, sub)
 
-
         # get connection string
         auth_rules = service_bus_client.namespaces.list_authorization_rules(
             resource_group_name, service_bus_namespace_name)
