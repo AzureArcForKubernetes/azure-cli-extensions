@@ -678,7 +678,7 @@ def _get_service_bus_connection_string(cmd, subscription_id, resource_group_name
             resource_group_name, service_bus_namespace_name, service_bus_namespace)
         while True:
             service_bus_object = async_poller.result(15)
-            if service_bus_object.done():
+            if async_poller.done():
                 service_bus_resource_id = service_bus_object.id
                 break
 
