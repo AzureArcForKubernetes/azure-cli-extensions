@@ -27,6 +27,7 @@ from azure.mgmt.resource.locks.models import ManagementLockObject
 from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 from msrest.exceptions import HttpOperationError
+import azure.core.exceptions
 
 from .._client_factory import cf_resources
 from .DefaultExtension import DefaultExtension, user_confirmation_factory
@@ -608,11 +609,11 @@ def _get_relay_connection_str(
     # only create relay if not found
     try:
         # get connection string
-        key: azure.mgmt.relay.models.AccessKeys = relay_client.hybrid_connections.list_keys(
-            resource_group_name, relay_namespace_name, hybrid_connection_name, auth_rule_name)
         hybrid_connection_object = relay_client.hybrid_connections.get(
             resource_group_name, relay_namespace_name, hybrid_connection_name)
         hc_resource_id = hybrid_connection_object.id
+        key: azure.mgmt.relay.models.AccessKeys = relay_client.hybrid_connections.list_keys(
+            resource_group_name, relay_namespace_name, hybrid_connection_name, auth_rule_name)
     except HttpOperationError as e:
         if e.response.status_code != 404 or get_key_only:
             raise e
@@ -663,7 +664,7 @@ def _get_service_bus_connection_string(cmd, subscription_id, resource_group_name
             key: azure.mgmt.servicebus.models.AccessKeys = service_bus_client.namespaces.list_keys(
                 resource_group_name, service_bus_namespace_name, rule.name)
             return key.primary_connection_string, service_bus_resource_id
-    except HttpOperationError as e:
+    except azure.core.exceptions.HttpResponseError as e:
         if e.response.status_code != 404 or get_key_only:
             raise e
         # create namespace
@@ -718,7 +719,7 @@ def _get_log_analytics_ws_connection_string(
         customer_id = log_analytics_ws_object.customer_id
         shared_key = log_analytics_ws_client.shared_keys.get_shared_keys(
             resource_group_name, log_analytics_ws_name).primary_shared_key
-    except HttpOperationError as e:
+    except azure.core.exceptions.HttpResponseError as e:
         if e.response.status_code != 404 or get_key_only:
             raise e
         log_analytics_ws = azure.mgmt.loganalytics.models.Workspace(location=cluster_location, tags=resource_tag)
