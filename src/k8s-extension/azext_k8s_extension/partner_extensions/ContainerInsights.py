@@ -501,14 +501,18 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
         raise InvalidArgumentValueError(
             'Fails to retrieve workspace by {}'.format(workspace_name))
 
-    shared_keys = log_analytics_client.shared_keys.get_shared_keys(
-        workspace_rg_name, workspace_name)
-    if not shared_keys:
-        raise InvalidArgumentValueError('Fails to retrieve shared key for workspace {}'.format(
-            log_analytics_workspace))
+    # workspace key not used in case of AAD MSI auth
+    configuration_protected_settings['omsagent.secret.key'] = "<not_used>"
+    if not useAADAuth:
+        shared_keys = log_analytics_client.shared_keys.get_shared_keys(
+            workspace_rg_name, workspace_name)
+        if not shared_keys:
+            raise InvalidArgumentValueError('Fails to retrieve shared key for workspace {}'.format(
+                log_analytics_workspace))
+        configuration_protected_settings['omsagent.secret.key'] = shared_keys.primary_shared_key
     configuration_protected_settings['omsagent.secret.wsid'] = log_analytics_workspace.customer_id
     configuration_settings['logAnalyticsWorkspaceResourceID'] = workspace_resource_id
-    configuration_protected_settings['omsagent.secret.key'] = shared_keys.primary_shared_key
+
     # set the domain for the ci agent for non azure public clouds
     cloud_name = cmd.cli_ctx.cloud.name
     if cloud_name.lower() == 'azurechinacloud':
