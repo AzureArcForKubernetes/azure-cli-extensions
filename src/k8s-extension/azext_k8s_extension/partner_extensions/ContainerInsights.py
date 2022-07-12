@@ -483,12 +483,12 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
             raise InvalidArgumentValueError('{} is not a valid Azure resource ID.'.format(workspace_resource_id))
 
     if is_ci_extension_type:
-        if not _is_container_insights_solution_exists(cmd, workspace_resource_id):
-            logger.info("creating containerinsights solution resource since it doesnt exist")
-            _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
         if useAADAuth:
             logger.info("creating data collection rule and association")
             _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_resource_group_name, cluster_name, workspace_resource_id)
+        elif not _is_container_insights_solution_exists(cmd, workspace_resource_id):
+           logger.info("creating containerinsights solution resource since it doesnt exist and its legacy auth")
+           _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
 
     # extract subscription ID and resource group from workspace_resource_id URL
     parsed = parse_resource_id(workspace_resource_id)
@@ -562,6 +562,9 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     try:
         resource = resources.get_by_id(workspace_resource_id, '2015-11-01-preview')
         workspace_region = resource.location
+        # location can have spaces for example 'East US'
+        # and some workspaces it will be "eastus" hence remove the spaces and converting lowercase
+        workspace_region = workspace_region.replace(" ", "").lower()
     except HttpResponseError as ex:
         raise ex
 
