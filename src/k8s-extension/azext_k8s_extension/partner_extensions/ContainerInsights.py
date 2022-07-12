@@ -487,8 +487,8 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
             logger.info("creating data collection rule and association")
             _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_resource_group_name, cluster_name, workspace_resource_id)
         elif not _is_container_insights_solution_exists(cmd, workspace_resource_id):
-           logger.info("creating containerinsights solution resource since it doesnt exist and its legacy auth")
-           _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
+            logger.info("creating containerinsights solution resource since it doesnt exist and its legacy auth")
+            _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
 
     # extract subscription ID and resource group from workspace_resource_id URL
     parsed = parse_resource_id(workspace_resource_id)
