@@ -13,7 +13,7 @@ DF_RM_HOSTNAME = "api-dogfood.resources.windows-int.net"
 CONNECTED_CLUSTER_RP = "Microsoft.Kubernetes"
 MANAGED_CLUSTER_RP = "Microsoft.ContainerService"
 APPLIANCE_RP = "Microsoft.ResourceConnector"
-HYBRIDCONTAINERSERVICE_RP = "Microsoft.HybridContainerService"
+HYBRIDCONTAINERSERVICE_RP = "microsoft.hybridcontainerservice"
 
 CONNECTED_CLUSTER_TYPE = "connectedclusters"
 MANAGED_CLUSTER_TYPE = "managedclusters"
