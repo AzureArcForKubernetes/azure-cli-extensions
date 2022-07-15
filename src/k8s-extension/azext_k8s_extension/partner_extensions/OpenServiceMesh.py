@@ -26,14 +26,15 @@ from ..vendored_sdks.models import (
 )
 
 from .._client_factory import cf_resources
+from ..utils import get_cluster_rp_api_version
 
 logger = get_logger(__name__)
 
 
 class OpenServiceMesh(DefaultExtension):
 
-    def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, extension_type,
-               scope, auto_upgrade_minor_version, release_train, version, target_namespace,
+    def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
+               extension_type, scope, auto_upgrade_minor_version, release_train, version, target_namespace,
                release_namespace, configuration_settings, configuration_protected_settings,
                configuration_settings_file, configuration_protected_settings_file):
         """ExtensionType 'microsoft.openservicemesh' specific validations & defaults for Create
@@ -52,7 +53,15 @@ class OpenServiceMesh(DefaultExtension):
         # NOTE-2: Return a valid Extension object, Instance name and flag for Identity
         create_identity = True
 
-        _validate_tested_distro(cmd, resource_group_name, cluster_name, version, release_train)
+        _validate_tested_distro(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            cluster_rp=cluster_rp,
+            cluster_type=cluster_type,
+            cluster_name=cluster_name,
+            extension_version=version,
+            extension_release_train=release_train
+        )
 
         extension = Extension(
             extension_type=extension_type,
@@ -68,7 +77,7 @@ class OpenServiceMesh(DefaultExtension):
         return extension, name, create_identity
 
 
-def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version, extension_release_train):
+def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name, extension_version, extension_release_train):
 
     field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
         'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
@@ -78,10 +87,13 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
     subscription_id = get_subscription_id(cmd.cli_ctx)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
-    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes' \
-        '/connectedClusters/{2}'.format(subscription_id, cluster_resource_group_name, cluster_name)
+    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(
+        subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
 
-    resource = resources.get_by_id(cluster_resource_id, '2021-10-01')
+    cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_rp=cluster_rp,
+                                                                cluster_type=cluster_type)
+
+    resource = resources.get_by_id(cluster_resource_id, parent_api_version)
     cluster_location = resource.location
     cluster_distro = resource.properties['distribution'].lower()
 
