@@ -3,6 +3,10 @@
 Release History
 ===============
 
+1.2.5
+++++++++++++++++++
+* Add support for Microsoft.HybridContainerService.ProvisionedClusters
+
 1.2.4
 ++++++++++++++++++
 * microsoft.azureml.kubernetes: Do not invoke `create_or_update` for already existed resources.
