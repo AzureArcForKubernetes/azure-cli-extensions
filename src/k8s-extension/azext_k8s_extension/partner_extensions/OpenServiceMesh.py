@@ -55,7 +55,7 @@ class OpenServiceMesh(DefaultExtension):
 
         _validate_tested_distro(
             cmd=cmd,
-            resource_group_name=resource_group_name,
+            cluster_resource_group_name=resource_group_name,
             cluster_rp=cluster_rp,
             cluster_type=cluster_type,
             cluster_name=cluster_name,
