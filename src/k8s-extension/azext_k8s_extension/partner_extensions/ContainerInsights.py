@@ -487,7 +487,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
             logger.info("creating data collection rule and association")
             _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_resource_group_name, cluster_name, workspace_resource_id)
         elif not _is_container_insights_solution_exists(cmd, workspace_resource_id):
-            logger.info("creating containerinsights solution resource since it doesnt exist and its legacy auth")
+            logger.info("Creating ContainerInsights solution resource, since it doesn't exist and it is using legacy authentication")
             _ensure_container_insights_for_monitoring(cmd, workspace_resource_id).result()
 
     # extract subscription ID and resource group from workspace_resource_id URL
@@ -499,7 +499,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
     log_analytics_workspace = log_analytics_client.workspaces.get(workspace_rg_name, workspace_name)
     if not log_analytics_workspace:
         raise InvalidArgumentValueError(
-            'Fails to retrieve workspace by {}'.format(workspace_name))
+            'Failed to retrieve workspace by {}'.format(workspace_name))
 
     # workspace key not used in case of AAD MSI auth
     configuration_protected_settings['omsagent.secret.key'] = "<not_used>"
@@ -507,7 +507,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_n
         shared_keys = log_analytics_client.shared_keys.get_shared_keys(
             workspace_rg_name, workspace_name)
         if not shared_keys:
-            raise InvalidArgumentValueError('Fails to retrieve shared key for workspace {}'.format(
+            raise InvalidArgumentValueError('Failed to retrieve shared key for workspace {}'.format(
                 log_analytics_workspace))
         configuration_protected_settings['omsagent.secret.key'] = shared_keys.primary_shared_key
     configuration_protected_settings['omsagent.secret.wsid'] = log_analytics_workspace.customer_id
