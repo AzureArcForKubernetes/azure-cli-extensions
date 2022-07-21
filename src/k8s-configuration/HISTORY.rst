@@ -3,10 +3,6 @@
 Release History
 ===============
 
-1.5.2
-++++++++++++++++++
-* Add support for Microsoft.HybridContainerService ProvisionedClusters
-
 1.5.1
 ++++++++++++++++++
 * Bump pycryptodome to 3.14.1 to support Python 3.10

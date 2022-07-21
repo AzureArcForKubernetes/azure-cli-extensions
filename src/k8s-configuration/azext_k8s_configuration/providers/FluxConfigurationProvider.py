@@ -749,7 +749,7 @@ def __add_identity(
     if cluster_type.lower() == consts.MANAGED_CLUSTER_TYPE:
         return extension_instance
 
-    cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_type)
+    cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_rp)
 
     cluster_resource_id = (
         "/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}".format(
