@@ -37,8 +37,13 @@ def load_arguments(self, _):
         c.argument(
             "cluster_type",
             options_list=["--cluster-type", "-t"],
-            arg_type=get_enum_type(["connectedClusters", "managedClusters"]),
+            arg_type=get_enum_type(["connectedClusters", "managedClusters", "provisionedClusters"]),
             help="Specify Arc connected clusters or AKS managed clusters.",
+        )
+        c.argument(
+            "cluster_resource_provider",
+            options_list=['--cluster-resource-provider', '--cluster-rp'],
+            help='Cluster Resource Provider name for this clusterType (Required for provisionedClusters)'
         )
 
     with self.argument_context("k8s-configuration flux") as c:
