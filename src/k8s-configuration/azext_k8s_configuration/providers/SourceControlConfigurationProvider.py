@@ -28,12 +28,12 @@ from ..vendored_sdks.v2022_03_01.models import (
 logger = get_logger(__name__)
 
 
-def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, name, cluster_resource_provider=None):
+def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, name):
     # Validate that the subscription is registered to Microsoft.KubernetesConfiguration
     validate_cc_registration(cmd)
 
     # Determine ClusterRP
-    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=None)
     try:
         extension = client.get(
             resource_group_name, cluster_rp, cluster_type, cluster_name, name
@@ -64,19 +64,19 @@ def show_config(cmd, client, resource_group_name, cluster_type, cluster_name, na
         raise ex
 
 
-def list_configs(cmd, client, resource_group_name, cluster_type, cluster_name, cluster_resource_provider=None):
+def list_configs(cmd, client, resource_group_name, cluster_type, cluster_name):
     # Validate that the subscription is registered to Microsoft.KubernetesConfiguration
     validate_cc_registration(cmd)
 
-    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=None)
     return client.list(resource_group_name, cluster_rp, cluster_type, cluster_name)
 
 
-def delete_config(cmd, client, resource_group_name, cluster_type, cluster_name, name, cluster_resource_provider=None):
+def delete_config(cmd, client, resource_group_name, cluster_type, cluster_name, name):
     # Validate that the subscription is registered to Microsoft.KubernetesConfiguration
     validate_cc_registration(cmd)
 
-    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=None)
     return client.begin_delete(
         resource_group_name, cluster_rp, cluster_type, cluster_name, name
     )
@@ -105,12 +105,11 @@ def create_config(
     ssh_known_hosts_file="",
     enable_helm_operator=None,
     helm_operator_params="",
-    cluster_resource_provider=None
 ):
 
     """Create a new Kubernetes Source Control Configuration."""
     # Determine ClusterRP
-    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
+    cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=None)
 
     # Determine operatorInstanceName
     if operator_instance_name is None:
