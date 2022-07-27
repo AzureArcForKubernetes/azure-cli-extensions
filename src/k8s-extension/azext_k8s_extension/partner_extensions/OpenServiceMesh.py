@@ -53,15 +53,8 @@ class OpenServiceMesh(DefaultExtension):
         # NOTE-2: Return a valid Extension object, Instance name and flag for Identity
         create_identity = True
 
-        _validate_tested_distro(
-            cmd=cmd,
-            cluster_resource_group_name=resource_group_name,
-            cluster_rp=cluster_rp,
-            cluster_type=cluster_type,
-            cluster_name=cluster_name,
-            extension_version=version,
-            extension_release_train=release_train
-        )
+        if cluster_type == "connectedClusters":
+            _validate_tested_distro(cmd, resource_group_name, cluster_name, version, release_train)
 
         extension = Extension(
             extension_type=extension_type,
@@ -77,8 +70,9 @@ class OpenServiceMesh(DefaultExtension):
         return extension, name, create_identity
 
 
-def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name, extension_version, extension_release_train):
+def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version, extension_release_train):
 
+    logger.warning("Running validated distros...")
     field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
         'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
 
