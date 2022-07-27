@@ -26,7 +26,6 @@ from ..vendored_sdks.models import (
 )
 
 from .._client_factory import cf_resources
-from ..utils import get_cluster_rp_api_version
 
 logger = get_logger(__name__)
 
@@ -81,13 +80,10 @@ def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, exte
     subscription_id = get_subscription_id(cmd.cli_ctx)
     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
-    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(
-        subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
+    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes' \
+        '/connectedClusters/{2}'.format(subscription_id, cluster_resource_group_name, cluster_name)
 
-    cluster_rp, parent_api_version = get_cluster_rp_api_version(cluster_rp=cluster_rp,
-                                                                cluster_type=cluster_type)
-
-    resource = resources.get_by_id(cluster_resource_id, parent_api_version)
+    resource = resources.get_by_id(cluster_resource_id, '2021-10-01')
     cluster_location = resource.location
     cluster_distro = resource.properties['distribution'].lower()
 
