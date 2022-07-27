@@ -16,7 +16,7 @@ from azure.cli.core.azclierror import (
 from . import consts
 
 
-def get_cluster_rp_api_version(cluster_type, cluster_rp) -> Tuple[str, str]:
+def get_cluster_rp_api_version(cluster_type, cluster_rp=None) -> Tuple[str, str]:
     if cluster_type.lower() == consts.PROVISIONED_CLUSTER_TYPE:
         if cluster_rp is None or cluster_rp.strip() == "":
             raise RequiredArgumentMissingError(
