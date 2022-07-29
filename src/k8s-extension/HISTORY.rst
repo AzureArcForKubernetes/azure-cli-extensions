@@ -5,7 +5,9 @@ Release History
 
 1.2.5
 ++++++++++++++++++
-* Add support for Microsoft.HybridContainerService.ProvisionedClusters
+* microsoft.azuremonitor.containers: ContainerInsights Extension Managed Identity Auth Onboarding related bug fixes.
+* microsoft.openservicemesh: Fix osm-arc installations for non-connectedClusters
+* k8s-extension azuredefender namespace to mdc
 
 1.2.4
 ++++++++++++++++++
