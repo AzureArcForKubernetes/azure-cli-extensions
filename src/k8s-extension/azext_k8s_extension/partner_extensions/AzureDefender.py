@@ -13,6 +13,7 @@ from ..vendored_sdks.models import Scope
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from .._client_factory import cf_resources
+from ..consts import *
 
 from .DefaultExtension import DefaultExtension
 from .ContainerInsights import _get_container_insights_settings
@@ -21,8 +22,8 @@ logger = get_logger(__name__)
 
 
 class AzureDefender(DefaultExtension):
-    def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, extension_type,
-               scope, auto_upgrade_minor_version, release_train, version, target_namespace,
+    def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
+               extension_type, scope, auto_upgrade_minor_version, release_train, version, target_namespace,
                release_namespace, configuration_settings, configuration_protected_settings,
                configuration_settings_file, configuration_protected_settings_file):
 
@@ -35,10 +36,10 @@ class AzureDefender(DefaultExtension):
         # Hardcoding  name, release_namespace and scope since ci only supports one instance and cluster scope
         # and platform doesn't have support yet extension specific constraints like this
         name = extension_type.lower()
-
+        
         logger.warning('Ignoring name, release-namespace and scope parameters since %s '
                        'only supports cluster scope and single instance of this extension.', extension_type)
-        release_namespace = self._choose_the_right_namespace(cmd, resource_group_name, cluster_name, name)
+        release_namespace = self._choose_the_right_namespace(cmd, cluster_type, resource_group_name, cluster_name, name)
         logger.warning("Defaulting to extension name '%s' and using release-namespace '%s'", name, release_namespace)
 
         # Scope is always cluster
@@ -46,7 +47,7 @@ class AzureDefender(DefaultExtension):
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
         is_ci_extension_type = False
 
-        _get_container_insights_settings(cmd, resource_group_name, cluster_name, configuration_settings,
+        _get_container_insights_settings(cmd, resource_group_name, cluster_rp, cluster_type, cluster_name, configuration_settings,
                                          configuration_protected_settings, is_ci_extension_type)
 
         # NOTE-2: Return a valid Extension object, Instance name and flag for Identity
@@ -62,8 +63,14 @@ class AzureDefender(DefaultExtension):
         )
         return extension_instance, name, create_identity
 
-    def _choose_the_right_namespace(self, cmd, cluster_resource_group_name, cluster_name, extension_name):
+    def _choose_the_right_namespace(self, cmd, cluster_type, cluster_resource_group_name, cluster_name, extension_name):
         logger.warning("Choosing the right namespace ...")
+
+        choosen_namespace = "mdc"
+        # If that's not connected cluster, the namespace should always stay mdc
+        if cluster_type.lower() != CONNECTED_CLUSTER_TYPE.lower():    
+            logger.info("Non connected cluster, hence, Defaulted to {0}...".format(choosen_namespace))
+            return choosen_namespace
 
         subscription_id = get_subscription_id(cmd.cli_ctx)
         resources = cf_resources(cmd.cli_ctx, subscription_id)
@@ -74,7 +81,6 @@ class AzureDefender(DefaultExtension):
         try:
             resource = resources.get_by_id(cluster_resource_id, '2022-03-01')
         except:
-            choosen_namespace = "mdc"
             logger.info("Defaulted to {0}...".format(choosen_namespace))
             return choosen_namespace
 
