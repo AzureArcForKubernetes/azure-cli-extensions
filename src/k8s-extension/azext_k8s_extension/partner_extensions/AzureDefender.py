@@ -11,6 +11,9 @@ from ..vendored_sdks.models import Extension
 from ..vendored_sdks.models import ScopeCluster
 from ..vendored_sdks.models import Scope
 
+from azure.cli.core.commands.client_factory import get_subscription_id
+from .._client_factory import cf_resources
+
 from .DefaultExtension import DefaultExtension
 from .ContainerInsights import _get_container_insights_settings
 
@@ -32,16 +35,16 @@ class AzureDefender(DefaultExtension):
         # Hardcoding  name, release_namespace and scope since ci only supports one instance and cluster scope
         # and platform doesn't have support yet extension specific constraints like this
         name = extension_type.lower()
-        release_namespace = "mdc"
+        
+        logger.warning('Ignoring name, release-namespace and scope parameters since %s '
+                       'only supports cluster scope and single instance of this extension.', extension_type)
+        release_namespace = self._choose_the_right_namespace(cmd, resource_group_name, cluster_name, name)
+        logger.warning("Defaulting to extension name '%s' and using release-namespace '%s'", name, release_namespace)
+        
         # Scope is always cluster
         scope_cluster = ScopeCluster(release_namespace=release_namespace)
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
-
         is_ci_extension_type = False
-
-        logger.warning('Ignoring name, release-namespace and scope parameters since %s '
-                       'only supports cluster scope and single instance of this extension.', extension_type)
-        logger.warning("Defaulting to extension name '%s' and release-namespace '%s'", name, release_namespace)
 
         _get_container_insights_settings(cmd, resource_group_name, cluster_name, configuration_settings,
                                          configuration_protected_settings, is_ci_extension_type)
@@ -58,3 +61,23 @@ class AzureDefender(DefaultExtension):
             configuration_protected_settings=configuration_protected_settings
         )
         return extension_instance, name, create_identity
+
+    def _choose_the_right_namespace(self, cmd, cluster_resource_group_name, cluster_name, extension_name):
+        logger.warning("Choosing the right namespace ...")
+
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        resources = cf_resources(cmd.cli_ctx, subscription_id)
+
+        cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes' \
+            '/connectedClusters/{2}/providers/Microsoft.KubernetesConfiguration/extensions/microsoft.azuredefender.kubernetes'.format(subscription_id, cluster_resource_group_name, cluster_name)
+        resource = None
+        try:
+            resource = resources.get_by_id(cluster_resource_id, '2022-03-01')
+        except:
+            choosen_namespace = "mdc"
+            logger.info("Defaulted to {0}...".format(choosen_namespace))
+            return choosen_namespace
+
+        choosen_namespace = resource.properties["scope"]["cluster"]["releaseNamespace"]
+        logger.info("found an existing extension, using its namespace: {0}".format(choosen_namespace))
+        return choosen_namespace
