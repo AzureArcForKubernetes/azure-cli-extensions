@@ -35,12 +35,12 @@ class AzureDefender(DefaultExtension):
         # Hardcoding  name, release_namespace and scope since ci only supports one instance and cluster scope
         # and platform doesn't have support yet extension specific constraints like this
         name = extension_type.lower()
-        
+
         logger.warning('Ignoring name, release-namespace and scope parameters since %s '
                        'only supports cluster scope and single instance of this extension.', extension_type)
         release_namespace = self._choose_the_right_namespace(cmd, resource_group_name, cluster_name, name)
         logger.warning("Defaulting to extension name '%s' and using release-namespace '%s'", name, release_namespace)
-        
+
         # Scope is always cluster
         scope_cluster = ScopeCluster(release_namespace=release_namespace)
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
