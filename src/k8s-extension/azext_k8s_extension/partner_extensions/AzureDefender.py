@@ -13,7 +13,7 @@ from ..vendored_sdks.models import Scope
 
 from azure.cli.core.commands.client_factory import get_subscription_id
 from .._client_factory import cf_resources
-from ..consts import *
+from .. import consts
 
 from .DefaultExtension import DefaultExtension
 from .ContainerInsights import _get_container_insights_settings
@@ -36,7 +36,7 @@ class AzureDefender(DefaultExtension):
         # Hardcoding  name, release_namespace and scope since ci only supports one instance and cluster scope
         # and platform doesn't have support yet extension specific constraints like this
         name = extension_type.lower()
-        
+
         logger.warning('Ignoring name, release-namespace and scope parameters since %s '
                        'only supports cluster scope and single instance of this extension.', extension_type)
         release_namespace = self._choose_the_right_namespace(cmd, cluster_type, resource_group_name, cluster_name, name)
@@ -68,7 +68,7 @@ class AzureDefender(DefaultExtension):
 
         choosen_namespace = "mdc"
         # If that's not connected cluster, the namespace should always stay mdc
-        if cluster_type.lower() != CONNECTED_CLUSTER_TYPE.lower():    
+        if cluster_type.lower() != consts.CONNECTED_CLUSTER_TYPE.lower():
             logger.info("Non connected cluster, hence, Defaulted to {0}...".format(choosen_namespace))
             return choosen_namespace
 
