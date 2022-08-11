@@ -5,10 +5,15 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.azclierror import (ValidationError, ResourceNotFoundError)
+from knack.log import get_logger
 
 from ._clients import ContainerAppClient
 from ._ssh_utils import ping_container_app
 from ._utils import safe_get
+from ._constants import ACR_IMAGE_SUFFIX
+
+
+logger = get_logger(__name__)
 
 
 def _is_number(s):
@@ -61,21 +66,21 @@ def validate_registry_server(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_server:
             if not namespace.registry_user or not namespace.registry_pass:
-                if ".azurecr.io" not in namespace.registry_server:
+                if ACR_IMAGE_SUFFIX not in namespace.registry_server:
                     raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_user(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_user:
-            if not namespace.registry_server or (not namespace.registry_pass and ".azurecr.io" not in namespace.registry_server):
+            if not namespace.registry_server or (not namespace.registry_pass and ACR_IMAGE_SUFFIX not in namespace.registry_server):
                 raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_pass(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_pass:
-            if not namespace.registry_server or (not namespace.registry_user and ".azurecr.io" not in namespace.registry_server):
+            if not namespace.registry_server or (not namespace.registry_user and ACR_IMAGE_SUFFIX not in namespace.registry_server):
                 raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
@@ -104,7 +109,10 @@ def _set_ssh_defaults(cmd, namespace):
             raise ResourceNotFoundError("Could not find a revision")
     if not namespace.replica:
         # VVV this may not be necessary according to Anthony Chu
-        ping_container_app(app)  # needed to get an alive replica
+        try:
+            ping_container_app(app)  # needed to get an alive replica
+        except Exception as e:
+            logger.warning("Failed to ping container app with error '%s' \nPlease ensure there is an alive replica. ", str(e))
         replicas = ContainerAppClient.list_replicas(cmd=cmd,
                                                     resource_group_name=namespace.resource_group_name,
                                                     container_app_name=namespace.name,
