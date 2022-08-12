@@ -117,7 +117,7 @@ class AzureMLKubernetes(DefaultExtension):
                configuration_settings_file, configuration_protected_settings_file):
 
         logger.warning("Troubleshooting: {}".format(self.TSG_LINK))
-        
+
         if scope == 'namespace':
             raise InvalidArgumentValueError("Invalid scope '{}'.  This extension can't be installed "
                                             "only at 'cluster' scope. "
@@ -228,7 +228,7 @@ class AzureMLKubernetes(DefaultExtension):
 
     def Update(self, cmd, resource_group_name, cluster_name, auto_upgrade_minor_version, release_train, version, configuration_settings,
                configuration_protected_settings, original_extension, yes=False):
-        
+
         logger.warning("Troubleshooting: {}".format(self.TSG_LINK))
 
         input_configuration_settings = copy.deepcopy(configuration_settings)
