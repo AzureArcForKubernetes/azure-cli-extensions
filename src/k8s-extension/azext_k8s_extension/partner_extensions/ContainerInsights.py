@@ -245,7 +245,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
     cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(
         subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
     try:
-        if (cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP) :
+        if cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP:
             resource = resources.get_by_id(cluster_resource_id, '2022-05-01-preview')
         else:
             resource = resources.get_by_id(cluster_resource_id, '2020-01-01-preview')
@@ -578,7 +578,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(
         subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
     try:
-        if (cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP) :
+        if cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP:
             resource = resources.get_by_id(cluster_resource_id, '2022-05-01-preview')
         else:
             resource = resources.get_by_id(cluster_resource_id, '2020-01-01-preview')
