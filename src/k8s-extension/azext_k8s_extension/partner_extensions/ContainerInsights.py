@@ -9,9 +9,9 @@ import datetime
 import json
 
 from ..utils import get_cluster_rp_api_version
+from .. import consts
 
 from knack.log import get_logger
-from .. import consts
 
 from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ClientRequestError
 from azure.cli.core.commands import LongRunningOperation
@@ -246,7 +246,7 @@ def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id,
         subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
     try:
         if cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP:
-            resource = resources.get_by_id(cluster_resource_id, '2022-05-01-preview')
+            resource = resources.get_by_id(cluster_resource_id, consts.HYBRIDCONTAINERSERVICE_API_VERSION)
         else:
             resource = resources.get_by_id(cluster_resource_id, '2020-01-01-preview')
         cluster_location = resource.location.lower()
@@ -579,7 +579,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
         subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
     try:
         if cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP:
-            resource = resources.get_by_id(cluster_resource_id, '2022-05-01-preview')
+            resource = resources.get_by_id(cluster_resource_id, consts.HYBRIDCONTAINERSERVICE_API_VERSION)
         else:
             resource = resources.get_by_id(cluster_resource_id, '2020-01-01-preview')
         cluster_region = resource.location.lower()
