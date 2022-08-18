@@ -94,7 +94,7 @@ class DataProtectionKubernetes(DefaultExtension):
         self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
 
         configuration_settings[self.TENANT_ID] = tenant_id
-        print(configuration_settings)
+
         if release_train is None:
             release_train = 'preview'
 
