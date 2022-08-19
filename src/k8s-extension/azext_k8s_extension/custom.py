@@ -48,7 +48,7 @@ def ExtensionFactory(extension_name):
         "microsoft.openservicemesh": OpenServiceMesh,
         "microsoft.azureml.kubernetes": AzureMLKubernetes,
         "microsoft.dapr": Dapr,
-        "microsoft.azurebackup.kubernetes.test": DataProtectionKubernetes,
+        "microsoft.dataprotection.kubernetes": DataProtectionKubernetes,
     }
 
     # Return the extension if we find it in the map, else return the default
