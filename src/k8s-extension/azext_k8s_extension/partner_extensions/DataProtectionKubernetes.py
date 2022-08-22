@@ -34,8 +34,8 @@ class DataProtectionKubernetes(DefaultExtension):
         self.storage_account = "storageAccount"
         self.storage_account_resource_group = "storageAccountResourceGroup"
         self.storage_account_subsciption = "storageAccountSubscriptionId"
-        self.cpu_limit = "cpu"
-        self.memory_limit = "memory"
+        self.cpu_limit = "cpuLimit"
+        self.memory_limit = "memoryLimit"
 
         self.configuration_mapping = {
             self.blob_container.lower(): self.BACKUP_STORAGE_ACCOUNT_CONTAINER,
@@ -97,7 +97,7 @@ class DataProtectionKubernetes(DefaultExtension):
         configuration_settings[self.TENANT_ID] = tenant_id
 
         if release_train is None:
-            release_train = 'preview'
+            release_train = 'stable'
 
         create_identity = True
         extension = Extension(
