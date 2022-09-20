@@ -587,7 +587,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
         raise ex
 
     # extract subscription ID and resource group from workspace_resource_id URL
-    parsed = parse_resource_id(workspace_resource_id)
+    parsed = parse_resource_id(workspace_resource_id.lower())
     workspace_subscription_id = parsed["subscription"]
     workspace_region = ''
     resources = cf_resources(cmd.cli_ctx, workspace_subscription_id)
