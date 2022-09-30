@@ -21,7 +21,7 @@ Describe 'Azure Flux Testing' {
             if ($provisioningState -eq $SUCCEEDED) {
                 break
             }
-            Start-Sleep -Seconds 10
+            Start-Sleep -Seconds 40
             $n += 1
         } while ($n -le $MAX_RETRY_ATTEMPTS)
         $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
