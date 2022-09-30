@@ -18,7 +18,7 @@ Describe 'Azure Flux Testing' {
             $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type $clusterType -n $extensionName
             $provisioningState = ($output | ConvertFrom-Json).provisioningState
             Write-Host "Provisioning State: $provisioningState"
-            if ($provisioningState -eq $SUCCEEDED) {
+            if ($provisioningState -eq "Succeeded") {
                 break
             }
             Start-Sleep -Seconds 40
