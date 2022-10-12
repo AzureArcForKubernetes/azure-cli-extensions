@@ -549,6 +549,16 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
         configuration_settings['omsagent.domain'] = 'opinsights.azure.microsoft.scloud'
         configuration_settings['amalogs.domain'] = 'opinsights.azure.microsoft.scloud'
 
+        
+def sanitize_name(name):
+    name = name[0:43]
+    lastIndexAlphaNumeric = len(name)- 1
+    while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
+        lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
+    if lastIndexAlphaNumeric < 0:
+        return ""
+    return name[0:lastIndexAlphaNumeric + 1]
+
 
 def get_existing_container_insights_extension_dcr_tags(cmd, dcr_url):
     tags = {}
@@ -600,7 +610,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     except HttpResponseError as ex:
         raise ex
 
-    dataCollectionRuleName = f"MSCI-{cluster_name}-{cluster_region}"
+    dataCollectionRuleName = sanitize_name(f"MSCI-{cluster_region}-{cluster_name}")
     dcr_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
 
     # first get the association between region display names and region IDs (because for some reason
