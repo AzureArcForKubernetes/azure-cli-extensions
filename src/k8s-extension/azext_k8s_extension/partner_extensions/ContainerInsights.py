@@ -549,10 +549,10 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
         configuration_settings['omsagent.domain'] = 'opinsights.azure.microsoft.scloud'
         configuration_settings['amalogs.domain'] = 'opinsights.azure.microsoft.scloud'
 
-        
+
 def sanitize_name(name):
     name = name[0:43]
-    lastIndexAlphaNumeric = len(name)- 1
+    lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
         lastIndexAlphaNumeric = lastIndexAlphaNumeric - 1
     if lastIndexAlphaNumeric < 0:
