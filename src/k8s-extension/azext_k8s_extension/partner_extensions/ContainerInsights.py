@@ -31,6 +31,90 @@ from .._client_factory import (
 
 logger = get_logger(__name__)
 
+# mapping for azure public cloud
+# log analytics workspaces cannot be created in WCUS region due to capacity limits
+# so mapped to EUS per discussion with log analytics team
+# pylint: disable=too-many-locals,too-many-statements
+azurecloud_location_to_oms_region_code_map = {
+    "australiasoutheast": "ASE",
+    "australiaeast": "EAU",
+    "australiacentral": "CAU",
+    "canadacentral": "CCA",
+    "centralindia": "CIN",
+    "centralus": "CUS",
+    "eastasia": "EA",
+    "eastus": "EUS",
+    "eastus2": "EUS2",
+    "eastus2euap": "EAP",
+    "francecentral": "PAR",
+    "japaneast": "EJP",
+    "koreacentral": "SE",
+    "northeurope": "NEU",
+    "southcentralus": "SCUS",
+    "southeastasia": "SEA",
+    "uksouth": "SUK",
+    "usgovvirginia": "USGV",
+    "westcentralus": "EUS",
+    "westeurope": "WEU",
+    "westus": "WUS",
+    "westus2": "WUS2"
+}
+azurecloud_region_to_oms_region_map = {
+    "australiacentral": "australiacentral",
+    "australiacentral2": "australiacentral",
+    "australiaeast": "australiaeast",
+    "australiasoutheast": "australiasoutheast",
+    "brazilsouth": "southcentralus",
+    "canadacentral": "canadacentral",
+    "canadaeast": "canadacentral",
+    "centralus": "centralus",
+    "centralindia": "centralindia",
+    "eastasia": "eastasia",
+    "eastus": "eastus",
+    "eastus2": "eastus2",
+    "francecentral": "francecentral",
+    "francesouth": "francecentral",
+    "japaneast": "japaneast",
+    "japanwest": "japaneast",
+    "koreacentral": "koreacentral",
+    "koreasouth": "koreacentral",
+    "northcentralus": "eastus",
+    "northeurope": "northeurope",
+    "southafricanorth": "westeurope",
+    "southafricawest": "westeurope",
+    "southcentralus": "southcentralus",
+    "southeastasia": "southeastasia",
+    "southindia": "centralindia",
+    "uksouth": "uksouth",
+    "ukwest": "uksouth",
+    "westcentralus": "eastus",
+    "westeurope": "westeurope",
+    "westindia": "centralindia",
+    "westus": "westus",
+    "westus2": "westus2",
+    "eastus2euap": "eastus2euap"
+}
+# mapping for azure china cloud
+# currently log analytics supported only China East 2 region
+azurechina_location_to_oms_region_code_map = {
+    "chinaeast": "EAST2",
+    "chinaeast2": "EAST2",
+    "chinanorth": "EAST2",
+    "chinanorth2": "EAST2"
+}
+azurechina_region_to_oms_region_map = {
+    "chinaeast": "chinaeast2",
+    "chinaeast2": "chinaeast2",
+    "chinanorth": "chinaeast2",
+    "chinanorth2": "chinaeast2"
+}
+# mapping for azure us governmner cloud
+azurefairfax_location_to_oms_region_code_map = {
+    "usgovvirginia": "USGV"
+}
+azurefairfax_region_to_oms_region_map = {
+    "usgovvirginia": "usgovvirginia"
+}
 
 class ContainerInsights(DefaultExtension):
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
@@ -148,94 +232,6 @@ def _invoke_deployment(cmd, resource_group_name, deployment_name, template, para
 
 def _ensure_default_log_analytics_workspace_for_monitoring(cmd, subscription_id, cluster_resource_group_name,
                                                            cluster_rp, cluster_type, cluster_name):
-    # mapping for azure public cloud
-    # log analytics workspaces cannot be created in WCUS region due to capacity limits
-    # so mapped to EUS per discussion with log analytics team
-    # pylint: disable=too-many-locals,too-many-statements
-
-    azurecloud_location_to_oms_region_code_map = {
-        "australiasoutheast": "ASE",
-        "australiaeast": "EAU",
-        "australiacentral": "CAU",
-        "canadacentral": "CCA",
-        "centralindia": "CIN",
-        "centralus": "CUS",
-        "eastasia": "EA",
-        "eastus": "EUS",
-        "eastus2": "EUS2",
-        "eastus2euap": "EAP",
-        "francecentral": "PAR",
-        "japaneast": "EJP",
-        "koreacentral": "SE",
-        "northeurope": "NEU",
-        "southcentralus": "SCUS",
-        "southeastasia": "SEA",
-        "uksouth": "SUK",
-        "usgovvirginia": "USGV",
-        "westcentralus": "EUS",
-        "westeurope": "WEU",
-        "westus": "WUS",
-        "westus2": "WUS2"
-    }
-    azurecloud_region_to_oms_region_map = {
-        "australiacentral": "australiacentral",
-        "australiacentral2": "australiacentral",
-        "australiaeast": "australiaeast",
-        "australiasoutheast": "australiasoutheast",
-        "brazilsouth": "southcentralus",
-        "canadacentral": "canadacentral",
-        "canadaeast": "canadacentral",
-        "centralus": "centralus",
-        "centralindia": "centralindia",
-        "eastasia": "eastasia",
-        "eastus": "eastus",
-        "eastus2": "eastus2",
-        "francecentral": "francecentral",
-        "francesouth": "francecentral",
-        "japaneast": "japaneast",
-        "japanwest": "japaneast",
-        "koreacentral": "koreacentral",
-        "koreasouth": "koreacentral",
-        "northcentralus": "eastus",
-        "northeurope": "northeurope",
-        "southafricanorth": "westeurope",
-        "southafricawest": "westeurope",
-        "southcentralus": "southcentralus",
-        "southeastasia": "southeastasia",
-        "southindia": "centralindia",
-        "uksouth": "uksouth",
-        "ukwest": "uksouth",
-        "westcentralus": "eastus",
-        "westeurope": "westeurope",
-        "westindia": "centralindia",
-        "westus": "westus",
-        "westus2": "westus2",
-        "eastus2euap": "eastus2euap"
-    }
-
-    # mapping for azure china cloud
-    # currently log analytics supported only China East 2 region
-    azurechina_location_to_oms_region_code_map = {
-        "chinaeast": "EAST2",
-        "chinaeast2": "EAST2",
-        "chinanorth": "EAST2",
-        "chinanorth2": "EAST2"
-    }
-    azurechina_region_to_oms_region_map = {
-        "chinaeast": "chinaeast2",
-        "chinaeast2": "chinaeast2",
-        "chinanorth": "chinaeast2",
-        "chinanorth2": "chinaeast2"
-    }
-
-    # mapping for azure us governmner cloud
-    azurefairfax_location_to_oms_region_code_map = {
-        "usgovvirginia": "USGV"
-    }
-    azurefairfax_region_to_oms_region_map = {
-        "usgovvirginia": "usgovvirginia"
-    }
-
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.profiles import ResourceType
 
@@ -550,7 +546,29 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
         configuration_settings['amalogs.domain'] = 'opinsights.azure.microsoft.scloud'
 
 
-def sanitize_name(name):
+def getRegionCodeForAzureRegion(cmd, cluster_region):
+    region_code = "EUS"
+    cloud_name = cmd.cli_ctx.cloud.name
+    if cloud_name.lower() == "azurecloud":
+        region_code = azurecloud_location_to_oms_region_code_map.get(
+            cluster_region, "EUS"
+        )
+    elif cloud_name.lower() == "azurechinacloud":
+        region_code = azurechina_location_to_oms_region_code_map.get(
+            cluster_region, "EAST2"
+        )
+    elif cloud_name.lower() == "azureusgovernment":
+        region_code = azurefairfax_location_to_oms_region_code_map.get(
+            cluster_region, "USGV"
+        )
+    else:
+        logger.error(
+            "AKS Monitoring addon not supported in cloud : %s", cloud_name
+        )
+    return region_code
+
+
+def sanitize_dcr_name(name):
     name = name[0:43]
     lastIndexAlphaNumeric = len(name) - 1
     while ((name[lastIndexAlphaNumeric].isalnum() is False) and lastIndexAlphaNumeric > -1):
@@ -610,7 +628,8 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     except HttpResponseError as ex:
         raise ex
 
-    dataCollectionRuleName = sanitize_name(f"MSCI-{cluster_region}-{cluster_name}")
+    region_code = getRegionCodeForAzureRegion(cmd, cluster_region)
+    dataCollectionRuleName = sanitize_dcr_name(f"MSCI-{region_code}-{cluster_name}")
     dcr_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.Insights/dataCollectionRules/{dataCollectionRuleName}"
 
     # first get the association between region display names and region IDs (because for some reason
