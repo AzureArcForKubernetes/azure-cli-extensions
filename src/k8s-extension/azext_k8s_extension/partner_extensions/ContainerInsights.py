@@ -116,6 +116,7 @@ azurefairfax_region_to_oms_region_map = {
     "usgovvirginia": "usgovvirginia"
 }
 
+
 class ContainerInsights(DefaultExtension):
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
                extension_type, scope, auto_upgrade_minor_version, release_train, version, target_namespace,
