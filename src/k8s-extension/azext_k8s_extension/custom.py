@@ -48,7 +48,7 @@ def ExtensionFactory(extension_name):
         "microsoft.openservicemesh": OpenServiceMesh,
         "microsoft.azureml.kubernetes": AzureMLKubernetes,
         "microsoft.dapr": Dapr,
-        "microsoft.costexport": CostExport,
+        "costexport": CostExport,
     }
 
     # Return the extension if we find it in the map, else return the default
