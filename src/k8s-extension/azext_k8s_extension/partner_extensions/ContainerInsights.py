@@ -7,6 +7,7 @@
 
 import datetime
 import json
+import re
 
 from ..utils import get_cluster_rp_api_version
 from .. import consts
@@ -475,9 +476,25 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
             if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                 useAADAuth = True
         if useAADAuth and ('dataCollectionSettings' in configuration_settings):
-            dataCollectionSettings = configuration_settings["dataCollectionSettings"]
-            extensionSettings["dataCollectionSettings"] = json.loads(dataCollectionSettings)
-            logger.info("provided dataCollectionSettings  is : %s", dataCollectionSettings)
+            dataCollectionSettingsString = configuration_settings["dataCollectionSettings"]
+            logger.info("provided dataCollectionSettings  is : %s", dataCollectionSettingsString)
+            extensionSettings["dataCollectionSettings"] = json.loads(dataCollectionSettingsString)
+            dataCollectionSettings = json.loads(dataCollectionSettingsString)
+            if 'interval' in dataCollectionSettings.keys():
+                intervalValue = dataCollectionSettings["interval"]
+                if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
+                     raise InvalidArgumentValueError('interval format must be in <number>m')
+                intervalValue = int(intervalValue.rstrip("m"))
+                if intervalValue <= 0 or intervalValue > 30:
+                    raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
+            if 'namespaceFilteringMode' in dataCollectionSettings.keys():
+                namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"]
+                if namespaceFilteringModeValue not in ["Off", "Exclude", "Include"]:
+                    raise InvalidArgumentValueError('namespaceFilteringMode value is Off or Exclude or Include')
+            if 'namespaces' in dataCollectionSettings.keys():
+                namspaces = dataCollectionSettings["namespaces"]
+                if isinstance(namspaces, list) is False:
+                   raise InvalidArgumentValueError('namespaces must be an array type')
 
     workspace_resource_id = workspace_resource_id.strip()
 
