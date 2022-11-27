@@ -483,7 +483,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
             if 'interval' in dataCollectionSettings.keys():
                 intervalValue = dataCollectionSettings["interval"]
                 if (bool(re.match(r'^[0-9]+[m]$', intervalValue))) is False:
-                     raise InvalidArgumentValueError('interval format must be in <number>m')
+                    raise InvalidArgumentValueError('interval format must be in <number>m')
                 intervalValue = int(intervalValue.rstrip("m"))
                 if intervalValue <= 0 or intervalValue > 30:
                     raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
@@ -494,7 +494,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
             if 'namespaces' in dataCollectionSettings.keys():
                 namspaces = dataCollectionSettings["namespaces"]
                 if isinstance(namspaces, list) is False:
-                   raise InvalidArgumentValueError('namespaces must be an array type')
+                    raise InvalidArgumentValueError('namespaces must be an array type')
 
     workspace_resource_id = workspace_resource_id.strip()
 
