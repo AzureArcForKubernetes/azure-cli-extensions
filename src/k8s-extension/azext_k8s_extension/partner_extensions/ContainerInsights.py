@@ -495,7 +495,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
                 if isinstance(namspaces, list) is False:
                     raise InvalidArgumentValueError('namespaces must be an array type')
             extensionSettings["dataCollectionSettings"] = dataCollectionSettings
-            
+
     workspace_resource_id = workspace_resource_id.strip()
 
     if configuration_protected_settings is not None:
