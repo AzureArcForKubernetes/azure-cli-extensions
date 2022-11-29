@@ -4,8 +4,10 @@ import datetime
 import time
 
 from azure.cli.core import AzCli
-from azure.cli.core.azclierror import CLIInternalError, ValidationError
+from azure.cli.core.azclierror import CLIInternalError, ValidationError, ResourceNotFoundError
 from azure.cli.core.profiles import ResourceType
+from azure.mgmt.core.tools import parse_resource_id
+
 from .DefaultExtension import DefaultExtension
 from azure.cli.core import get_default_cli
 from ..vendored_sdks.models import Extension
@@ -14,6 +16,7 @@ from ..vendored_sdks.models import Scope
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from knack.log import get_logger
 from logging import Logger
+from typing import TypedDict
 
 logger: Logger = get_logger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -23,38 +26,47 @@ class CostExport(DefaultExtension):
     def __init__(self):
         self.DEFAULT_RELEASE_NAMESPACE = 'cost-export'
 
-    # Configuration parameters:
-    # storage-account-resource-id
-    # storage-account-name
-    # storage-container-name
-
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, extension_type,
                scope, auto_upgrade_minor_version, release_train, version, target_namespace,
                release_namespace, configuration_settings, configuration_protected_settings,
                configuration_settings_file, configuration_protected_settings_file):
         logger.info("Creating CostExport extension")
+        if 'storageAccountId' not in configuration_settings:
+            raise ValidationError("configuration-settings", "storageAccountId is required")
+        if 'storageContainer' not in configuration_settings:
+            raise ValidationError("configuration-settings", "storageContainer is required")
+        if 'storagePath' not in configuration_settings:
+            configuration_settings['storagePath'] = resource_group_name + "-" + cluster_name
+        if 'cmStorageAccountId' not in configuration_settings:
+            configuration_settings['cmStorageAccountId'] = configuration_settings['storageAccountId']
+        if 'cmStorageContainer' not in configuration_settings:
+            configuration_settings['cmStorageContainer'] = configuration_settings['storageContainer']
+        if 'cmStoragePath' not in configuration_settings:
+            configuration_settings['cmStoragePath'] = "cost-management-export-" + configuration_settings['storagePath']
 
-        storage_account_name = configuration_settings.get('storage-account-name', None)
-        if not storage_account_name:
-            raise ValidationError("config parameter storage-account-name is required")
-        storage_container_name = configuration_settings.get('storage-container', "costexport")
-        storage_resource_group = configuration_settings.get('storage-resource-group', resource_group_name)
         subscription: str = get_subscription_id(cmd.cli_ctx)
+        mc_resource_group = _mc_resource_group(subscription=subscription, resource_group_name=resource_group_name,
+                                               cluster_name=cluster_name)
+        configuration_settings["clusterResourceGroup"] = mc_resource_group
+        configuration_settings["subscriptionId"] = subscription
 
         _ensure_storage_container(
-            subscription_id=subscription,
-            resource_group_name=storage_resource_group,
-            storage_account_name=storage_account_name,
-            storage_container_name=storage_container_name,
+            storage_account_id=configuration_settings['storageAccountId'],
+            storage_container=configuration_settings['storageContainer'],
         )
-        _register_resource_provider(cmd, "Microsoft.CostManagementExports")
+
+        # resource group name limit is 90 chars
+        # SP name limit is more than len(cost-export-) + 90
+        sp_name = "cost-export-" + mc_resource_group
+        configuration_protected_settings["servicePrincipal"] = _create_service_principal(sp_name=sp_name)
+
         # use cluster resource group if not specified
         _create_cost_export(
+            cmd=cmd,
             subscription=subscription,
             cluster_name=cluster_name,
-            resource_group_name=resource_group_name,
-            storage_account_name=storage_account_name,
-            storage_resource_group_name=storage_resource_group
+            storage_account_id=configuration_settings['storageAccountId'],
+            mc_resource_group=mc_resource_group,
         )
 
         # Default validations & defaults for Create
@@ -64,13 +76,14 @@ class CostExport(DefaultExtension):
         extension = Extension(
             extension_type=extension_type,
             auto_upgrade_minor_version=auto_upgrade_minor_version,
-            release_train=release_train,
+            release_train=release_train,  # TODO: set it for dev
             version=version,
             scope=ext_scope,
             configuration_settings=configuration_settings,
             configuration_protected_settings=configuration_protected_settings,
         )
         create_identity = True
+        logger.info("deploying helm in cluster")
         return extension, name, create_identity
 
 
@@ -126,13 +139,9 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).providers
 
 
-def _create_cost_export(subscription: str, cluster_name: str, storage_account_name: str, resource_group_name: str,
-                        storage_resource_group_name: str):
+def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str):
+    _register_resource_provider(cmd, "Microsoft.CostManagementExports")
     # TODO skip if exists
-    mc_resource_group = _mc_resource_group(subscription=subscription, resource_group_name=resource_group_name,
-                                           cluster_name=cluster_name)
-    logger.info("creating cost export job for AKS cluster %s", mc_resource_group)
-    cli = _cli()
     type = 'Usage'
     # TODO: 'AmortizedCost'
     args = [
@@ -145,15 +154,13 @@ def _create_cost_export(subscription: str, cluster_name: str, storage_account_na
         "to=2200-01-01T00:00:00",
         "--recurrence", "Daily",
         "--schedule-status", "Active",
-        "--storage-account-id",
-        f"/subscriptions/{subscription}/resourceGroups/{storage_resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}",
+        "--storage-account-id", storage_account_id,
         "--storage-container", "cost",
         "--query", "'id'",
         "--subscription", subscription,
         "-o", "tsv"
     ]
-    logger.info("running command: %s", " ".join(args))
-    cli.invoke(args)
+    _invoke(args)
     logger.info("cost export created")
 
 
@@ -167,24 +174,40 @@ def _mc_resource_group(subscription: str, resource_group_name: str, cluster_name
     return cli.result.result['nodeResourceGroup']
 
 
-def _ensure_storage_container(subscription_id: str, resource_group_name: str, storage_account_name: str,
-                                  storage_container_name: str):
-    # TODO: ensure create storage uses good security practices
-    logger.info("checking storage account %s, %s", storage_account_name, subscription_id)
-    create_storage_args = ["storage", "account", "create",
-                           "--resource-group", resource_group_name,
-                           "--name", storage_account_name,
-                           "--subscription", subscription_id,
-                           "--allow-blob-public-access", "false"]
-    _invoke(create_storage_args)  # TODO: error handling
+def _ensure_storage_container(storage_account_id: str, storage_container: str):
+    resource = parse_resource_id(storage_account_id)
+    try:
+        _invoke(["storage", "account", "show", "--ids", storage_account_id])
+    except SystemExit as e:
+        if e.code != 3:
+            raise e
+        create_storage_args = ["storage", "account", "create",
+                               "--resource-group", resource['resource_group'],
+                               "--name", resource['name'],
+                               "--subscription", resource['subscription'],
+                               "--allow-blob-public-access", "false"]
+        _invoke(create_storage_args)
+        logger.info(f"created storage account {storage_account_id}")
+    cli = _invoke(["storage", "container", "exists", "--name", storage_container, "--account-name", resource["name"],
+                   "--auth-mode", "login"])
+    if cli.result.result['exists']:
+        return
+    _invoke(["storage", "container", "create", "--name", storage_container, "--account-name", resource["name"],
+             "--auth-mode", "login"])
+    logger.info(f"created new container {storage_container} for {storage_account_id}")
 
-    logger.info(f"checking storage container {storage_container_name}, {storage_account_name}")
-    _invoke(["storage", "container", "create",
-             "--name", storage_container_name,
-             "--account-name", storage_account_name,
-             "--public-access", "off",
-             "--auth-mode", "login"
-             ])
+
+class ServicePrincipal(TypedDict):
+    appId: str
+    password: str
+    tenant: str
+    displayName: str
+
+
+def _create_service_principal(sp_name: str) -> ServicePrincipal:
+    cli = _invoke(["ad", "sp", "create-for-rbac", "--display-name", sp_name, "--years", "2"])
+    logger.info(f"created service principal {sp_name}")
+    return cli.result.result
 
 
 def _cli() -> AzCli:
@@ -195,7 +218,7 @@ def _invoke(args) -> AzCli:
     cli = _cli()
     try:
         cli.invoke(args)
-    except BaseException as e:
+    except SystemExit as e:
         cmd = "az " + " ".join(args)
         # TODO: is it helpful enough?
         # it seems like the error message is logged inside invokation and isn't available here
