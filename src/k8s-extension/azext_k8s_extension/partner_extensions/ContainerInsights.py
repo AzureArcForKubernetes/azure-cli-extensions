@@ -487,9 +487,9 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
                 if intervalValue <= 0 or intervalValue > 30:
                     raise InvalidArgumentValueError('interval value MUST be in the range from 1m to 30m')
             if 'namespaceFilteringMode' in dataCollectionSettings.keys():
-                namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"]
-                if namespaceFilteringModeValue not in ["Off", "Exclude", "Include"]:
-                    raise InvalidArgumentValueError('namespaceFilteringMode value is Off or Exclude or Include')
+                namespaceFilteringModeValue = dataCollectionSettings["namespaceFilteringMode"].lower()
+                if namespaceFilteringModeValue not in ["off", "exclude", "include"]:
+                    raise InvalidArgumentValueError('namespaceFilteringMode value MUST be either Off or Exclude or Include')
             if 'namespaces' in dataCollectionSettings.keys():
                 namspaces = dataCollectionSettings["namespaces"]
                 if isinstance(namspaces, list) is False:
