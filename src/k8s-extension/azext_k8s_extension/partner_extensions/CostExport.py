@@ -58,7 +58,29 @@ class CostExport(DefaultExtension):
         # resource group name limit is 90 chars
         # SP name limit is more than len(cost-export-) + 90
         sp_name = "cost-export-" + mc_resource_group
-        configuration_protected_settings["servicePrincipal"] = _create_service_principal(sp_name=sp_name)
+        sp = _create_service_principal(sp_name=sp_name)
+        configuration_protected_settings["servicePrincipal.appId"] = sp["appId"]
+        configuration_protected_settings["servicePrincipal.tenant"] = sp["tenant"]
+        configuration_protected_settings["servicePrincipal.password"] = sp["password"]
+        configuration_protected_settings["servicePrincipal.displayName"] = sp["displayName"]
+
+        _invoke(["role", "assignment", "create",
+                 "--assignee", sp["appId"],
+                 "--role", "Storage Blob Data Contributor",
+                 "--scope", configuration_settings['storageAccountId']
+                 ])
+
+        if configuration_settings['cmStorageAccountId'] != configuration_settings['storageAccountId']:
+            _invoke(["role", "assignment", "create",
+                     "--assignee", sp["appId"],
+                     "--role", "Storage Blob Data Contributor",
+                     "--scope", configuration_settings['cmStorageAccountId']
+                     ])
+
+        _invoke(["role", "assignment", "create",
+                 "--assignee", sp["appId"],
+                 "--role", "Reader",
+                 "--scope", "/subscriptions/" + subscription + "/resourceGroups/" + mc_resource_group])
 
         # use cluster resource group if not specified
         _create_cost_export(
