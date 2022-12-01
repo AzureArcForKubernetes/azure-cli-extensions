@@ -1,22 +1,23 @@
 import logging
-
 import datetime
 import time
+from logging import Logger
+from typing import TypedDict
+
+from knack.log import get_logger
 
 from azure.cli.core import AzCli
-from azure.cli.core.azclierror import CLIInternalError, ValidationError, ResourceNotFoundError
+from azure.cli.core.azclierror import CLIInternalError, ValidationError
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core import get_default_cli
 from azure.mgmt.core.tools import parse_resource_id
 
-from .DefaultExtension import DefaultExtension
-from azure.cli.core import get_default_cli
 from ..vendored_sdks.models import Extension
 from ..vendored_sdks.models import ScopeCluster
 from ..vendored_sdks.models import Scope
-from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from knack.log import get_logger
-from logging import Logger
-from typing import TypedDict
+
+from .DefaultExtension import DefaultExtension
 
 logger: Logger = get_logger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -91,16 +92,12 @@ class CostExport(DefaultExtension):
             mc_resource_group=mc_resource_group,
         )
 
-        # Default validations & defaults for Create
-        release_namespace = self.DEFAULT_RELEASE_NAMESPACE
-        scope_cluster = ScopeCluster(release_namespace=release_namespace)
-        ext_scope = Scope(cluster=scope_cluster, namespace=None)
         extension = Extension(
             extension_type=extension_type,
             auto_upgrade_minor_version=auto_upgrade_minor_version,
             release_train=release_train,  # TODO: set it for dev
             version=version,
-            scope=ext_scope,
+            scope=Scope(cluster=ScopeCluster(release_namespace=release_namespace), namespace=None),
             configuration_settings=configuration_settings,
             configuration_protected_settings=configuration_protected_settings,
         )
@@ -115,7 +112,7 @@ def _register_resource_provider(cmd, resource_provider):
         return
     from azure.mgmt.resource.resources.models import ProviderRegistrationRequest, ProviderConsentDefinition
 
-    logger.warning(f"Registering resource provider {resource_provider} ...")
+    logger.warning("Registering resource provider %s ...", resource_provider)
     properties = ProviderRegistrationRequest(
         third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=True))
 
@@ -163,15 +160,14 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
 
 def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str):
     _register_resource_provider(cmd, "Microsoft.CostManagementExports")
-    # TODO skip if exists
-    type = 'Usage'
+    export_type = 'Usage'
     # TODO: 'AmortizedCost'
     args = [
         "costmanagement", "export", "create",
         "--name", cluster_name,
         "--scope", f"/subscriptions/{subscription}/resourceGroups/{mc_resource_group}",
         "--timeframe", "MonthToDate",
-        "--type", type,
+        "--type", export_type,
         "--recurrence-period", f"from={datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
         "to=2200-01-01T00:00:00",
         "--recurrence", "Daily",
@@ -209,14 +205,14 @@ def _ensure_storage_container(storage_account_id: str, storage_container: str):
                                "--subscription", resource['subscription'],
                                "--allow-blob-public-access", "false"]
         _invoke(create_storage_args)
-        logger.info(f"created storage account {storage_account_id}")
+        logger.info("created storage account %s", storage_account_id)
     cli = _invoke(["storage", "container", "exists", "--name", storage_container, "--account-name", resource["name"],
                    "--auth-mode", "login"])
     if cli.result.result['exists']:
         return
     _invoke(["storage", "container", "create", "--name", storage_container, "--account-name", resource["name"],
              "--auth-mode", "login"])
-    logger.info(f"created new container {storage_container} for {storage_account_id}")
+    logger.info("created new container %s for %s", storage_container, storage_account_id)
 
 
 class ServicePrincipal(TypedDict):
@@ -228,7 +224,7 @@ class ServicePrincipal(TypedDict):
 
 def _create_service_principal(sp_name: str) -> ServicePrincipal:
     cli = _invoke(["ad", "sp", "create-for-rbac", "--display-name", sp_name, "--years", "2"])
-    logger.info(f"created service principal {sp_name}")
+    logger.info("created service principal %s", sp_name)
     return cli.result.result
 
 
@@ -244,7 +240,7 @@ def _invoke(args) -> AzCli:
         cmd = "az " + " ".join(args)
         # TODO: is it helpful enough?
         # it seems like the error message is logged inside invokation and isn't available here
-        logger.error(f"An error during setup step. Check your permissions or try to run it manually:\n{cmd}")
+        logger.error("An error during setup step. Check your permissions or try to run it manually:\n %s", cmd)
         raise e
     if cli.result.exit_code != 0:
         cmd = "az " + " ".join(args)
