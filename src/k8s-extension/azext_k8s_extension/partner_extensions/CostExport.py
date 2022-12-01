@@ -32,12 +32,15 @@ class CostExport(DefaultExtension):
                release_namespace, configuration_settings, configuration_protected_settings,
                configuration_settings_file, configuration_protected_settings_file):
         logger.info("Creating CostExport extension")
+        subscription: str = get_subscription_id(cmd.cli_ctx)
+        mc_resource_group = _mc_resource_group(subscription=subscription, resource_group_name=resource_group_name,
+                                               cluster_name=cluster_name)
         if 'storageAccountId' not in configuration_settings:
             raise ValidationError("configuration-settings", "storageAccountId is required")
         if 'storageContainer' not in configuration_settings:
             raise ValidationError("configuration-settings", "storageContainer is required")
         if 'storagePath' not in configuration_settings:
-            configuration_settings['storagePath'] = resource_group_name + "-" + cluster_name
+            configuration_settings['storagePath'] = mc_resource_group
         if 'cmStorageAccountId' not in configuration_settings:
             configuration_settings['cmStorageAccountId'] = configuration_settings['storageAccountId']
         if 'cmStorageContainer' not in configuration_settings:
@@ -45,9 +48,6 @@ class CostExport(DefaultExtension):
         if 'cmStoragePath' not in configuration_settings:
             configuration_settings['cmStoragePath'] = "cost-management-export-" + configuration_settings['storagePath']
 
-        subscription: str = get_subscription_id(cmd.cli_ctx)
-        mc_resource_group = _mc_resource_group(subscription=subscription, resource_group_name=resource_group_name,
-                                               cluster_name=cluster_name)
         configuration_settings["clusterResourceGroup"] = mc_resource_group
         configuration_settings["subscriptionId"] = subscription
 
