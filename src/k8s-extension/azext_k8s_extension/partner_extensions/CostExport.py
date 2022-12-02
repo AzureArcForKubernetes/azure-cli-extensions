@@ -6,6 +6,7 @@ from typing import TypedDict
 
 from knack.log import get_logger
 
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core import AzCli
 from azure.cli.core.azclierror import CLIInternalError, ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -95,7 +96,7 @@ class CostExport(DefaultExtension):
         extension = Extension(
             extension_type=extension_type,
             auto_upgrade_minor_version=auto_upgrade_minor_version,
-            release_train=release_train,  # TODO: set it for dev
+            release_train=release_train,
             version=version,
             scope=Scope(cluster=ScopeCluster(release_namespace=release_namespace), namespace=None),
             configuration_settings=configuration_settings,
@@ -160,14 +161,11 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
 
 def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str):
     _register_resource_provider(cmd, "Microsoft.CostManagementExports")
-    export_type = 'Usage'
-    # TODO: 'AmortizedCost'
     args = [
         "costmanagement", "export", "create",
         "--name", cluster_name,
         "--scope", f"/subscriptions/{subscription}/resourceGroups/{mc_resource_group}",
         "--timeframe", "MonthToDate",
-        "--type", export_type,
         "--recurrence-period", f"from={datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
         "to=2200-01-01T00:00:00",
         "--recurrence", "Daily",
@@ -175,11 +173,22 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
         "--storage-account-id", storage_account_id,
         "--storage-container", "cost",
         "--query", "'id'",
-        "--subscription", subscription,
-        "-o", "tsv"
+        "--subscription", subscription
     ]
-    _invoke(args)
-    logger.info("cost export created")
+    cli = _cli()
+    # Not every subscription can create AmortizedCost (prefered) export
+    # If it fails, try to create Usage export
+    cli.invoke(args + ["--type", "AmortizedCost"])
+    if cli.result.exit_code == 1 and isinstance(cli.result.error, HttpResponseError) and cli.result.error.status_code == 400:
+        logger.info("couldn't create AmortizedCost export, trying Usage")
+        cli = _cli()
+        cli.invoke(args + ["--type", "Usage"])
+        if cli.result.exit_code != 0:
+            raise cli.result.error
+    elif cli.result.exit_code == 0:
+        logger.info("created cost export with 'Usage' type")
+    else:
+        raise cli.result.error
 
 
 def _mc_resource_group(subscription: str, resource_group_name: str, cluster_name: str) -> str:
