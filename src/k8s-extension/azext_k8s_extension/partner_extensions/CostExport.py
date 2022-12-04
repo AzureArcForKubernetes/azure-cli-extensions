@@ -89,8 +89,10 @@ class CostExport(DefaultExtension):
             cmd=cmd,
             subscription=subscription,
             cluster_name=cluster_name,
-            storage_account_id=configuration_settings['storageAccountId'],
+            storage_account_id=configuration_settings['cmStorageAccountId'],
             mc_resource_group=mc_resource_group,
+            storage_container=configuration_settings['cmStorageContainer'],
+            storage_directory=configuration_settings['cmStoragePath'],
         )
 
         extension = Extension(
@@ -159,7 +161,8 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).providers
 
 
-def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str):
+def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str,
+                        storage_container: str, storage_directory: str):
     _register_resource_provider(cmd, "Microsoft.CostManagementExports")
     args = [
         "costmanagement", "export", "create",
@@ -171,7 +174,8 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
         "--recurrence", "Daily",
         "--schedule-status", "Active",
         "--storage-account-id", storage_account_id,
-        "--storage-container", "cost",
+        "--storage-container", storage_container,
+        "--storage-directory", storage_directory,
         "--query", "'id'",
         "--subscription", subscription
     ]
@@ -179,7 +183,8 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
     # Not every subscription can create AmortizedCost (prefered) export
     # If it fails, try to create Usage export
     cli.invoke(args + ["--type", "AmortizedCost"])
-    if cli.result.exit_code == 1 and isinstance(cli.result.error, HttpResponseError) and cli.result.error.status_code == 400:
+    if cli.result.exit_code == 1 and isinstance(cli.result.error,
+                                                HttpResponseError) and cli.result.error.status_code == 400:
         logger.info("couldn't create AmortizedCost export, trying Usage")
         cli = _cli()
         cli.invoke(args + ["--type", "Usage"])
@@ -193,9 +198,10 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
 
 def _mc_resource_group(subscription: str, resource_group_name: str, cluster_name: str) -> str:
     cli = _cli()
-    cli.invoke(
-        ["aks", "show", "--subscription", subscription, "--resource-group", resource_group_name, "-n", cluster_name,
-         "-o", "json"])
+    cli.invoke(["aks", "show",
+                "--subscription", subscription,
+                "--resource-group", resource_group_name,
+                "-n", cluster_name])
     if cli.result.exit_code != 0:
         raise Exception("Unable to get cluster resource group")
     return cli.result.result['nodeResourceGroup']
