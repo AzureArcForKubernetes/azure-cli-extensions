@@ -179,21 +179,18 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
         "--query", "'id'",
         "--subscription", subscription
     ]
-    cli = _cli()
-    # Not every subscription can create AmortizedCost (prefered) export
-    # If it fails, try to create Usage export
-    cli.invoke(args + ["--type", "AmortizedCost"])
-    if cli.result.exit_code == 1 and isinstance(cli.result.error,
-                                                HttpResponseError) and cli.result.error.status_code == 400:
-        logger.info("couldn't create AmortizedCost export, trying Usage")
+
+    # AmortizedCost provides the most accurate cost data, but it's not available for all subscriptions
+    for export_type in ["AmortizedCost", "Usage"]:
         cli = _cli()
-        cli.invoke(args + ["--type", "Usage"])
-        if cli.result.exit_code != 0:
-            raise cli.result.error
-    elif cli.result.exit_code == 0:
-        logger.info("created cost export with 'Usage' type")
-    else:
-        raise cli.result.error
+        cli.invoke(args + ["--type", export_type])
+        if cli.result.exit_code == 0:
+            logger.info("created cost export with '%s' type", export_type)
+            return
+        else:
+            logger.info("couldn't create export with '%' type", export_type)
+    # raise last error
+    raise cli.result.error
 
 
 def _mc_resource_group(subscription: str, resource_group_name: str, cluster_name: str) -> str:
