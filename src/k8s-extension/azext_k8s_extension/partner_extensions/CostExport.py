@@ -150,7 +150,7 @@ def _is_resource_provider_registered(cmd, resource_provider, subscription_id=Non
         providers_client = _providers_client_factory(cmd.cli_ctx, subscription_id)
         registration_state = getattr(providers_client.get(resource_provider), 'registration_state', "NotRegistered")
 
-        registered = (registration_state and registration_state.lower() == 'registered')
+        registered = bool(registration_state and registration_state.lower() == 'registered')
     except Exception:  # pylint: disable=broad-except
         pass
     return registered
