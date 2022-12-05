@@ -1,17 +1,17 @@
-Describe 'Azure Monitor Testing' {
+Describe 'Cost Export Testing' {
     BeforeAll {
         $extensionType = "costexport"
-        $extensionName = "cost-export"
+        $extensionName = "costexport"
 
         . $PSScriptRoot/../../helper/Constants.ps1
         . $PSScriptRoot/../../helper/Helper.ps1
     }
 
     It 'Creates the extension and checks that it onboards correctly' {
-        az $Env:K8sExtensionName create -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters --extension-type $extensionType -n $extensionName --no-wait
+        az $Env:K8sExtensionName create -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters --extension-type $extensionType --config storageAccountId=/subscriptions/$($ENVCONFIG.subscriptionId)/resourceGroups/$(resourceGroup)/providers/Microsoft.Storage/storageAccounts/cost-export-test --config storageContainer=cost-export --release-train dev -n $extensionName --no-wait
         $? | Should -BeTrue
 
-        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters -n $extensionName
         $? | Should -BeTrue
 
         $isAutoUpgradeMinorVersion = ($output | ConvertFrom-Json).autoUpgradeMinorVersion
@@ -31,13 +31,13 @@ Describe 'Azure Monitor Testing' {
     }
 
     It "Performs a show on the extension" {
-        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters -n $extensionName
         $? | Should -BeTrue
         $output | Should -Not -BeNullOrEmpty
     }
 
     It "Lists the extensions on the cluster" {
-        $output = az $Env:K8sExtensionName list -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters
+        $output = az $Env:K8sExtensionName list -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters
         $? | Should -BeTrue
 
         $output | Should -Not -BeNullOrEmpty
@@ -46,17 +46,17 @@ Describe 'Azure Monitor Testing' {
     }
 
     It "Deletes the extension from the cluster" {
-        $output = az $Env:K8sExtensionName delete -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --force
+        $output = az $Env:K8sExtensionName delete -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters -n $extensionName --force
         $? | Should -BeTrue
 
         # Extension should not be found on the cluster
-        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+        $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters -n $extensionName
         $? | Should -BeFalse
         $output | Should -BeNullOrEmpty
     }
 
     It "Performs another list after the delete" {
-        $output = az $Env:K8sExtensionName list -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters
+        $output = az $Env:K8sExtensionName list -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters
         $? | Should -BeTrue
         $output | Should -Not -BeNullOrEmpty
 
