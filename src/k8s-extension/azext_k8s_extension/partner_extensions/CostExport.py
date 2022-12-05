@@ -1,7 +1,9 @@
 import logging
 import datetime
 import time
+import shlex
 from logging import Logger
+
 from typing import TypedDict
 
 from knack.log import get_logger
@@ -249,12 +251,12 @@ def _invoke(args) -> AzCli:
     try:
         cli.invoke(args)
     except SystemExit as e:
-        cmd = "az " + " ".join(args)
+        cmd = shlex.join(["az"] + args)
         # TODO: is it helpful enough?
         # it seems like the error message is logged inside invokation and isn't available here
         logger.error("An error during setup step. Check your permissions or try to run it manually:\n %s", cmd)
         raise e
     if cli.result.exit_code != 0:
-        cmd = "az " + " ".join(args)
+        cmd = shlex.join(["az"] + args)
         raise Exception(f"Unexpected non-zero exit code ({cli.result.exit_code}) during command execution: az {cmd}")
     return cli
