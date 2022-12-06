@@ -5,10 +5,11 @@ Describe 'Cost Export Testing' {
 
         . $PSScriptRoot/../../helper/Constants.ps1
         . $PSScriptRoot/../../helper/Helper.ps1
+        $MAX_RETRY_ATTEMPTS = 30
     }
 
     It 'Creates the extension and checks that it onboards correctly' {
-        az $Env:K8sExtensionName create -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters --extension-type $extensionType --config storageAccountId=/subscriptions/$($ENVCONFIG.subscriptionId)/resourceGroups/$($ENVCONFIG.resourceGroup)/providers/Microsoft.Storage/storageAccounts/costexporttestci --config storageContainer=cost-export --release-train dev -n $extensionName --no-wait
+        az $Env:K8sExtensionName create -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters --extension-type $extensionType --config storageAccountId=/subscriptions/$($ENVCONFIG.subscriptionId)/resourceGroups/$($ENVCONFIG.resourceGroup)/providers/Microsoft.Storage/storageAccounts/costexporttestci2--config storageContainer=cost-export --release-train dev -n $extensionName --no-wait
         $? | Should -BeTrue
 
         $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.aksClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type managedClusters -n $extensionName
