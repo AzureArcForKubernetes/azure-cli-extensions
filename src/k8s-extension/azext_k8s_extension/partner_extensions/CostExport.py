@@ -190,7 +190,7 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
             logger.info("created cost export with '%s' type", export_type)
             return
         else:
-            logger.info("couldn't create export with '%' type", export_type)
+            logger.info("couldn't create export with '%s' type", export_type)
     # raise last error
     raise cli.result.error
 
@@ -258,5 +258,5 @@ def _invoke(args) -> AzCli:
         raise e
     if cli.result.exit_code != 0:
         cmd = shlex.join(["az"] + args)
-        raise Exception(f"Unexpected non-zero exit code ({cli.result.exit_code}) during command execution: az {cmd}")
+        raise Exception(f"Unexpected non-zero exit code ({cli.result.exit_code}) during command execution: {cmd}")
     return cli
