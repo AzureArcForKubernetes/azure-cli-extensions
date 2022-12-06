@@ -53,6 +53,8 @@ class CostExport(DefaultExtension):
         configuration_settings["clusterResourceGroup"] = mc_resource_group
         configuration_settings["subscriptionId"] = subscription
 
+        _register_resource_provider(cmd, "Microsoft.CostManagementExports")
+
         _ensure_storage_container(
             storage_account_id=configuration_settings['storageAccountId'],
             storage_container=configuration_settings['storageContainer'],
@@ -88,7 +90,6 @@ class CostExport(DefaultExtension):
         # cost export automatically append the export name (cluster_name in our case) to the path
         # so we need to adjust the value we pass to the exporter
         configuration_settings['cmStoragePath'] = _create_cost_export(
-            cmd=cmd,
             subscription=subscription,
             cluster_name=cluster_name,
             storage_account_id=configuration_settings['cmStorageAccountId'],
@@ -144,18 +145,17 @@ def _register_resource_provider(cmd, resource_provider):
     logger.info("Resource provider '%s' is now registered.", resource_provider)
 
 
-def _is_resource_provider_registered(cmd, resource_provider, subscription_id=None):
-    registered = None
+def _is_resource_provider_registered(cmd, resource_provider, subscription_id=None) -> bool:
     if not subscription_id:
         subscription_id = get_subscription_id(cmd.cli_ctx)
     try:
         providers_client = _providers_client_factory(cmd.cli_ctx, subscription_id)
         registration_state = getattr(providers_client.get(resource_provider), 'registration_state', "NotRegistered")
 
-        registered = bool(registration_state and registration_state.lower() == 'registered')
-    except Exception:  # pylint: disable=broad-except
-        pass
-    return registered
+        return bool(registration_state and registration_state.lower() == 'registered')
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to get resource provider %s: %s", resource_provider, e)
+        return False
 
 
 def _providers_client_factory(cli_ctx, subscription_id=None):
@@ -163,10 +163,8 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).providers
 
 
-def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str,
+def _create_cost_export(subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str,
                         storage_container: str, storage_directory: str) -> str:
-    # returns path to the export directory inside storage container
-    _register_resource_provider(cmd, "Microsoft.CostManagementExports")
     args = [
         "costmanagement", "export", "create",
         "--name", cluster_name,
