@@ -8,7 +8,6 @@ from typing import TypedDict
 
 from knack.log import get_logger
 
-from azure.core.exceptions import HttpResponseError
 from azure.cli.core import AzCli
 from azure.cli.core.azclierror import CLIInternalError, ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
@@ -49,7 +48,7 @@ class CostExport(DefaultExtension):
         if 'cmStorageContainer' not in configuration_settings:
             configuration_settings['cmStorageContainer'] = configuration_settings['storageContainer']
         if 'cmStoragePath' not in configuration_settings:
-            configuration_settings['cmStoragePath'] = "cost-management-export-" + configuration_settings['storagePath']
+            configuration_settings['cmStoragePath'] = configuration_settings['storagePath']
 
         configuration_settings["clusterResourceGroup"] = mc_resource_group
         configuration_settings["subscriptionId"] = subscription
@@ -86,8 +85,9 @@ class CostExport(DefaultExtension):
                  "--role", "Reader",
                  "--scope", "/subscriptions/" + subscription + "/resourceGroups/" + mc_resource_group])
 
-        # use cluster resource group if not specified
-        _create_cost_export(
+        # cost export automatically append the export name (cluster_name in our case) to the path
+        # so we need to adjust the value we pass to the exporter
+        configuration_settings['cmStoragePath'] = _create_cost_export(
             cmd=cmd,
             subscription=subscription,
             cluster_name=cluster_name,
@@ -164,7 +164,8 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
 
 
 def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str,
-                        storage_container: str, storage_directory: str):
+                        storage_container: str, storage_directory: str) -> str:
+    # returns path to the export directory inside storage container
     _register_resource_provider(cmd, "Microsoft.CostManagementExports")
     args = [
         "costmanagement", "export", "create",
@@ -188,7 +189,7 @@ def _create_cost_export(cmd, subscription: str, mc_resource_group: str, cluster_
         cli.invoke(args + ["--type", export_type])
         if cli.result.exit_code == 0:
             logger.info("created cost export with '%s' type", export_type)
-            return
+            return storage_directory + "/" + cluster_name
         else:
             logger.info("couldn't create export with '%s' type", export_type)
     # raise last error
