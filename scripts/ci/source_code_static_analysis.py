@@ -88,6 +88,7 @@ def _get_ci_py_file_paths(directory):
             sys.exit(se.code)
 """
 
+
 def _run_flake8(module_paths, config_file=None):
     flake8_opts = ["--statistics"]
 
@@ -108,7 +109,7 @@ def _run_flake8(module_paths, config_file=None):
 
 
 def main():
-    cpu_count = multiprocessing.cpu_count()
+    # cpu_count = multiprocessing.cpu_count()
 
     root_dir = get_repo_root()
     sdk_modules = _get_sdk_module_list(root_dir)
@@ -118,7 +119,7 @@ def main():
     scripts_dir = os.path.join(root_dir, "scripts")
     ci_files = _get_ci_py_file_paths(os.path.join(scripts_dir, "ci"))
 
-    rc_file = os.path.join(root_dir, "pylintrc")
+    # rc_file = os.path.join(root_dir, "pylintrc")
     config_file = os.path.join(root_dir, ".flake8")
 
     # Disable PyLint for now, as the new version has breaking changes and requires lot more fixes
