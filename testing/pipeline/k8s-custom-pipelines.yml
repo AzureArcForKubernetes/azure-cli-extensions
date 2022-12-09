@@ -111,9 +111,9 @@ stages:
       vmImage: 'ubuntu-latest'
     steps:
       - task: UsePythonVersion@0
-        displayName: 'Use Python 3.10'
+        displayName: 'Use Python 3.8'
         inputs:
-          versionSpec: 3.10
+          versionSpec: 3.8
       - bash: pip install wheel==0.30.0 flake8 requests
         displayName: 'Install wheel, flake8, requests'
       - bash: python scripts/ci/source_code_static_analysis.py
