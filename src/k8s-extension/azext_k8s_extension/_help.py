@@ -38,8 +38,8 @@ helps[f'{consts.EXTENSION_NAME} create'] = f"""
         text: |-
           az {consts.EXTENSION_NAME} create --resource-group my-resource-group \
 --cluster-name mycluster --cluster-type managedClusters --name myextension \
---extension-type Contoso.AzureVoteKubernetesAppTest --scope cluster --release-train stable
---plan-info name=testplan product=kubernetest_apps_demo_offer publisher=test_test_mix3pptest0011614206850774
+--extension-type Contoso.AzureVoteKubernetesAppTest --scope cluster --release-train stable \
+--plan-name testplan --plan-product kubernetest_apps_demo_offer --plan-publisher test_test_mix3pptest0011614206850774
 """
 
 helps[f'{consts.EXTENSION_NAME} list'] = f"""
