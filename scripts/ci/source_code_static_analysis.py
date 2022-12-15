@@ -121,7 +121,6 @@ def main():
     rc_file = os.path.join(root_dir, "pylintrc")
     config_file = os.path.join(root_dir, ".flake8")
 
-    Disable PyLint for now, as the new version has breaking changes and requires lot more fixes
     print("\nRunning pylint on extensions...")
     _run_pylint(module_paths, ",".join(sdk_modules), rc_file, cpu_count)
     print("Pylint OK.\n")
