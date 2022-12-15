@@ -105,6 +105,7 @@ stages:
 
         azdev verify license
 
+
   - job: StaticAnalysis
     displayName: "Static Analysis"
     pool:
