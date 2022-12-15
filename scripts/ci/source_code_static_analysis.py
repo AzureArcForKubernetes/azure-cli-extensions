@@ -9,6 +9,7 @@ import os
 import sys
 import multiprocessing
 
+from pylint import lint
 from flake8.main import application
 
 from util import get_repo_root
@@ -62,8 +63,7 @@ def _get_ci_py_file_paths(directory):
     return [os.path.join(directory, path) for path in os.listdir(directory) if path.endswith(".py")]
 
 
-# Commenting out the entire method, since it is not being used.  Uncomment after fixing the breaking PyLint errors
-"""def _run_pylint(module_paths, ignored_modules=None, rcfile=None, cpu_count=1):
+def _run_pylint(module_paths, ignored_modules=None, rcfile=None, cpu_count=1):
     pylint_opts = []
 
     if ignored_modules:
@@ -86,7 +86,6 @@ def _get_ci_py_file_paths(directory):
         # 32: Usage error
         if se.code != 0:
             sys.exit(se.code)
-"""
 
 
 def _run_flake8(module_paths, config_file=None):
@@ -109,31 +108,31 @@ def _run_flake8(module_paths, config_file=None):
 
 
 def main():
-    # cpu_count = multiprocessing.cpu_count()
+    cpu_count = multiprocessing.cpu_count()
 
     root_dir = get_repo_root()
     sdk_modules = _get_sdk_module_list(root_dir)
     sdk_modules.append("vendored_sdks")
-    module_paths = os.path.join(root_dir, "src/k8s-extension/azext_k8s_extension")
+    module_paths = _get_azext_module_paths(root_dir)
 
     scripts_dir = os.path.join(root_dir, "scripts")
     ci_files = _get_ci_py_file_paths(os.path.join(scripts_dir, "ci"))
 
-    # rc_file = os.path.join(root_dir, "pylintrc")
+    rc_file = os.path.join(root_dir, "pylintrc")
     config_file = os.path.join(root_dir, ".flake8")
 
-    # Disable PyLint for now, as the new version has breaking changes and requires lot more fixes
-    # print("\nRunning pylint on extensions...")
-    # _run_pylint(module_paths, ",".join(sdk_modules), rc_file, cpu_count)
-    # print("Pylint OK.\n")
+    Disable PyLint for now, as the new version has breaking changes and requires lot more fixes
+    print("\nRunning pylint on extensions...")
+    _run_pylint(module_paths, ",".join(sdk_modules), rc_file, cpu_count)
+    print("Pylint OK.\n")
 
     print("Running flake8 on extensions...")
     _run_flake8(module_paths, config_file)
     print("Flake8 OK.\n")
 
-    # print("Running pylint on CI scripts...")
-    # _run_pylint(ci_files, rcfile=rc_file, cpu_count=cpu_count)
-    # print("Pylint OK.\n")
+    print("Running pylint on CI scripts...")
+    _run_pylint(ci_files, rcfile=rc_file, cpu_count=cpu_count)
+    print("Pylint OK.\n")
 
     print("Running flake8 on CI scripts...")
     _run_flake8(ci_files, config_file=config_file)
