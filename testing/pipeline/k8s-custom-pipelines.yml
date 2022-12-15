@@ -108,7 +108,7 @@ stages:
   - job: StaticAnalysis
     displayName: "Static Analysis"
     pool:
-    name: 'pool-ubuntu-2004'
+      name: 'pool-ubuntu-2004'
     steps:
       - task: UsePythonVersion@0
         displayName: 'Use Python 3.6'
@@ -122,7 +122,7 @@ stages:
   - job: IndexVerify
     displayName: "Verify Extensions Index"
     pool:
-    name: 'pool-ubuntu-2004'
+      name: 'pool-ubuntu-2004'
     steps:
     - task: UsePythonVersion@0
       displayName: 'Use Python 3.10'
@@ -139,7 +139,7 @@ stages:
   - job: SourceTests
     displayName: "Integration Tests, Build Tests"
     pool:
-    name: 'pool-ubuntu-2004'
+      name: 'pool-ubuntu-2004'
     strategy:
       matrix:
         Python38:
@@ -178,7 +178,7 @@ stages:
   - job: LintModifiedExtensions
     displayName: "CLI Linter on Modified Extensions"
     pool:
-    name: 'pool-ubuntu-2004'
+      name: 'pool-ubuntu-2004'
     steps:
       - task: UsePythonVersion@0
         displayName: 'Use Python 3.10'
