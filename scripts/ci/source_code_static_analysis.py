@@ -114,7 +114,7 @@ def main():
     root_dir = get_repo_root()
     sdk_modules = _get_sdk_module_list(root_dir)
     sdk_modules.append("vendored_sdks")
-    module_paths = _get_azext_module_paths(root_dir)
+    module_paths = os.path.join(root_dir, "src/k8s-extension/azext_k8s_extension")
 
     scripts_dir = os.path.join(root_dir, "scripts")
     ci_files = _get_ci_py_file_paths(os.path.join(scripts_dir, "ci"))
