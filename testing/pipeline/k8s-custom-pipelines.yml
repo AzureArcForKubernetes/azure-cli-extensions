@@ -108,7 +108,7 @@ stages:
   - job: StaticAnalysis
     displayName: "Static Analysis"
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'pool-ubuntu-2004'
     steps:
       - task: UsePythonVersion@0
         displayName: 'Use Python 3.6'
