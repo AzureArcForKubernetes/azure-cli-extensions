@@ -114,7 +114,7 @@ stages:
         displayName: 'Use Python 3.8'
         inputs:
           versionSpec: 3.8
-      - bash: pip install wheel==0.30.0 flake8=6.0.0 requests
+      - bash: pip install wheel==0.30.0 flake8==6.0.0 requests
         displayName: 'Install wheel, flake8, requests'
       - bash: python scripts/ci/source_code_static_analysis.py
         displayName: "Static Analysis"
