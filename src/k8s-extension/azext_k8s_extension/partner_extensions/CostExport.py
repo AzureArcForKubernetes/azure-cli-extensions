@@ -91,7 +91,6 @@ class CostExport(DefaultExtension):
         # so we need to adjust the value we pass to the exporter
         configuration_settings['cmStoragePath'] = _create_cost_export(
             subscription=subscription,
-            cluster_name=cluster_name,
             storage_account_id=configuration_settings['cmStorageAccountId'],
             mc_resource_group=mc_resource_group,
             storage_container=configuration_settings['cmStorageContainer'],
@@ -136,7 +135,7 @@ def _register_resource_provider(cmd, resource_provider):
                 raise CLIInternalError(
                     f"Timed out while waiting for the {resource_provider} resource provider to be registered.")
     except Exception as e:
-        msg = ("This operation requires requires registering the resource provider {0}. "
+        msg = ("This operation requires registering the resource provider {0}. "
                "We were unable to perform that registration on your behalf: "
                "Server responded with error message -- {1} . "
                "Please check with your admin on permissions, "
