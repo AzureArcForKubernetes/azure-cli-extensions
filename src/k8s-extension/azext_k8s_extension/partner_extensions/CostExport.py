@@ -162,11 +162,11 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
                                    subscription_id=subscription_id).providers
 
 
-def _create_cost_export(subscription: str, mc_resource_group: str, cluster_name: str, storage_account_id: str,
+def _create_cost_export(subscription: str, mc_resource_group: str, storage_account_id: str,
                         storage_container: str, storage_directory: str) -> str:
     args = [
         "costmanagement", "export", "create",
-        "--name", cluster_name,
+        "--name", mc_resource_group,
         "--scope", f"/subscriptions/{subscription}/resourceGroups/{mc_resource_group}",
         "--timeframe", "MonthToDate",
         "--recurrence-period", f"from={datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
@@ -186,7 +186,7 @@ def _create_cost_export(subscription: str, mc_resource_group: str, cluster_name:
         cli.invoke(args + ["--type", export_type])
         if cli.result.exit_code == 0:
             logger.info("created cost export with '%s' type", export_type)
-            return storage_directory + "/" + cluster_name
+            return storage_directory + "/" + mc_resource_group
         else:
             logger.info("couldn't create export with '%s' type", export_type)
     # raise last error
