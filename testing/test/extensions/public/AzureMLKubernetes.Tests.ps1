@@ -57,53 +57,53 @@ Describe 'AzureML Kubernetes Testing' {
         $extensionExists | Should -Not -BeNullOrEmpty
     }
 
-    It "Wait for the extension to be ready" {
-        # Loop and retry until the extension installed
-        $n = 0
-        do 
-        {
+    # It "Wait for the extension to be ready" {
+    #    # Loop and retry until the extension installed
+    #    $n = 0
+    #    do 
+    #    {
+    #
+    #       $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+    #       $? | Should -BeTrue
+    #
+    #       $provisioningState = ($output | ConvertFrom-Json).provisioningState
+    #       Write-Host "Provisioning state: $provisioningState"
+    #       if ($provisioningState -eq "Succeeded") {
+    #           break
+    #       }
+    #       Start-Sleep -Seconds 20
+    #       $n += 1
+    #   } while ($n -le $MAX_RETRY_ATTEMPTS)
+    #   $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+    #}
 
-            $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
-            $? | Should -BeTrue
-
-            $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            Write-Host "Provisioning state: $provisioningState"
-            if ($provisioningState -eq "Succeeded") {
-                break
-            }
-            Start-Sleep -Seconds 20
-            $n += 1
-        } while ($n -le $MAX_RETRY_ATTEMPTS)
-        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
-    }
-
-    It "Perform Update extension" {
-        $sslKeyPemFile = Join-Path (Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "data") "azure_ml") "test_key.pem"
-        $sslCertPemFile = Join-Path (Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "data") "azure_ml") "test_cert.pem"
-        az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config "$($mockUpdateKey)=true" --config-protected "$($mockProtectedUpdateKey)=true" sslKeyPemFile=$sslKeyPemFile sslCertPemFile=$sslCertPemFile --no-wait
-        $? | Should -BeTrue        
-
-        # Loop and retry until the extension updated
-        $n = 0
-        do 
-        {
-
-            $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
-            $? | Should -BeTrue
-
-            $provisioningState = ($output | ConvertFrom-Json).provisioningState
-            Write-Host "Provisioning state: $provisioningState"
-            if ($provisioningState -eq "Succeeded") {
-                break
-            }
-            Start-Sleep -Seconds 20
-            $n += 1
-        } while ($n -le $MAX_RETRY_ATTEMPTS)
-        $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
-
-        $mockedUpdateData = Get-ExtensionConfigurationSettings $extensionName $mockUpdateKey
-        $mockedUpdateData | Should -Not -BeNullOrEmpty
-    }
+    # It "Perform Update extension" {
+    #   $sslKeyPemFile = Join-Path (Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "data") "azure_ml") "test_key.pem"
+    #   $sslCertPemFile = Join-Path (Join-Path (Join-Path (Split-Path $PSScriptRoot -Parent) "data") "azure_ml") "test_cert.pem"
+    #   az $Env:K8sExtensionName update -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName --config "$($mockUpdateKey)=true" --config-protected "$($mockProtectedUpdateKey)=true" sslKeyPemFile=$sslKeyPemFile sslCertPemFile=$sslCertPemFile --no-wait
+    #   $? | Should -BeTrue        
+    #
+    #   # Loop and retry until the extension updated
+    #   $n = 0
+    #   do 
+    #   {
+    #
+    #       $output = az $Env:K8sExtensionName show -c $($ENVCONFIG.arcClusterName) -g $($ENVCONFIG.resourceGroup) --cluster-type connectedClusters -n $extensionName
+    #       $? | Should -BeTrue
+    #
+    #       $provisioningState = ($output | ConvertFrom-Json).provisioningState
+    #       Write-Host "Provisioning state: $provisioningState"
+    #       if ($provisioningState -eq "Succeeded") {
+    #           break
+    #       }
+    #       Start-Sleep -Seconds 20
+    #       $n += 1
+    #   } while ($n -le $MAX_RETRY_ATTEMPTS)
+    #   $n | Should -BeLessOrEqual $MAX_RETRY_ATTEMPTS
+    #
+    #   $mockedUpdateData = Get-ExtensionConfigurationSettings $extensionName $mockUpdateKey
+    #   $mockedUpdateData | Should -Not -BeNullOrEmpty
+    # }
 
     It "Deletes the extension from the cluster with inference enabled" {
         # cleanup the relay and servicebus
