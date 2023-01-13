@@ -240,7 +240,7 @@ class ServicePrincipal(TypedDict):
 
 
 def _create_service_principal(sp_name: str) -> ServicePrincipal:
-    cli = _invoke(["ad", "sp", "create-for-rbac", "--display-name", sp_name, "--years", "2"])
+    cli = _invoke(["ad", "sp", "create-for-rbac", "-n", sp_name, "--years", "2"])
     logger.info("created service principal %s", sp_name)
     return cli.result.result
 
