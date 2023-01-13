@@ -169,12 +169,15 @@ def _providers_client_factory(cli_ctx, subscription_id=None):
 
 def _create_cost_export(subscription: str, mc_resource_group: str, storage_account_id: str,
                         storage_container: str, storage_directory: str) -> str:
+    # from date must be in the future
+    # adding few minutes to avoid potential issues with clock drift or delay in the request
+    from_datetime = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=2)
     args = [
         "costmanagement", "export", "create",
         "--name", mc_resource_group,
         "--scope", f"/subscriptions/{subscription}/resourceGroups/{mc_resource_group}",
         "--timeframe", "MonthToDate",
-        "--recurrence-period", f"from={datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')}",
+        "--recurrence-period", f"from={from_datetime.strftime('%Y-%m-%dT%H:%M:%S')}",
         "to=2200-01-01T00:00:00",
         "--recurrence", "Daily",
         "--schedule-status", "Active",
