@@ -272,6 +272,7 @@ def _create_service_principal(sp_name: str) -> ServicePrincipal:
         on_error()
     return cli.result.result
 
+
 def _check_service_principal_exists(sp_name: str) -> bool:
     cli = _cli()
     cli.invoke(["ad", "sp", "list", "--filter", f"displayname eq '{sp_name}'"])
