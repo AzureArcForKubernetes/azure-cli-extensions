@@ -76,7 +76,6 @@ class CostExport(DefaultExtension):
                 # resource group name limit is 90 chars
                 # SP name limit is more than len(cost-export-) + 90
                 configuration_settings['servicePrincipalName'] = "cost-export-" + mc_resource_group
-            logger.info("Creating service principal %s", configuration_settings['servicePrincipalName'])
             sp = _create_service_principal(sp_name=configuration_settings['servicePrincipalName'])
             configuration_protected_settings["servicePrincipal.appId"] = sp["appId"]
             configuration_protected_settings["servicePrincipal.tenant"] = sp["tenant"]
