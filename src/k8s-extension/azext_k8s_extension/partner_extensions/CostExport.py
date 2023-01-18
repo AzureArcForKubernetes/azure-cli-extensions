@@ -14,11 +14,12 @@ from typing import TypedDict
 from knack.log import get_logger
 
 from azure.cli.core import AzCli
-from azure.cli.core.azclierror import CLIInternalError, ValidationError
+from azure.cli.core.azclierror import CLIInternalError, ValidationError, ManualInterrupt
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core import get_default_cli
 from azure.mgmt.core.tools import parse_resource_id
+from knack.util import CLIError
 
 from ..vendored_sdks.models import Extension
 from ..vendored_sdks.models import ScopeCluster
@@ -252,16 +253,31 @@ class ServicePrincipal(TypedDict):
 
 def _create_service_principal(sp_name: str) -> ServicePrincipal:
     def on_error():
-        raise Exception("unable to create service principal %s" % sp_name)
+        raise CLIError("Unable to create the service principal named '%s'. If the service principal already exists, "
+                       "please delete it manually and try again." % sp_name)
 
     cli = _cli()
+    if _check_service_principal_exists(sp_name):
+        from knack.prompting import prompt_y_n, NoTTYException
+        try:
+            if not prompt_y_n("Service principal %s already exists. Do you want to overwrite it?" % sp_name):
+                raise ManualInterrupt('Operation cancelled.')
+        except NoTTYException:
+            on_error()
     try:
         cli.invoke(["ad", "sp", "create-for-rbac", "-n", sp_name, "--years", "2"])
-    except SystemExit as e:
+    except SystemExit:
         on_error()
     if cli.result.exit_code != 0:
         on_error()
     return cli.result.result
+
+def _check_service_principal_exists(sp_name: str) -> bool:
+    cli = _cli()
+    cli.invoke(["ad", "sp", "list", "--filter", f"displayname eq '{sp_name}'"])
+    if cli.result.exit_code == 0:
+        return len(cli.result.result) > 0
+    return False
 
 
 def _cli() -> AzCli:
