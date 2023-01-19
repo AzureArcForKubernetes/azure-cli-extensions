@@ -67,7 +67,7 @@ jobs:
   - task: AzureCLI@2
     displayName: Bootstrap
     inputs:
-      azureSubscription: AzureResourceConnection
+      azureSubscription: AzureResourceConnection2
       scriptType: pscore
       scriptLocation: inlineScript
       inlineScript: |
@@ -77,7 +77,7 @@ jobs:
   - task: AzureCLI@2
     displayName: Run the Test Suite for ${{ parameters.path }}
     inputs:
-      azureSubscription: AzureResourceConnection
+      azureSubscription: AzureResourceConnection2
       scriptType: pscore
       scriptLocation: inlineScript
       inlineScript: |
@@ -95,7 +95,7 @@ jobs:
   - task: AzureCLI@2
     displayName: Cleanup
     inputs:
-      azureSubscription: AzureResourceConnection
+      azureSubscription: AzureResourceConnection2
       scriptType: pscore
       scriptLocation: inlineScript
       inlineScript: |
