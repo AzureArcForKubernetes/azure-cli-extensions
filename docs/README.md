@@ -3,7 +3,7 @@ Azure CLI Extension Documention
 Information
 ------------
 
-Take a look at: [Azure CLI Extensions](https://github.com/Azure/azure-cli/tree/dev/doc/extensions)
+Take a look at : [Azure CLI Extensions](https://github.com/Azure/azure-cli/tree/dev/doc/extensions)
 
 Doc Sections
 ------------
