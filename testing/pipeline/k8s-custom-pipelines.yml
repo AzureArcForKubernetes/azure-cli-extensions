@@ -30,7 +30,7 @@ stages:
       path: ./test/configurations/Flux.*.Tests.ps1
   - job: BuildPublishExtension
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-20.04'
     displayName: "Build and Publish the Extension Artifact"
     variables: 
       CLI_REPO_PATH: $(Agent.BuildDirectory)/s
