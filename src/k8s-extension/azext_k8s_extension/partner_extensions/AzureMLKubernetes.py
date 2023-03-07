@@ -408,6 +408,14 @@ class AzureMLKubernetes(DefaultExtension):
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
 
+        fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
+        fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
+        fe_ssl_secret = _get_value_from_config_protected_config(
+                self.SSL_SECRET, configuration_settings, configuration_protected_settings)
+        # use secret if key/cert file is not provided
+        if fe_ssl_secret and (not fe_ssl_cert_file or not fe_ssl_key_file):
+            self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
+
     def __validate_config(self, configuration_settings, configuration_protected_settings, release_namespace):
         # perform basic validation of the input config
         config_keys = configuration_settings.keys()
