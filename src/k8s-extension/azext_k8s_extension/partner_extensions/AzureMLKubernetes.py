@@ -366,14 +366,17 @@ class AzureMLKubernetes(DefaultExtension):
 
             configuration_protected_settings = _dereference(self.reference_mapping, configuration_protected_settings)
 
-            if self.sslKeyPemFile in configuration_protected_settings and \
-                    self.sslCertPemFile in configuration_protected_settings:
-                logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, update ssl key.")
-                fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
-                fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
-
-                if fe_ssl_cert_file and fe_ssl_key_file:
-                    self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
+        fe_ssl_secret = _get_value_from_config_protected_config(
+            self.SSL_SECRET, configuration_settings, configuration_protected_settings)
+        fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
+        fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
+        # always take ssl key/cert first, then secret if key/cert file is not provided
+        if fe_ssl_cert_file and fe_ssl_key_file:
+            logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, update ssl key.")
+            self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
+        elif fe_ssl_secret:
+            logger.info(f"{self.SSL_SECRET} is set, update ssl secret.")
+            self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
 
         # if no entries are existed in configuration_protected_settings, configuration_settings, return whatever passed
         #  in the Update function(empty dict or None).
@@ -407,14 +410,6 @@ class AzureMLKubernetes(DefaultExtension):
             configuration_settings['scoringFe.serviceType.internalLoadBalancer'] = feIsInternalLoadBalancer
             logger.warning(
                 'Internal load balancer only supported on AKS and AKS Engine Clusters.')
-
-        fe_ssl_cert_file = configuration_protected_settings.get(self.sslCertPemFile)
-        fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
-        fe_ssl_secret = _get_value_from_config_protected_config(
-                self.SSL_SECRET, configuration_settings, configuration_protected_settings)
-        # use secret if key/cert file is not provided
-        if fe_ssl_secret and (not fe_ssl_cert_file or not fe_ssl_key_file):
-            self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
 
     def __validate_config(self, configuration_settings, configuration_protected_settings, release_namespace):
         # perform basic validation of the input config
