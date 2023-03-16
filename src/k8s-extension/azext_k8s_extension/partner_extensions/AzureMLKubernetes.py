@@ -372,10 +372,10 @@ class AzureMLKubernetes(DefaultExtension):
         fe_ssl_key_file = configuration_protected_settings.get(self.sslKeyPemFile)
         # always take ssl key/cert first, then secret if key/cert file is not provided
         if fe_ssl_cert_file and fe_ssl_key_file:
-            logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, update ssl key.")
+            logger.info(f"Both {self.sslKeyPemFile} and {self.sslCertPemFile} are set, updating ssl key.")
             self.__set_inference_ssl_from_file(configuration_protected_settings, fe_ssl_cert_file, fe_ssl_key_file)
         elif fe_ssl_secret:
-            logger.info(f"{self.SSL_SECRET} is set, update ssl secret.")
+            logger.info(f"{self.SSL_SECRET} is set, updating ssl secret.")
             self.__set_inference_ssl_from_secret(configuration_settings, fe_ssl_secret)
 
         # if no entries are existed in configuration_protected_settings, configuration_settings, return whatever passed
