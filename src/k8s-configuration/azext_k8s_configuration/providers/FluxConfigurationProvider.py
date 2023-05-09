@@ -62,6 +62,7 @@ from ..vendored_sdks.v2023_05_01.models import (
     KustomizationDefinition,
     KustomizationPatchDefinition,
     SourceKindType,
+    PostBuildDefinition,
 )
 from ..vendored_sdks.v2023_05_01.models import Extension, Identity
 
@@ -413,8 +414,9 @@ def create_kustomization(
     no_wait=False,
     cluster_resource_provider=None,
     wait=True,
+    substitute=None,
 ):
-
+    print("hello!!!! \n", wait)
     # Get Resource Provider to call
     cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_resource_provider)
     validate_cc_registration(cmd)
@@ -432,6 +434,13 @@ def create_kustomization(
             consts.CREATE_KUSTOMIZATION_EXIST_ERROR.format(kustomization_name, name),
             consts.CREATE_KUSTOMIZATION_EXIST_HELP,
         )
+    
+    # assign substitute to postBuild.substitutions in KustomizationPatchDefinition
+    postBuild = None
+    if substitute:
+        postBuild = PostBuildDefinition(
+            substitute=substitute,
+        )
 
     kustomization = {
         kustomization_name: KustomizationPatchDefinition(
@@ -446,16 +455,16 @@ def create_kustomization(
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)
-    return sdk_no_wait(
-        no_wait,
-        client.begin_update,
-        resource_group_name,
-        cluster_rp,
-        cluster_type,
-        cluster_name,
-        name,
-        flux_configuration_patch,
-    )
+    # return sdk_no_wait(
+    #     no_wait,
+    #     client.begin_update,
+    #     resource_group_name,
+    #     cluster_rp,
+    #     cluster_type,
+    #     cluster_name,
+    #     name,
+    #     flux_configuration_patch,
+    # )
 
 
 def update_kustomization(

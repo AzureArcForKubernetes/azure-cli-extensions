@@ -406,6 +406,13 @@ def load_arguments(self, _):
             arg_type=get_three_state_flag(),
             help="Enable health check for all Kubernetes objects created by this Kustomization.",
         )
+        c.argument(
+            "substitute",
+            arg_group="Configuration",
+            action=AddSubstitutionsAction,
+            nargs='+',
+            help='Substitution variables as key=value pair.  Repeat parameter for each setting'
+        )
 
     with self.argument_context("k8s-configuration flux kustomization delete") as c:
         c.argument(
