@@ -47,7 +47,7 @@ from ..validators import (
     validate_url_with_params,
 )
 from .. import consts
-from ..vendored_sdks.v2022_07_01.models import (
+from ..vendored_sdks.v2023_05_01.models import (
     FluxConfiguration,
     FluxConfigurationPatch,
     GitRepositoryDefinition,
@@ -63,7 +63,7 @@ from ..vendored_sdks.v2022_07_01.models import (
     KustomizationPatchDefinition,
     SourceKindType,
 )
-from ..vendored_sdks.v2022_07_01.models import Extension, Identity
+from ..vendored_sdks.v2023_05_01.models import Extension, Identity
 
 logger = get_logger(__name__)
 
@@ -412,6 +412,7 @@ def create_kustomization(
     force=None,
     no_wait=False,
     cluster_resource_provider=None,
+    wait=True,
 ):
 
     # Get Resource Provider to call
@@ -441,6 +442,7 @@ def create_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
+            wait=wait,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)
@@ -473,6 +475,7 @@ def update_kustomization(
     force=None,
     no_wait=False,
     cluster_resource_provider=None,
+    wait=True,
 ):
 
     # Get Resource Provider to call
@@ -502,6 +505,7 @@ def update_kustomization(
             retry_interval_in_seconds=parse_duration(retry_interval),
             prune=prune,
             force=force,
+            wait=wait,
         )
     }
     flux_configuration_patch = FluxConfigurationPatch(kustomizations=kustomization)
