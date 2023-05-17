@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+from knack.util import CLIError
 from ..constants import MapToClosestMACRegion
 from .defaults import get_default_region, sanitize_name
 from ..constants import (
     DC_TYPE,
     DC_API
 )
-from knack.util import CLIError
 
 
 def get_default_dcr_name(cmd, mac_region, cluster_name):
@@ -24,11 +24,7 @@ def get_default_dcr_name(cmd, mac_region, cluster_name):
 def create_dcr(cmd, mac_region, azure_monitor_workspace_resource_id, cluster_subscription, cluster_resource_group_name, cluster_name, dce_resource_id):
     from azure.cli.core.util import send_raw_request
     dcr_name = get_default_dcr_name(cmd, mac_region, cluster_name)
-    dcr_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionRules/{2}".format(
-        cluster_subscription,
-        cluster_resource_group_name,
-        dcr_name
-    )
+    dcr_resource_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.Insights/dataCollectionRules/{dcr_name}"
     dcr_creation_body = json.dumps({"location": mac_region,
                                     "kind": "Linux",
                                     "properties": {

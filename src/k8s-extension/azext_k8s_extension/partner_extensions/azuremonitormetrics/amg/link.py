@@ -19,7 +19,7 @@ def link_grafana_instance(cmd, azure_monitor_workspace_resource_id, configuratio
     try:
         grafana_resource_id = ""
         if configuration_settings is not None and 'grafana-resource-id' in configuration_settings:
-             grafana_resource_id = configuration_settings['grafana-resource-id']
+            grafana_resource_id = configuration_settings['grafana-resource-id']
         if grafana_resource_id is None or grafana_resource_id == "":
             return GrafanaLink.NOPARAMPROVIDED
         grafana_resource_id = sanitize_resource_id(grafana_resource_id)

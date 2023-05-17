@@ -2,12 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from azure.core.exceptions import HttpResponseError
 from .create import create_default_mac
 from ..helper import sanitize_resource_id
 from ..constants import MAC_API
-from ...._client_factory import (
-    cf_resources, cf_resource_groups, cf_log_analytics)
-from azure.core.exceptions import HttpResponseError
+from ...._client_factory import cf_resources
 
 
 def get_amw_region(cmd, azure_monitor_workspace_resource_id):
@@ -26,7 +25,7 @@ def get_amw_region(cmd, azure_monitor_workspace_resource_id):
 def get_azure_monitor_workspace_resource(cmd, cluster_subscription, cluster_region, configuration_settings):
     azure_monitor_workspace_resource_id = ""
     if 'azure-monitor-workspace-resource-id' in configuration_settings:
-            azure_monitor_workspace_resource_id = configuration_settings['azure-monitor-workspace-resource-id']
+        azure_monitor_workspace_resource_id = configuration_settings['azure-monitor-workspace-resource-id']
     if azure_monitor_workspace_resource_id is None or azure_monitor_workspace_resource_id == "":
         azure_monitor_workspace_resource_id, azure_monitor_workspace_location = create_default_mac(
             cmd,

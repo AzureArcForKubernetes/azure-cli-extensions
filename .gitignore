@@ -88,6 +88,7 @@ venv/
 ENV/
 env/
 env27/
+azenv/
 
 # Spyder project settings
 .spyderproject

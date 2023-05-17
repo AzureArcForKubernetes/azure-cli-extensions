@@ -3,26 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+from azure.core.exceptions import HttpResponseError
+from knack.util import CLIError
 
 from ..constants import MAC_API
 from .defaults import get_default_mac_name_and_region
-from ...._client_factory import (
-    cf_resources, cf_resource_groups, cf_log_analytics)
-from azure.core.exceptions import HttpResponseError
-from knack.util import CLIError
+from ...._client_factory import cf_resources, cf_resource_groups
 
 
 def create_default_mac(cmd, cluster_subscription, cluster_region):
     from azure.cli.core.util import send_raw_request
     default_mac_name, default_mac_region = get_default_mac_name_and_region(cmd, cluster_region)
-    default_resource_group_name = "DefaultResourceGroup-{0}".format(default_mac_region)
-    azure_monitor_workspace_resource_id = \
-        "/subscriptions/{0}/resourceGroups/{1}/providers/microsoft.monitor/accounts/{2}"\
-        .format(
-            cluster_subscription,
-            default_resource_group_name,
-            default_mac_name
-        )
+    default_resource_group_name = f"DefaultResourceGroup-{default_mac_region}"
+    azure_monitor_workspace_resource_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{default_resource_group_name}/providers/microsoft.monitor/accounts/{default_mac_name}"
     # Check if default resource group exists or not, if it does not then create it
     resource_groups = cf_resource_groups(cmd.cli_ctx, cluster_subscription)
     resources = cf_resources(cmd.cli_ctx, cluster_subscription)

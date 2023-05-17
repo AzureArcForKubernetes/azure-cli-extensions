@@ -3,28 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
+from knack.util import CLIError
 from ..constants import DC_API
 from .defaults import get_default_dcra_name
-from knack.util import CLIError
 
 
 # pylint: disable=line-too-long
 def create_dcra(cmd, cluster_region, cluster_subscription, cluster_resource_group_name, cluster_name, dcr_resource_id):
     from azure.cli.core.util import send_raw_request
-    cluster_resource_id = \
-        "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes/connectedClusters/{2}".format(
-            cluster_subscription,
-            cluster_resource_group_name,
-            cluster_name
-        )
+    cluster_resource_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.Kubernetes/connectedClusters/{cluster_name}"
     dcra_name = get_default_dcra_name(cmd, cluster_region, cluster_name)
-    dcra_resource_id = \
-        "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{2}"\
-        .format(
-            cluster_subscription,
-            cluster_resource_group_name,
-            dcra_name
-        )
+    dcra_resource_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{dcra_name}"
     description_str = "Promtheus data collection association between DCR, DCE and target AKS resource"
     # only create or delete the association between the DCR and cluster
     association_body = json.dumps({"location": cluster_region,
