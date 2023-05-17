@@ -1,7 +1,0 @@
-#!D:\git_repos\azure-cli-extensions\azenv\Scripts\python.exe
-# EASY-INSTALL-DEV-SCRIPT: 'azure-cli==2.48.1','az'
-__requires__ = 'azure-cli==2.48.1'
-__import__('pkg_resources').require('azure-cli==2.48.1')
-__file__ = 'D:\\git_repos\\azure-cli\\src\\azure-cli\\az'
-with open(__file__) as f:
-    exec(compile(f.read(), __file__, 'exec'))
