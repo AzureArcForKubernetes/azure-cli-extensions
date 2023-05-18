@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from azure.core.exceptions import HttpResponseError
 from .create import create_default_mac
-from ..helper import sanitize_resource_id
+from ..helper import sanitize_resource_id, safe_key_check, safe_value_get
 from ..constants import MAC_API
 from ...._client_factory import cf_resources
 
@@ -24,8 +24,8 @@ def get_amw_region(cmd, azure_monitor_workspace_resource_id):
 
 def get_azure_monitor_workspace_resource(cmd, cluster_subscription, cluster_region, configuration_settings):
     azure_monitor_workspace_resource_id = ""
-    if 'azure-monitor-workspace-resource-id' in configuration_settings:
-        azure_monitor_workspace_resource_id = configuration_settings['azure-monitor-workspace-resource-id']
+    if safe_key_check('azure-monitor-workspace-resource-id', configuration_settings):
+        azure_monitor_workspace_resource_id = safe_value_get('azure-monitor-workspace-resource-id', configuration_settings)
     if azure_monitor_workspace_resource_id is None or azure_monitor_workspace_resource_id == "":
         azure_monitor_workspace_resource_id, azure_monitor_workspace_location = create_default_mac(
             cmd,

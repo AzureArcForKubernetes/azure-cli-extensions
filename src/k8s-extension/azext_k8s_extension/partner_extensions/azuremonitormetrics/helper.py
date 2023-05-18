@@ -8,7 +8,7 @@ from azure.cli.core.azclierror import (
     UnknownError
 )
 from .constants import (
-    RP_API
+    RP_API, ClUSTER_RESOURCE_API, CLUSTER_RESOURCE_ID
 )
 from ..._client_factory import (
     cf_resources, cf_resource_groups, cf_log_analytics)
@@ -71,15 +71,19 @@ def rp_registrations(cmd, subscription_id):
         if value["namespace"].lower() == "microsoft.dashboard" and value["registrationState"].lower() == "registered":
             isAlertsManagementRpRegistered = True
     if isInsightsRpRegistered is False:
+        print(f"Registering microsoft.insights RP for the subscription {subscription_id}")
         headers = ['User-Agent=arc-azuremonitormetrics.register_insights_rp']
         post_request(cmd, subscription_id, "microsoft.insights", headers)
     if isAlertsManagementRpRegistered is False:
+        print(f"Registering microsoft.alertsmanagement RP for the subscription {subscription_id}")
         headers = ['User-Agent=arc-azuremonitormetrics.register_alertsmanagement_rp']
         post_request(cmd, subscription_id, "microsoft.alertsmanagement", headers)
     if isMoniotrRpRegistered is False:
+        print(f"Registering microsoft.monitor RP for the subscription {subscription_id}")
         headers = ['User-Agent=arc-azuremonitormetrics.register_monitor_rp']
         post_request(cmd, subscription_id, "microsoft.monitor", headers)
     if isDashboardRpRegistered is False:
+        print(f"Registering microsoft.dashboard RP for the subscription {subscription_id}")
         headers = ['User-Agent=arc-azuremonitormetrics.register_dashboard_rp']
         post_request(cmd, subscription_id, "microsoft.dashboard", headers)
 
@@ -87,14 +91,29 @@ def rp_registrations(cmd, subscription_id):
 def get_cluster_region(cmd, cluster_rp, subscription_id, cluster_resource_group_name, cluster_name, cluster_type):
     cluster_region = ''
     resources = cf_resources(cmd.cli_ctx, subscription_id)
-    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}'.format(
+    cluster_resource_id = CLUSTER_RESOURCE_ID.format(
         subscription_id, cluster_resource_group_name, cluster_rp, cluster_type, cluster_name)
     try:
         if cluster_rp.lower() == consts.HYBRIDCONTAINERSERVICE_RP:
             resource = resources.get_by_id(cluster_resource_id, consts.HYBRIDCONTAINERSERVICE_API_VERSION)
         else:
-            resource = resources.get_by_id(cluster_resource_id, '2020-01-01-preview')
+            resource = resources.get_by_id(cluster_resource_id, ClUSTER_RESOURCE_API)
         cluster_region = resource.location.lower()
     except HttpResponseError as ex:
         raise ex
     return cluster_region
+
+
+def safe_key_check(key_to_check, strStrDict):
+    if strStrDict is None or key_to_check is None:
+        return False
+    if key_to_check.lower() in [key.lower() for key in strStrDict.keys()]:
+        return True
+    return False
+
+
+def safe_value_get(key_to_find, strStrDict):
+    for key in strStrDict:
+        if key.lower() == key_to_find.lower():
+            return strStrDict[key]
+    return ""

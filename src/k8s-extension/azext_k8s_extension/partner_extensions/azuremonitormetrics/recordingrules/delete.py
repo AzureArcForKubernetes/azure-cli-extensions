@@ -35,15 +35,3 @@ def delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         cluster_resource_group_name,
         "KubernetesRecordingRulesRuleGroup-{0}".format(cluster_name)
     )
-    delete_rule(
-        cmd,
-        cluster_subscription,
-        cluster_resource_group_name,
-        "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-    )
-    delete_rule(
-        cmd,
-        cluster_subscription,
-        cluster_resource_group_name,
-        "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-    )

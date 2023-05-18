@@ -10,7 +10,7 @@ from ..constants import (
     GRAFANA_ROLE_ASSIGNMENT_API,
     GrafanaLink
 )
-from ..helper import sanitize_resource_id
+from ..helper import safe_key_check, safe_value_get, sanitize_resource_id
 
 
 def link_grafana_instance(cmd, azure_monitor_workspace_resource_id, configuration_settings):
@@ -18,8 +18,8 @@ def link_grafana_instance(cmd, azure_monitor_workspace_resource_id, configuratio
     # GET grafana principal ID
     try:
         grafana_resource_id = ""
-        if configuration_settings is not None and 'grafana-resource-id' in configuration_settings:
-            grafana_resource_id = configuration_settings['grafana-resource-id']
+        if safe_key_check('grafana-resource-id', configuration_settings):
+            grafana_resource_id = safe_value_get('grafana-resource-id', configuration_settings)
         if grafana_resource_id is None or grafana_resource_id == "":
             return GrafanaLink.NOPARAMPROVIDED
         grafana_resource_id = sanitize_resource_id(grafana_resource_id)

@@ -14,7 +14,9 @@ FEATURE_API = "2020-09-01"
 RP_API = "2021-04-01"
 ALERTS_API = "2023-01-01-preview"
 RP_LOCATION_API = "2022-01-01"
+ClUSTER_RESOURCE_API = "2020-01-01-preview"
 
+CLUSTER_RESOURCE_ID = "/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}/{4}"
 
 MapToClosestMACRegion = {
     "australiacentral": "eastus",

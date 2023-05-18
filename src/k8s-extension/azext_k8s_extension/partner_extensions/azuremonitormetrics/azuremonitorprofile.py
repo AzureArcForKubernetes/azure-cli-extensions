@@ -16,6 +16,7 @@ from .amg.link import link_grafana_instance
 from .recordingrules.create import create_rules
 from .recordingrules.delete import delete_rules
 from .dc.delete import get_dc_objects_list, delete_dc_objects_if_prometheus_enabled
+from .helper import safe_key_check, safe_value_get
 
 
 # pylint: disable=line-too-long
@@ -40,7 +41,7 @@ def link_azure_monitor_profile_artifacts(
     # Link grafana
     link_grafana_instance(cmd, azure_monitor_workspace_resource_id, configuration_settings)
     # create recording rules and alerts
-    create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, azure_monitor_workspace_location, configuration_settings)
+    create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, azure_monitor_workspace_location)
 
 
 # pylint: disable=line-too-long
@@ -68,8 +69,8 @@ def ensure_azure_monitor_profile_prerequisites(
         raise CLIError("Azure China Cloud is not supported for the Azure Monitor Metrics extension")
 
     if cloud_name.lower() == "azureusgovernment":
-        if configuration_settings is not None and 'grafana-resource-id' in configuration_settings:
-            grafana_resource_id = configuration_settings['grafana-resource-id']
+        if safe_key_check('grafana-resource-id', configuration_settings):
+            grafana_resource_id = safe_value_get('grafana-resource-id', configuration_settings)
         if grafana_resource_id is not None:
             if grafana_resource_id != "":
                 raise InvalidArgumentValueError("Azure US Government cloud does not support Azure Managed Grarfana yet. Please follow this documenation for enabling it via the public cloud : aka.ms/ama-grafana-link-ff")

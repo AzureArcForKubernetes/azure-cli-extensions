@@ -49,7 +49,7 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
 
 
 # pylint: disable=line-too-long
-def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region, configuration_settings):
+def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region):
     default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
     default_rule_group_name = "NodeRecordingRulesRuleGroup-{0}".format(cluster_name)
     default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
@@ -76,34 +76,3 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         RULES_API
     )
     put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, True, 1)
-
-    enable_windows_recording_rules = False
-    if configuration_settings is not None and 'enable-windows-recording-rules' in configuration_settings:
-        if configuration_settings['enable-windows-recording-rules'].lower == "true":
-            enable_windows_recording_rules = True
-
-    default_rule_group_name = "NodeRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
-        cluster_subscription,
-        cluster_resource_group_name,
-        default_rule_group_name
-    )
-    url = "{0}{1}?api-version={2}".format(
-        cmd.cli_ctx.cloud.endpoints.resource_manager,
-        default_rule_group_id,
-        RULES_API
-    )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 2)
-
-    default_rule_group_name = "NodeAndKubernetesRecordingRulesRuleGroup-Win-{0}".format(cluster_name)
-    default_rule_group_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{2}".format(
-        cluster_subscription,
-        cluster_resource_group_name,
-        default_rule_group_name
-    )
-    url = "{0}{1}?api-version={2}".format(
-        cmd.cli_ctx.cloud.endpoints.resource_manager,
-        default_rule_group_id,
-        RULES_API
-    )
-    put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, azure_monitor_workspace_resource_id, cluster_name, default_rules_template, url, enable_windows_recording_rules, 3)
