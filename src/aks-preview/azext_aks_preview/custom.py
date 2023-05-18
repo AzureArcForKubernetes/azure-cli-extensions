@@ -1920,7 +1920,7 @@ def _update_addons(cmd,  # pylint: disable=too-many-branches,too-many-statements
 
                 addon_profile.config = {
                     logAnalyticsConstName: workspace_resource_id}
-                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "True" if enable_msi_auth_for_monitoring else "False"
+                addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
