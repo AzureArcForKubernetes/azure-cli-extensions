@@ -1917,7 +1917,7 @@ def _update_addons(cmd,  # pylint: disable=too-many-branches,too-many-statements
                     if instance.identity is not None and instance.identity.type is not None and instance.identity.type == "userassigned":
                         logger.warning("--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
                         enable_msi_auth_for_monitoring = False
-                        
+
                 addon_profile.config = {
                     logAnalyticsConstName: workspace_resource_id}
                 addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "True" if enable_msi_auth_for_monitoring else "False"

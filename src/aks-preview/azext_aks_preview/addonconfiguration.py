@@ -139,7 +139,7 @@ def enable_addons(cmd,
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
             client.begin_create_or_update(resource_group_name, name, instance))
-        
+
         if ingress_appgw_addon_enabled:
             add_ingress_appgw_addon_role_assignment(result, cmd)
         if enable_virtual_node:
