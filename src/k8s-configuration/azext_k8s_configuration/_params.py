@@ -21,6 +21,7 @@ from .validators import (
 
 from .action import (
     KustomizationAddAction,
+    AddSubstitutionsAction,
 )
 from . import consts
 

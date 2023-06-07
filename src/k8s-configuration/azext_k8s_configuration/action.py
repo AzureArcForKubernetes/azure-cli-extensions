@@ -81,6 +81,6 @@ class AddSubstitutionsAction(argparse._AppendAction):
                 key, value = item.split('=', 1)
                 settings[key] = value
             except ValueError as ex:
-                raise ArgumentUsageError('Usage error: {} configuration_setting_key=configuration_setting_value'.
+                raise ArgumentUsageError('Usage error: {} substitution_key=substitution_value'.
                                          format(option_string)) from ex
         super().__call__(parser, namespace, settings, option_string)
