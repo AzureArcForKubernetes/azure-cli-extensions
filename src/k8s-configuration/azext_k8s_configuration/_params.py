@@ -21,6 +21,7 @@ from .validators import (
 
 from .action import (
     KustomizationAddAction,
+    AddSubstitutionsAction,
 )
 from . import consts
 
@@ -175,7 +176,7 @@ def load_arguments(self, _):
             "kustomization",
             action=KustomizationAddAction,
             options_list=["--kustomization", "-k"],
-            help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force']",
+            help="Define kustomizations to sync sources with parameters ['name', 'path', 'depends_on', 'timeout', 'sync_interval', 'retry_interval', 'prune', 'force', 'wait', 'postBuild']",
             nargs="+",
         )
         c.argument(
@@ -400,6 +401,18 @@ def load_arguments(self, _):
             "force",
             arg_type=get_three_state_flag(),
             help="Re-create resources that cannot be updated on the cluster (i.e. jobs)",
+        )
+        c.argument(
+            "wait",
+            arg_type=get_three_state_flag(),
+            help="Enable health check for all Kubernetes objects created by this Kustomization.",
+        )
+        c.argument(
+            "substitute",
+            arg_group="Configuration",
+            action=AddSubstitutionsAction,
+            nargs='+',
+            help='Substitution variables as key=value pair.  Repeat parameter for each setting'
         )
 
     with self.argument_context("k8s-configuration flux kustomization delete") as c:

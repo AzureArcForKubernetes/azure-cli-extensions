@@ -71,3 +71,16 @@ class KustomizationAddAction(argparse._AppendAction):
             ),
             option_string,
         )
+
+class AddSubstitutionsAction(argparse._AppendAction):
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        settings = {}
+        for item in values:
+            try:
+                key, value = item.split('=', 1)
+                settings[key] = value
+            except ValueError as ex:
+                raise ArgumentUsageError('Usage error: {} substitution_key=substitution_value'.
+                                         format(option_string)) from ex
+        super().__call__(parser, namespace, settings, option_string)
