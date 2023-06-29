@@ -680,9 +680,11 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2022-06-01"
     # get existing tags on the container insights extension DCR if the customer added any
     existing_tags = get_existing_container_insights_extension_dcr_tags(cmd, dcr_url)
-    streams = "Microsoft-ContainerInsights-Group-Default"
-    if extensionSettings is not None and extensionSettings["streams"] is not None:
-       streams = extensionSettings["streams"]
+    streams = ["Microsoft-ContainerInsights-Group-Default"]
+    if extensionSettings is not None and 'dataCollectionSettings' in extensionSettings.keys():
+       dataCollectionSettings = extensionSettings["dataCollectionSettings"]
+       if dataCollectionSettings is not None and 'streams' in dataCollectionSettings.keys():
+           streams = dataCollectionSettings["streams"]
 
     # create the DCR
     dcr_creation_body = json.dumps(
