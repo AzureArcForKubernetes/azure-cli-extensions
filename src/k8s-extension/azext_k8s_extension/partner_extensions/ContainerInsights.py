@@ -739,7 +739,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
             },
         }
     )
-    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version={DCR_API_VERSION}"
     for _ in range(3):
         try:
             send_raw_request(cmd.cli_ctx, "PUT", association_url, body=association_body,)
