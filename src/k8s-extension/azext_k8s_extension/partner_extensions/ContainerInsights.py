@@ -31,7 +31,7 @@ from .._client_factory import (
     cf_resources, cf_resource_groups, cf_log_analytics)
 
 logger = get_logger(__name__)
-
+DCR_API_VERSION = "2022-06-01"
 
 class ContainerInsights(DefaultExtension):
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
@@ -100,7 +100,7 @@ class ContainerInsights(DefaultExtension):
                 if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                     useAADAuth = True
         if useAADAuth:
-            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version={DCR_API_VERSION}"
             for _ in range(3):
                 try:
                     send_raw_request(cmd.cli_ctx, "GET", association_url,)
@@ -114,7 +114,7 @@ class ContainerInsights(DefaultExtension):
                     pass  # its OK to ignore the exception since MSI auth in preview
 
         if isDCRAExists:
-            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+            association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version={DCR_API_VERSION}"
             for _ in range(3):
                 try:
                     send_raw_request(cmd.cli_ctx, "DELETE", association_url,)
@@ -677,7 +677,7 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
             if (cluster_region not in region_ids):
                 raise ClientRequestError(f"Data Collection Rule Associations are not supported for cluster region {cluster_region}")
 
-    dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version=2022-06-01"
+    dcr_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{dcr_resource_id}?api-version={DCR_API_VERSION}"
     # get existing tags on the container insights extension DCR if the customer added any
     existing_tags = get_existing_container_insights_extension_dcr_tags(cmd, dcr_url)
     streams = ["Microsoft-ContainerInsights-Group-Default"]
