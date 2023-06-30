@@ -33,6 +33,7 @@ from .._client_factory import (
 logger = get_logger(__name__)
 DCR_API_VERSION = "2022-06-01"
 
+
 class ContainerInsights(DefaultExtension):
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
                extension_type, scope, auto_upgrade_minor_version, release_train, version, target_namespace,
