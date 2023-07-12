@@ -456,6 +456,7 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
     subscription_id = get_subscription_id(cmd.cli_ctx)
     workspace_resource_id = ''
     useAADAuth = True
+    configuration_settings['omsagent.useAADAuth'] = "true"
     extensionSettings = {}
 
     if configuration_settings is not None:
@@ -496,6 +497,10 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
                 namspaces = dataCollectionSettings["namespaces"]
                 if isinstance(namspaces, list) is False:
                     raise InvalidArgumentValueError('namespaces must be an array type')
+            if 'enableContainerLogV2' in dataCollectionSettings.keys():
+                enableContainerLogV2Value = dataCollectionSettings["enableContainerLogV2"]
+                if not isinstance(enableContainerLogV2Value, bool):
+                    raise InvalidArgumentValueError('enableContainerLogV2Value value MUST be either true or false')
             if 'streams' in dataCollectionSettings.keys():
                 streams = dataCollectionSettings["streams"]
                 if isinstance(streams, list) is False:
