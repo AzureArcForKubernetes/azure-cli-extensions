@@ -456,7 +456,8 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
     subscription_id = get_subscription_id(cmd.cli_ctx)
     workspace_resource_id = ''
     useAADAuth = True
-    configuration_settings['amalogs.useAADAuth'] = "true"
+    if 'amalogs.useAADAuth' not in configuration_settings:
+        configuration_settings['amalogs.useAADAuth'] = "true"
     extensionSettings = {}
 
     if configuration_settings is not None:
