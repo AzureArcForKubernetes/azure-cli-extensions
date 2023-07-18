@@ -96,10 +96,14 @@ class ContainerInsights(DefaultExtension):
                 useAADAuthSetting = configSettings['omsagent.useAADAuth']
                 if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                     useAADAuth = True
+                elif (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "false") or (isinstance(useAADAuthSetting, bool) and not useAADAuthSetting):
+                    useAADAuth = False
             elif 'amalogs.useAADAuth' in configSettings:
                 useAADAuthSetting = configSettings['amalogs.useAADAuth']
                 if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                     useAADAuth = True
+                elif (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "false") or (isinstance(useAADAuthSetting, bool) and not useAADAuthSetting):
+                    useAADAuth = False
         if useAADAuth:
             association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version={DCR_API_VERSION}"
             for _ in range(3):
@@ -472,11 +476,15 @@ def _get_container_insights_settings(cmd, cluster_resource_group_name, cluster_r
             logger.info("provided useAADAuth flag is : %s", useAADAuthSetting)
             if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                 useAADAuth = True
+            elif (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "false") or (isinstance(useAADAuthSetting, bool) and not useAADAuthSetting):
+                useAADAuth = False
         elif 'amalogs.useAADAuth' in configuration_settings:
             useAADAuthSetting = configuration_settings['amalogs.useAADAuth']
             logger.info("provided useAADAuth flag is : %s", useAADAuthSetting)
             if (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "true") or (isinstance(useAADAuthSetting, bool) and useAADAuthSetting):
                 useAADAuth = True
+            elif (isinstance(useAADAuthSetting, str) and str(useAADAuthSetting).lower() == "false") or (isinstance(useAADAuthSetting, bool) and not useAADAuthSetting):
+                useAADAuth = False
         if useAADAuth and ('dataCollectionSettings' in configuration_settings):
             dataCollectionSettingsString = configuration_settings["dataCollectionSettings"]
             logger.info("provided dataCollectionSettings  is : %s", dataCollectionSettingsString)
