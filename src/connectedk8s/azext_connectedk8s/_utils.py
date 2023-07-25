@@ -119,6 +119,7 @@ def get_chart_path(registry_path, kube_config, kube_context, helm_client_locatio
 
     return chart_path
 
+
 def get_helm_version(helm_client_location):
     cmd_helm_version = [helm_client_location, "version", "--short", "--client"]
     response_helm_version = subprocess.Popen(cmd_helm_version, stdout=PIPE, stderr=PIPE)
@@ -130,6 +131,7 @@ def get_helm_version(helm_client_location):
         return tuple(map(int, match.group(1).split('.')))
     else:
         raise CLIInternalError("Failed to parse Helm version")
+
 
 def pull_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name='azure-arc-k8sagents', retry_count=5, retry_delay=3):
     if helm_version >= (3, 7, 0):
@@ -151,6 +153,7 @@ def pull_helm_chart(registry_path, chart_export_path, kube_config, kube_context,
             raise CLIInternalError("Unable to pull {} helm chart from the registry '{}': ".format(chart_name, registry_path) + error_helm_chart_pull.decode("ascii"))
 
         time.sleep(retry_delay)
+
 
 def export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name='azure-arc-k8sagents'):
     if helm_version >= (3, 7, 0):
