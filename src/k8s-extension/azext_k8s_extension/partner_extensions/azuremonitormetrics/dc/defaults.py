@@ -14,7 +14,8 @@ from ..deaults import get_default_region
 # DCE remove underscore from cluster name
 def sanitize_name(name, objtype, length):
     name = name[0:length]
-    length = length - 1
+    length = length - 
+    
     if objtype == DC_TYPE.DCE:
         name = name.replace("_", "")
         name = ''.join(char for char in name if char.isalnum() or char == '-')
