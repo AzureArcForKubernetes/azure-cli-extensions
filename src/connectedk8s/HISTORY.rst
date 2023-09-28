@@ -3,13 +3,24 @@
 Release History
 ===============
 
+1.5.0
+++++++
+* Enforce valid custom locations service principal application object id passed in by the user for enabling custom locations feature.
+
+1.4.2
+++++++
+* Fix reference error.
+
+1.4.1
+++++++
+* Skip Onboarding prechecks for AKS-HCI.
+
 1.4.0
 ++++++
 * Added support for reading ARM metadata 2022-09-01.
 
 1.3.20
 ++++++
-
 * Bug fix in parsing logs for outbound connectivity check for troubleshoot command
 
 1.3.19

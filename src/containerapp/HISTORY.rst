@@ -3,6 +3,12 @@
 Release History
 ===============
 upcoming
+
+0.3.41
+++++++
+* 'az containerapp up/create': enable support for no Dockerfile cases with --repo
+
+0.3.40
 ++++++
 * 'az containerapp service': add support for creation and deletion of Qdrant vector database as a container app dev service
 * Add command group 'az containerapp connected-env', support show/list/delete/create connected environment
