@@ -691,9 +691,15 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     streams = ["Microsoft-ContainerInsights-Group-Default"]
     if extensionSettings is not None and 'dataCollectionSettings' in extensionSettings.keys():
         dataCollectionSettings = extensionSettings["dataCollectionSettings"]
+        dataCollectionSettings.setdefault("enableContainerLogV2", True)
         if dataCollectionSettings is not None and 'streams' in dataCollectionSettings.keys():
             streams = dataCollectionSettings["streams"]
-
+    else:
+        # If data_collection_settings is None, set default dataCollectionSettings
+        dataCollectionSettings = {
+            "enableContainerLogV2": True
+        }
+        extensionSettings["dataCollectionSettings"] = dataCollectionSettings
     # create the DCR
     dcr_creation_body = json.dumps(
         {
