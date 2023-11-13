@@ -682,7 +682,10 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
         dataCollectionSettings.setdefault("enableContainerLogV2", True)
         if dataCollectionSettings is not None and 'streams' in dataCollectionSettings.keys():
             streams = dataCollectionSettings["streams"]
+        extensionSettings["dataCollectionSettings"] = dataCollectionSettings
     else:
+        if extensionSettings is None:
+            extensionSettings = {}
         # If data_collection_settings is None, set default dataCollectionSettings
         dataCollectionSettings = {
             "enableContainerLogV2": True
