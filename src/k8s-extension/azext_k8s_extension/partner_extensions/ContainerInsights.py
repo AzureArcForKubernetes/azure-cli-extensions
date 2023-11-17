@@ -677,20 +677,20 @@ def _ensure_container_insights_dcr_for_monitoring(cmd, subscription_id, cluster_
     # get existing tags on the container insights extension DCR if the customer added any
     existing_tags = get_existing_container_insights_extension_dcr_tags(cmd, dcr_url)
     streams = ["Microsoft-ContainerInsights-Group-Default"]
-    if extensionSettings is not None and 'dataCollectionSettings' in extensionSettings.keys():
+    if extensionSettings is None:
+        extensionSettings = {}
+    if 'dataCollectionSettings' in extensionSettings.keys():
         dataCollectionSettings = extensionSettings["dataCollectionSettings"]
         dataCollectionSettings.setdefault("enableContainerLogV2", True)
         if dataCollectionSettings is not None and 'streams' in dataCollectionSettings.keys():
             streams = dataCollectionSettings["streams"]
-        extensionSettings["dataCollectionSettings"] = dataCollectionSettings
     else:
-        if extensionSettings is None:
-            extensionSettings = {}
         # If data_collection_settings is None, set default dataCollectionSettings
         dataCollectionSettings = {
             "enableContainerLogV2": True
         }
-        extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+    extensionSettings["dataCollectionSettings"] = dataCollectionSettings
+
     # create the DCR
     dcr_creation_body = json.dumps(
         {
