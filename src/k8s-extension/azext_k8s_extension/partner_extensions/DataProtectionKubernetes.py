@@ -52,7 +52,7 @@ class DataProtectionKubernetes(DefaultExtension):
             self.memory_limit.lower(): self.RESOURCE_LIMIT_MEMORY,
             self.use_aad.lower(): self.BACKUP_STORAGE_ACCOUNT_USE_AAD,
             self.storage_account_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI,
-            self.active_directory_authority_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI            
+            self.active_directory_authority_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI
         }
 
         self.bsl_configuration_settings = [
@@ -107,17 +107,16 @@ class DataProtectionKubernetes(DefaultExtension):
         self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
 
         configuration_settings[self.TENANT_ID] = tenant_id
-        
-        if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is None:           
+
+        if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is None:
             logger.warning("useAAD flag is not specified. Setting it to 'true'. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_USE_AAD] = "true"
-        
+
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true" and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI) is None:
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI] = self.__get_aad_endpoint(cmd.cli_ctx)
-        
+
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
-
 
         if release_train is None:
             release_train = 'stable'
@@ -185,21 +184,21 @@ class DataProtectionKubernetes(DefaultExtension):
                 logger.warning(f"Ignoring unrecognized configuration setting: {key}")
 
     def __validate_backup_storage_account(self, cli_ctx, resource_group_name, cluster_name, configuration_settings):
-            """Validations performed on the backup storage account
-               - Existance of the storage account
-               - Cluster and storage account are in the same location
-            """
-            storage_account = self.__get_storage_account(cli_ctx, configuration_settings)
+        """Validations performed on the backup storage account
+           - Existance of the storage account
+           - Cluster and storage account are in the same location
+        """
+        storage_account = self.__get_storage_account(cli_ctx, configuration_settings)
 
-            cluster_subscription_id = get_subscription_id(cli_ctx)
-            managed_clusters_client = cf_managed_clusters(cli_ctx, cluster_subscription_id)
-            managed_cluster = managed_clusters_client.get(
-                resource_group_name,
-                cluster_name)
+        cluster_subscription_id = get_subscription_id(cli_ctx)
+        managed_clusters_client = cf_managed_clusters(cli_ctx, cluster_subscription_id)
+        managed_cluster = managed_clusters_client.get(
+            resource_group_name,
+            cluster_name)
 
-            if managed_cluster.location != storage_account.location:
-                error_message = f"The Kubernetes managed cluster '{cluster_name} ({managed_cluster.location})' and the backup storage account '{configuration_settings[self.BACKUP_STORAGE_ACCOUNT_NAME]} ({storage_account.location})' are not in the same location. Please make sure that the cluster and the storage account are in the same location."
-                raise SystemExit(logger.error(error_message))
+        if managed_cluster.location != storage_account.location:
+            error_message = f"The Kubernetes managed cluster '{cluster_name} ({managed_cluster.location})' and the backup storage account '{configuration_settings[self.BACKUP_STORAGE_ACCOUNT_NAME]} ({storage_account.location})' are not in the same location. Please make sure that the cluster and the storage account are in the same location."
+            raise SystemExit(logger.error(error_message))
 
     def __get_storage_account(self, cli_ctx, configuration_settings):
         """Get the storage account properties"""
