@@ -34,6 +34,7 @@ from .partner_extensions.DefaultExtension import (
     DefaultExtension,
     user_confirmation_factory,
 )
+from .partner_extensions.WorkloadIAM import WorkloadIAM
 from . import consts
 
 from ._client_factory import cf_resources
@@ -51,6 +52,7 @@ def ExtensionFactory(extension_name):
         "microsoft.azureml.kubernetes": AzureMLKubernetes,
         "microsoft.dapr": Dapr,
         "microsoft.dataprotection.kubernetes": DataProtectionKubernetes,
+        "microsoft.workloadiam": WorkloadIAM,
     }
 
     # Return the extension if we find it in the map, else return the default
