@@ -183,7 +183,7 @@ class TestWorkloadIAM(unittest.TestCase):
                 plan_product=None)
 
         self.assertEqual(str(context.exception),
-                f"Invalid configuration settings '{settings}'. Please provide a tenant ID.")
+                f"Invalid configuration settings. Please provide a tenant ID.")
 
     def test_workload_iam_create_with_wrong_scope_fails(self):
         """
@@ -235,9 +235,10 @@ class TestWorkloadIAM(unittest.TestCase):
                 configuration_protected_settings_file=None, plan_name=None, plan_publisher=None,
                 plan_product=None)
 
+        str_settings = str(settings)
         self.assertEqual(str(context.exception),
-                f"Invalid configuration settings '{settings}'. Either a join token or a local "
-                "authority name must be provided.")
+                f"Invalid configuration settings. Either a join token or a local authority name "
+                "must be provided.")
 
         # Missing trust domain
 
@@ -256,9 +257,9 @@ class TestWorkloadIAM(unittest.TestCase):
                 configuration_protected_settings_file=None, plan_name=None, plan_publisher=None,
                 plan_product=None)
 
+        str_settings = str(settings)
         self.assertEqual(str(context.exception),
-                f"Invalid configuration settings '{settings}'. Please provide a trust "
-                "domain name.")
+                f"Invalid configuration settings. Please provide a trust domain name.")
 
     def test_workload_iam_get_join_token_with_valid_argument_success(self):
         """

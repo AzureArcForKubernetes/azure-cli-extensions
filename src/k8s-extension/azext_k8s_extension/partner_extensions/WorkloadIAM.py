@@ -16,10 +16,11 @@ from .DefaultExtension import DefaultExtension
 
 logger = get_logger(__name__)
 
-CONFIG_SETTINGS_USER_TRUST_DOMAIN = 'trustDomain'
-CONFIG_SETTINGS_USER_LOCAL_AUTHORITY = 'localAuthority'
-CONFIG_SETTINGS_USER_TENANT_ID = 'tenantID'
-CONFIG_SETTINGS_USER_JOIN_TOKEN = 'joinToken'
+# The user settings are case-insensitive
+CONFIG_SETTINGS_USER_TRUST_DOMAIN = 'trustdomain'
+CONFIG_SETTINGS_USER_LOCAL_AUTHORITY = 'localauthority'
+CONFIG_SETTINGS_USER_TENANT_ID = 'tenantid'
+CONFIG_SETTINGS_USER_JOIN_TOKEN = 'jointoken'
 
 CONFIG_SETTINGS_HELM_TRUST_DOMAIN = 'global.workload-iam.trustDomain'
 CONFIG_SETTINGS_HELM_TENANT_ID = 'global.workload-iam.tenantID'
@@ -42,6 +43,7 @@ class WorkloadIAM(DefaultExtension):
             # TODO - Set this to 'stable' when the extension is ready
             release_train = 'preview'
 
+        scope = scope.lower()
         if scope is None:
             scope = 'cluster'
         elif scope != 'cluster':
@@ -52,29 +54,40 @@ class WorkloadIAM(DefaultExtension):
         scope_cluster = ScopeCluster(release_namespace=release_namespace)
         ext_scope = Scope(cluster=scope_cluster, namespace=None)
 
-        # Get user configuration values and remove them from the dictionary
-        trust_domain = configuration_settings.pop(CONFIG_SETTINGS_USER_TRUST_DOMAIN, None)
-        tenant_id = configuration_settings.pop(CONFIG_SETTINGS_USER_TENANT_ID, None)
-        local_authority = configuration_settings.pop(CONFIG_SETTINGS_USER_LOCAL_AUTHORITY, None)
-        join_token = configuration_settings.pop(CONFIG_SETTINGS_USER_JOIN_TOKEN, None)
+        # Create new dictionary where the keys of the user settings are all lowercase (but leave the
+        # others alone in case they are specific settings that have to be passed to the Helm chart).
+        validated_settings = dict()
+        all_user_settings = [CONFIG_SETTINGS_USER_TRUST_DOMAIN, CONFIG_SETTINGS_USER_TENANT_ID,
+                CONFIG_SETTINGS_USER_LOCAL_AUTHORITY, CONFIG_SETTINGS_USER_JOIN_TOKEN]
+        for key, value in configuration_settings.items():
+            if key.lower() in all_user_settings:
+                validated_settings[key.lower()] = value
+            else:
+                validated_settings[key] = value
+        config_settings = validated_settings
+
+        # Get user configuration values and remove them from the dictionary so that they aren't
+        # passed to the Helm chart
+        trust_domain = config_settings.pop(CONFIG_SETTINGS_USER_TRUST_DOMAIN, None)
+        tenant_id = config_settings.pop(CONFIG_SETTINGS_USER_TENANT_ID, None)
+        local_authority = config_settings.pop(CONFIG_SETTINGS_USER_LOCAL_AUTHORITY, None)
+        join_token = config_settings.pop(CONFIG_SETTINGS_USER_JOIN_TOKEN, None)
 
         # A trust domain name is always required
         if trust_domain is None:
             raise InvalidArgumentValueError(
-                f"Invalid configuration settings '{configuration_settings}'. Please provide a trust "
-                "domain name.")
+                "Invalid configuration settings. Please provide a trust domain name.")
 
         if tenant_id is None:
             raise InvalidArgumentValueError(
-                f"Invalid configuration settings '{configuration_settings}'. Please provide a "
-                "tenant ID.")
+                "Invalid configuration settings. Please provide a tenant ID.")
 
         # If the user hasn't provided a join token, create one
         if join_token is None:
             if local_authority is None:
                 raise InvalidArgumentValueError(
-                    f"Invalid configuration settings '{configuration_settings}'. Either a join "
-                    "token or a local authority name must be provided.")
+                    "Invalid configuration settings. Either a join token or a local authority name "
+                    "must be provided.")
             join_token = self.get_join_token(trust_domain, local_authority)
         else:
             logger.info("Join token is provided")
@@ -84,7 +97,7 @@ class WorkloadIAM(DefaultExtension):
         configuration_settings[CONFIG_SETTINGS_HELM_TENANT_ID] = tenant_id
         configuration_settings[CONFIG_SETTINGS_HELM_JOIN_TOKEN] = join_token
 
-        logger.debug("Configuration settings value for Helm: %s", str(configuration_settings))
+        logger.debug("Configuration settings value for Helm: %s" % str(configuration_settings))
 
         create_identity = True
         extension = Extension(
