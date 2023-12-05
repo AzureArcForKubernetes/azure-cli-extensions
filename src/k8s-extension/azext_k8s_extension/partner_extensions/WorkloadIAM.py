@@ -26,6 +26,7 @@ CONFIG_SETTINGS_HELM_TRUST_DOMAIN = 'global.workload-iam.trustDomain'
 CONFIG_SETTINGS_HELM_TENANT_ID = 'global.workload-iam.tenantID'
 CONFIG_SETTINGS_HELM_JOIN_TOKEN = 'workload-iam-local-authority.localAuthorityArgs.joinToken'
 
+
 class WorkloadIAM(DefaultExtension):
 
     def Create(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp,
@@ -58,7 +59,7 @@ class WorkloadIAM(DefaultExtension):
         # others alone in case they are specific settings that have to be passed to the Helm chart).
         validated_settings = dict()
         all_user_settings = [CONFIG_SETTINGS_USER_TRUST_DOMAIN, CONFIG_SETTINGS_USER_TENANT_ID,
-                CONFIG_SETTINGS_USER_LOCAL_AUTHORITY, CONFIG_SETTINGS_USER_JOIN_TOKEN]
+                             CONFIG_SETTINGS_USER_LOCAL_AUTHORITY, CONFIG_SETTINGS_USER_JOIN_TOKEN]
         for key, value in configuration_settings.items():
             if key.lower() in all_user_settings:
                 validated_settings[key.lower()] = value
@@ -111,7 +112,6 @@ class WorkloadIAM(DefaultExtension):
         )
         return extension, name, create_identity
 
-
     def get_join_token(self, trust_domain, local_authority):
         """
         Invoke the az command to obtain a join token.
@@ -127,7 +127,7 @@ class WorkloadIAM(DefaultExtension):
             "--type", "joinTokenAttestationMethod",
             "--query", "singleUseToken",
             "--dn", "myJoinToken",
-            ]
+        ]
         cmd_str = " ".join(cmd)
 
         try:
