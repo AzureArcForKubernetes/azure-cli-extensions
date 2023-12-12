@@ -153,18 +153,6 @@ class DataProtectionKubernetes(DefaultExtension):
             if bsl_specified:
                 self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
 
-        # If customer already had aad enabled, then we don't want to disable it during update.
-        # similarly if they didn't have it enabled, we don't want to enable it automatically.
-        if original_extension.configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true":
-            logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
-            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_USE_AAD] = "true"
-
-        if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true" and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI) is None:
-            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI] = self.__get_aad_endpoint(cmd.cli_ctx)
-
-        if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true" and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
-            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
-
         return PatchExtension(
             auto_upgrade_minor_version=True,
             release_train=release_train,
