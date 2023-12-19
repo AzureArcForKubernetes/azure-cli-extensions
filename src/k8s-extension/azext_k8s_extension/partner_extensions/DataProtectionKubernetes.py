@@ -31,7 +31,6 @@ class DataProtectionKubernetes(DefaultExtension):
         self.RESOURCE_LIMIT_MEMORY = "resources.limits.memory"
         self.BACKUP_STORAGE_ACCOUNT_USE_AAD = "configuration.backupStorageLocation.config.useAAD"
         self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI = "configuration.backupStorageLocation.config.storageAccountURI"
-        self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI = "configuration.backupStorageLocation.config.activeDirectoryAuthorityURI"
 
         self.blob_container = "blobContainer"
         self.storage_account = "storageAccount"
@@ -41,7 +40,6 @@ class DataProtectionKubernetes(DefaultExtension):
         self.memory_limit = "memoryLimit"
         self.use_aad = "useAAD"
         self.storage_account_uri = "storageAccountURI"
-        self.active_directory_authority_uri = "activeDirectoryAuthorityURI"
 
         self.configuration_mapping = {
             self.blob_container.lower(): self.BACKUP_STORAGE_ACCOUNT_CONTAINER,
@@ -51,8 +49,7 @@ class DataProtectionKubernetes(DefaultExtension):
             self.cpu_limit.lower(): self.RESOURCE_LIMIT_CPU,
             self.memory_limit.lower(): self.RESOURCE_LIMIT_MEMORY,
             self.use_aad.lower(): self.BACKUP_STORAGE_ACCOUNT_USE_AAD,
-            self.storage_account_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI,
-            self.active_directory_authority_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI
+            self.storage_account_uri.lower(): self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI           
         }
 
         self.bsl_configuration_settings = [
@@ -112,9 +109,6 @@ class DataProtectionKubernetes(DefaultExtension):
             logger.warning("useAAD flag is not specified. Setting it to 'true'. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_USE_AAD] = "true"
 
-        if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true" and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI) is None:
-            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_ACTIVE_DIRECTORY_AUTHORITY_URI] = self.__get_aad_endpoint(cmd.cli_ctx)
-
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
 
@@ -152,6 +146,14 @@ class DataProtectionKubernetes(DefaultExtension):
             self.__validate_and_map_config(configuration_settings, validate_bsl=bsl_specified)
             if bsl_specified:
                 self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
+
+        # this step is for brownfield migrating to AAD
+        if configuration_settings.configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true":
+            logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")                        
+           
+            # SA Uri not provided in user input, and not populated in the original extension, we populate it.
+            if original_extension.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
+                configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
 
         return PatchExtension(
             auto_upgrade_minor_version=True,
@@ -224,6 +226,3 @@ class DataProtectionKubernetes(DefaultExtension):
             if key.lower() in input_configuration_keys:
                 return True
         return False
-
-    def __get_aad_endpoint(self, cli_ctx):
-        return cli_ctx.cloud.endpoints.active_directory
