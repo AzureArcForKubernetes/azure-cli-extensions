@@ -149,19 +149,19 @@ class DataProtectionKubernetes(DefaultExtension):
             self.__validate_and_map_config(configuration_settings, validate_bsl=bsl_specified)
             if bsl_specified:
                 self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
-
         # this step is for brownfield migrating to AAD
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is not None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true":
             logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
 
-        # SA Uri not provided in user input, and not populated in the original extension, we populate it.
-        if original_extension.configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:            
-            if bsl_specified:
-                logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of provided storage account")
-                configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
-            else:
-                logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of extension's storage account")
-                configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, original_extension.configuration_settings)
+        # SA details provided in user inputs, but did not provide SA URI.
+        if bsl_specified and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
+            logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of provided storage account")
+            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
+            logger.warning(f"storageAccountURI: {configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI]}")
+        # SA details not provided in user input, SA Uri not provided in user input, and also not populated in the original extension, we populate it.
+        elif not bsl_specified and original_extension.configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
+            logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of extension's storage account")
+            configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, original_extension.configuration_settings)
             logger.warning(f"storageAccountURI: {configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI]}")
 
         return PatchExtension(
