@@ -9,20 +9,44 @@
 from copy import deepcopy
 from typing import Any, TYPE_CHECKING
 
-from msrest import Deserializer, Serializer
-
 from azure.core.rest import HttpRequest, HttpResponse
 from azure.mgmt.core import ARMPipelineClient
 
-from . import models
+from . import models as _models
 from ._configuration import DataFactoryManagementClientConfiguration
-from .operations import ActivityRunsOperations, DataFlowDebugSessionOperations, DataFlowsOperations, DatasetsOperations, ExposureControlOperations, FactoriesOperations, GlobalParametersOperations, IntegrationRuntimeNodesOperations, IntegrationRuntimeObjectMetadataOperations, IntegrationRuntimesOperations, LinkedServicesOperations, ManagedPrivateEndpointsOperations, ManagedVirtualNetworksOperations, Operations, PipelineRunsOperations, PipelinesOperations, PrivateEndPointConnectionsOperations, PrivateEndpointConnectionOperations, PrivateLinkResourcesOperations, TriggerRunsOperations, TriggersOperations
+from ._serialization import Deserializer, Serializer
+from .operations import (
+    ActivityRunsOperations,
+    ChangeDataCaptureOperations,
+    CredentialOperationsOperations,
+    DataFlowDebugSessionOperations,
+    DataFlowsOperations,
+    DatasetsOperations,
+    ExposureControlOperations,
+    FactoriesOperations,
+    GlobalParametersOperations,
+    IntegrationRuntimeNodesOperations,
+    IntegrationRuntimeObjectMetadataOperations,
+    IntegrationRuntimesOperations,
+    LinkedServicesOperations,
+    ManagedPrivateEndpointsOperations,
+    ManagedVirtualNetworksOperations,
+    Operations,
+    PipelineRunsOperations,
+    PipelinesOperations,
+    PrivateEndPointConnectionsOperations,
+    PrivateEndpointConnectionOperations,
+    PrivateLinkResourcesOperations,
+    TriggerRunsOperations,
+    TriggersOperations,
+)
 
 if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
     from azure.core.credentials import TokenCredential
 
-class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attributes
+
+class DataFactoryManagementClient:  # pylint: disable=client-accepts-api-version-keyword,too-many-instance-attributes
     """The Azure Data Factory V2 management API provides a RESTful set of web services that interact
     with Azure Data Factory V2 services.
 
@@ -66,6 +90,9 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
     :ivar managed_private_endpoints: ManagedPrivateEndpointsOperations operations
     :vartype managed_private_endpoints:
      azure.mgmt.datafactory.operations.ManagedPrivateEndpointsOperations
+    :ivar credential_operations: CredentialOperationsOperations operations
+    :vartype credential_operations:
+     azure.mgmt.datafactory.operations.CredentialOperationsOperations
     :ivar private_end_point_connections: PrivateEndPointConnectionsOperations operations
     :vartype private_end_point_connections:
      azure.mgmt.datafactory.operations.PrivateEndPointConnectionsOperations
@@ -77,9 +104,11 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
      azure.mgmt.datafactory.operations.PrivateLinkResourcesOperations
     :ivar global_parameters: GlobalParametersOperations operations
     :vartype global_parameters: azure.mgmt.datafactory.operations.GlobalParametersOperations
-    :param credential: Credential needed for the client to connect to Azure.
+    :ivar change_data_capture: ChangeDataCaptureOperations operations
+    :vartype change_data_capture: azure.mgmt.datafactory.operations.ChangeDataCaptureOperations
+    :param credential: Credential needed for the client to connect to Azure. Required.
     :type credential: ~azure.core.credentials.TokenCredential
-    :param subscription_id: The subscription identifier.
+    :param subscription_id: The subscription identifier. Required.
     :type subscription_id: str
     :param base_url: Service URL. Default value is "https://management.azure.com".
     :type base_url: str
@@ -97,19 +126,17 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
         base_url: str = "https://management.azure.com",
         **kwargs: Any
     ) -> None:
-        self._config = DataFactoryManagementClientConfiguration(credential=credential, subscription_id=subscription_id, **kwargs)
-        self._client = ARMPipelineClient(base_url=base_url, config=self._config, **kwargs)
+        self._config = DataFactoryManagementClientConfiguration(
+            credential=credential, subscription_id=subscription_id, **kwargs
+        )
+        self._client: ARMPipelineClient = ARMPipelineClient(base_url=base_url, config=self._config, **kwargs)
 
-        client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
+        client_models = {k: v for k, v in _models.__dict__.items() if isinstance(v, type)}
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
         self._serialize.client_side_validation = False
-        self.operations = Operations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.factories = FactoriesOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
+        self.operations = Operations(self._client, self._config, self._serialize, self._deserialize)
+        self.factories = FactoriesOperations(self._client, self._config, self._serialize, self._deserialize)
         self.exposure_control = ExposureControlOperations(
             self._client, self._config, self._serialize, self._deserialize
         )
@@ -122,30 +149,14 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
         self.integration_runtime_nodes = IntegrationRuntimeNodesOperations(
             self._client, self._config, self._serialize, self._deserialize
         )
-        self.linked_services = LinkedServicesOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.datasets = DatasetsOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.pipelines = PipelinesOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.pipeline_runs = PipelineRunsOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.activity_runs = ActivityRunsOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.triggers = TriggersOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.trigger_runs = TriggerRunsOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
-        self.data_flows = DataFlowsOperations(
-            self._client, self._config, self._serialize, self._deserialize
-        )
+        self.linked_services = LinkedServicesOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.datasets = DatasetsOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.pipelines = PipelinesOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.pipeline_runs = PipelineRunsOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.activity_runs = ActivityRunsOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.triggers = TriggersOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.trigger_runs = TriggerRunsOperations(self._client, self._config, self._serialize, self._deserialize)
+        self.data_flows = DataFlowsOperations(self._client, self._config, self._serialize, self._deserialize)
         self.data_flow_debug_session = DataFlowDebugSessionOperations(
             self._client, self._config, self._serialize, self._deserialize
         )
@@ -153,6 +164,9 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
             self._client, self._config, self._serialize, self._deserialize
         )
         self.managed_private_endpoints = ManagedPrivateEndpointsOperations(
+            self._client, self._config, self._serialize, self._deserialize
+        )
+        self.credential_operations = CredentialOperationsOperations(
             self._client, self._config, self._serialize, self._deserialize
         )
         self.private_end_point_connections = PrivateEndPointConnectionsOperations(
@@ -167,13 +181,11 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
         self.global_parameters = GlobalParametersOperations(
             self._client, self._config, self._serialize, self._deserialize
         )
+        self.change_data_capture = ChangeDataCaptureOperations(
+            self._client, self._config, self._serialize, self._deserialize
+        )
 
-
-    def _send_request(
-        self,
-        request: HttpRequest,
-        **kwargs: Any
-    ) -> HttpResponse:
+    def _send_request(self, request: HttpRequest, **kwargs: Any) -> HttpResponse:
         """Runs the network request through the client's chained policies.
 
         >>> from azure.core.rest import HttpRequest
@@ -182,7 +194,7 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
         >>> response = client._send_request(request)
         <HttpResponse: 200 OK>
 
-        For more information on this code flow, see https://aka.ms/azsdk/python/protocol/quickstart
+        For more information on this code flow, see https://aka.ms/azsdk/dpcodegen/python/send_request
 
         :param request: The network request you want to make. Required.
         :type request: ~azure.core.rest.HttpRequest
@@ -195,15 +207,12 @@ class DataFactoryManagementClient:    # pylint: disable=too-many-instance-attrib
         request_copy.url = self._client.format_url(request_copy.url)
         return self._client.send_request(request_copy, **kwargs)
 
-    def close(self):
-        # type: () -> None
+    def close(self) -> None:
         self._client.close()
 
-    def __enter__(self):
-        # type: () -> DataFactoryManagementClient
+    def __enter__(self) -> "DataFactoryManagementClient":
         self._client.__enter__()
         return self
 
-    def __exit__(self, *exc_details):
-        # type: (Any) -> None
+    def __exit__(self, *exc_details: Any) -> None:
         self._client.__exit__(*exc_details)

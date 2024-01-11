@@ -2,6 +2,13 @@
 
 Release History
 ===============
+0.2.2
+++++++
+* Updated create software update configuration cmdlet to address the bug to allow multiple values for classifications.
+
+0.2.1
+++++++
+* `az automation python3-package`: Add new command group to support managing python3 package operations.
 
 0.2.0
 ++++++
