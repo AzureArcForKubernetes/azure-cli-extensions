@@ -10,6 +10,7 @@ import subprocess
 from subprocess import Popen, PIPE
 import time
 import requests
+import re
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import json
@@ -93,32 +94,51 @@ def validate_custom_token(cmd, resource_group_name, location):
 
 
 def get_chart_path(registry_path, kube_config, kube_context, helm_client_location, chart_folder_name='AzureArcCharts', chart_name='azure-arc-k8sagents'):
-    # Pulling helm chart from registry
+    # Determine helm version
+    helm_version = get_helm_version(helm_client_location)
     os.environ['HELM_EXPERIMENTAL_OCI'] = '1'
-    pull_helm_chart(registry_path, kube_config, kube_context, helm_client_location, chart_name)
-
-    # Exporting helm chart after cleanup
     chart_export_path = os.path.join(os.path.expanduser('~'), '.azure', chart_folder_name)
-    try:
-        if os.path.isdir(chart_export_path):
-            shutil.rmtree(chart_export_path)
-    except:
-        logger.warning("Unable to cleanup the {} already present on the machine. In case of failure, please cleanup the directory '{}' and try again.".format(chart_folder_name, chart_export_path))
 
-    export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, chart_name)
+    # Handle directory cleanup differently based on helm version
+    if os.path.isdir(chart_export_path):
+        if helm_version < (3, 7, 0):
+            try:
+                shutil.rmtree(chart_export_path)
+            except:
+                logger.warning("Unable to cleanup the {} already present on the machine. In case of failure, please cleanup the directory '{}' and try again.".format(chart_folder_name, chart_export_path))
+
+    # Pulling helm chart from registry
+    pull_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name)
+
+    # Exporting helm chart if helm_version is < (3,7,0)
+    if helm_version < (3, 7, 0):
+        export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name)
 
     # Returning helm chart path
     helm_chart_path = os.path.join(chart_export_path, chart_name)
-    if chart_folder_name == consts.Pre_Onboarding_Helm_Charts_Folder_Name:
-        chart_path = helm_chart_path
-    else:
-        chart_path = os.getenv('HELMCHART') if os.getenv('HELMCHART') else helm_chart_path
+    chart_path = os.getenv('HELMCHART', helm_chart_path)
 
     return chart_path
 
 
-def pull_helm_chart(registry_path, kube_config, kube_context, helm_client_location, chart_name='azure-arc-k8sagents', retry_count=5, retry_delay=3):
-    cmd_helm_chart_pull = [helm_client_location, "chart", "pull", registry_path]
+def get_helm_version(helm_client_location):
+    cmd_helm_version = [helm_client_location, "version", "--short", "--client"]
+    response_helm_version = subprocess.Popen(cmd_helm_version, stdout=PIPE, stderr=PIPE)
+    output, error = response_helm_version.communicate()
+    if response_helm_version.returncode != 0:
+        raise CLIInternalError("Failed to get Helm version: " + error.decode("ascii"))
+    match = re.match(r"v(\d+\.\d+\.\d+)", output.decode("ascii"))
+    if match:
+        return tuple(map(int, match.group(1).split('.')))
+    else:
+        raise CLIInternalError("Failed to parse Helm version")
+
+
+def pull_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name='azure-arc-k8sagents', retry_count=5, retry_delay=3):
+    if helm_version >= (3, 7, 0):
+        cmd_helm_chart_pull = [helm_client_location, "pull", registry_path, "--destination", chart_export_path]
+    else:
+        cmd_helm_chart_pull = [helm_client_location, "chart", "pull", registry_path]
     if kube_config:
         cmd_helm_chart_pull.extend(["--kubeconfig", kube_config])
     if kube_context:
@@ -126,17 +146,19 @@ def pull_helm_chart(registry_path, kube_config, kube_context, helm_client_locati
     for i in range(retry_count):
         response_helm_chart_pull = subprocess.Popen(cmd_helm_chart_pull, stdout=PIPE, stderr=PIPE)
         _, error_helm_chart_pull = response_helm_chart_pull.communicate()
-        if response_helm_chart_pull.returncode != 0:
-            if i == retry_count - 1:
-                telemetry.set_exception(exception=error_helm_chart_pull.decode("ascii"), fault_type=consts.Pull_HelmChart_Fault_Type,
-                                        summary="Unable to pull {} helm charts from the registry".format(chart_name))
-                raise CLIInternalError("Unable to pull {} helm chart from the registry '{}': ".format(chart_name, registry_path) + error_helm_chart_pull.decode("ascii"))
-            time.sleep(retry_delay)
-        else:
-            break
+        if response_helm_chart_pull.returncode == 0:
+            return
+        if i == retry_count - 1:
+            telemetry.set_exception(exception=error_helm_chart_pull.decode("ascii"), fault_type=consts.Pull_HelmChart_Fault_Type,
+                                    summary="Unable to pull {} helm charts from the registry".format(chart_name))
+            raise CLIInternalError("Unable to pull {} helm chart from the registry '{}': ".format(chart_name, registry_path) + error_helm_chart_pull.decode("ascii"))
+
+        time.sleep(retry_delay)
 
 
-def export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, chart_name='azure-arc-k8sagents'):
+def export_helm_chart(registry_path, chart_export_path, kube_config, kube_context, helm_client_location, helm_version, chart_name='azure-arc-k8sagents'):
+    if helm_version >= (3, 7, 0):
+        return
     cmd_helm_chart_export = [helm_client_location, "chart", "export", registry_path, "--destination", chart_export_path]
     if kube_config:
         cmd_helm_chart_export.extend(["--kubeconfig", kube_config])
