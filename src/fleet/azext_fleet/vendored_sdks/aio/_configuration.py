@@ -10,7 +10,6 @@
 # --------------------------------------------------------------------------
 from typing import Any, TYPE_CHECKING
 
-from azure.core.configuration import Configuration
 from azure.core.pipeline import policies
 from azure.mgmt.core.policies import ARMHttpLoggingPolicy, AsyncARMChallengeAuthenticationPolicy
 
@@ -20,8 +19,8 @@ if TYPE_CHECKING:
     # pylint: disable=unused-import,ungrouped-imports
     from azure.core.credentials_async import AsyncTokenCredential
 
-class ContainerServiceClientConfiguration(Configuration):
-    """Configuration for ContainerServiceClient.
+class ContainerServiceFleetMgmtClientConfiguration:
+    """Configuration for ContainerServiceFleetMgmtClient.
 
     Note that all parameters used to create this instance are saved as instance
     attributes.
@@ -36,18 +35,18 @@ class ContainerServiceClientConfiguration(Configuration):
         self,
         credential: "AsyncTokenCredential",
         subscription_id: str,
-        **kwargs  # type: Any
+        **kwargs: Any
     ) -> None:
         if credential is None:
             raise ValueError("Parameter 'credential' must not be None.")
         if subscription_id is None:
             raise ValueError("Parameter 'subscription_id' must not be None.")
-        super(ContainerServiceClientConfiguration, self).__init__(**kwargs)
 
         self.credential = credential
         self.subscription_id = subscription_id
         self.credential_scopes = kwargs.pop('credential_scopes', ['https://management.azure.com/.default'])
-        kwargs.setdefault('sdk_moniker', 'azure-mgmt-containerservice/{}'.format(VERSION))
+        kwargs.setdefault('sdk_moniker', 'azure-mgmt-containerservicefleet/{}'.format(VERSION))
+        self.polling_interval = kwargs.get("polling_interval", 30)
         self._configure(**kwargs)
 
     def _configure(
