@@ -117,6 +117,40 @@ def transform_output(results):
                 ]))
         return table
 
+    elif isinstance(results, list) and len(results) > 0 and 'reportData' in results[0]:  # pylint: disable=too-many-nested-blocks
+        table = []
+
+        indices = range(len(results))
+
+        for group_index, group in enumerate(results[0]['reportData']['groups']):
+            table.append(OrderedDict([
+                ("Label", f"---{group['title']}---"),
+                *[(f"{i}", '---') for i in indices]
+            ]))
+
+            visited_entries = set()
+
+            for entry in [entry for index in indices for entry in results[index]['reportData']['groups'][group_index]['entries']]:
+                label = entry['label']
+                if label in visited_entries:
+                    continue
+                visited_entries.add(label)
+
+                row = [("Label", label)]
+
+                for index in indices:
+                    val = results[index]
+                    for key in entry['path'].split("/"):
+                        if key in val:
+                            val = val[key]
+                        else:
+                            val = "N/A"
+                            break
+                    row.append((f"{index}", val))
+                table.append(OrderedDict(row))
+
+        return table
+
     elif 'errorData' in results:
         notFound = 'Not found'
         errorData = results['errorData']
@@ -148,6 +182,9 @@ def load_command_table(self, _):
         w.command('set', 'set', validator=validate_workspace_info)
         w.command('clear', 'clear')
         w.command('quotas', 'quotas', validator=validate_workspace_info)
+        w.command('keys list', 'list_keys')
+        w.command('keys regenerate', 'regenerate_keys')
+        w.command('update', 'enable_keys')
 
     with self.command_group('quantum target', target_ops) as t:
         t.command('list', 'list', validator=validate_workspace_info, table_transformer=transform_targets)
