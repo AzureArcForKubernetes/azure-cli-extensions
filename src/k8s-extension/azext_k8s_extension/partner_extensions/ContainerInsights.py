@@ -21,9 +21,12 @@ from azure.cli.core.util import sdk_no_wait, send_raw_request
 from msrestazure.tools import parse_resource_id, is_valid_resource_id
 from azure.core.exceptions import HttpResponseError
 
-from ..vendored_sdks.models import Extension
-from ..vendored_sdks.models import ScopeCluster
-from ..vendored_sdks.models import Scope
+from ..vendored_sdks.models import (
+    Extension,
+    Scope,
+    ScopeCluster,
+    PatchExtension
+)
 
 from .DefaultExtension import DefaultExtension
 
@@ -78,6 +81,35 @@ class ContainerInsights(DefaultExtension):
             configuration_protected_settings=configuration_protected_settings
         )
         return extension, name, create_identity
+
+    def Update(self, cmd, client, resource_group_name, cluster_name, name, cluster_type,
+               extension_type, scope, auto_upgrade_minor_version, release_train, version, target_namespace,
+               release_namespace, configuration_settings, configuration_protected_settings,
+               configuration_settings_file, configuration_protected_settings_file,
+               plan_name, plan_publisher, plan_product):
+        cluster_rp, _ = get_cluster_rp_api_version(cluster_type=cluster_type, cluster_rp=cluster_rp)
+        try:
+            extension = client.get(resource_group_name, cluster_rp, cluster_type, cluster_name, name)
+        except Exception as e:
+            pass
+
+        current_config_settings = extension.configuration_settings
+        current_protected_settings = extension.configuration_protected_settings
+
+        new_config_settings = configuration_settings if configuration_settings else current_config_settings
+        new_protected_settings = configuration_protected_settings if configuration_protected_settings else current_protected_settings
+
+        is_ci_extension_type = True
+        if not is_skip_prerequisites_specified(configuration_settings):
+            _get_container_insights_settings(cmd, resource_group_name, cluster_rp, cluster_type, cluster_name,  new_config_settings, new_protected_settings, is_ci_extension_type)
+        else:
+            logger.info("Provisioning of prerequisites is skipped")
+
+        return PatchExtension(auto_upgrade_minor_version=auto_upgrade_minor_version,
+                              release_train=release_train,
+                              version=version,
+                              configuration_settings=new_config_settings,
+                              configuration_protected_settings=new_protected_settings)
 
     def Delete(self, cmd, client, resource_group_name, cluster_name, name, cluster_type, cluster_rp, yes):
         # Delete DCR-A if it exists incase of MSI Auth
