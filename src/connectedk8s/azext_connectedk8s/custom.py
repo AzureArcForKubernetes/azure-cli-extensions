@@ -65,7 +65,7 @@ logger = get_logger(__name__)
 def create_connectedk8s(cmd, client, resource_group_name, cluster_name, correlation_id=None, https_proxy="", http_proxy="", no_proxy="", proxy_cert="", location=None,
                         kube_config=None, kube_context=None, no_wait=False, tags=None, distribution='generic', infrastructure='generic',
                         disable_auto_upgrade=False, cl_oid=None, onboarding_timeout="600", enable_private_link=None, private_link_scope_resource_id=None,
-                        distribution_version=None, azure_hybrid_benefit=None, skip_ssl_verification=False, yes=False, container_log_path=None):
+                        distribution_version=None, azure_hybrid_benefit=None, skip_ssl_verification=False, yes=False, container_log_path=None, enable_oidc_issuer=False):
     logger.warning("This operation might take a while...\n")
 
     # changing cli config to push telemetry in 1 hr interval
@@ -488,7 +488,7 @@ def create_connectedk8s(cmd, client, resource_group_name, cluster_name, correlat
                                private_key_pem, kube_config, kube_context, no_wait, values_file, azure_cloud,
                                disable_auto_upgrade, enable_custom_locations, custom_locations_oid,
                                helm_client_location, enable_private_link, arm_metadata,
-                               onboarding_timeout, container_log_path)
+                               onboarding_timeout, container_log_path, enable_oidc_issuer)
     return put_cc_response
 
 
@@ -1100,7 +1100,8 @@ def update_connected_cluster_internal(client, resource_group_name, cluster_name,
 
 def update_connected_cluster(cmd, client, resource_group_name, cluster_name, https_proxy="", http_proxy="", no_proxy="", proxy_cert="",
                              disable_proxy=False, kube_config=None, kube_context=None, auto_upgrade=None, tags=None,
-                             distribution=None, distribution_version=None, azure_hybrid_benefit=None, skip_ssl_verification=False, yes=False, container_log_path=None):
+                             distribution=None, distribution_version=None, azure_hybrid_benefit=None, skip_ssl_verification=False, yes=False, container_log_path=None,
+                             enable_oidc_issuer=None):
 
     # Prompt for confirmation for few parameters
     if azure_hybrid_benefit == "True":
@@ -1156,7 +1157,7 @@ def update_connected_cluster(cmd, client, resource_group_name, cluster_name, htt
     if proxy_params_unset and auto_upgrade is None and container_log_path is None and arm_properties_only_ahb_set:
         return patch_cc_response
 
-    if proxy_params_unset and not auto_upgrade and arm_properties_unset and not container_log_path:
+    if proxy_params_unset and not auto_upgrade and arm_properties_unset and not container_log_path and enable_oidc_issuer == None:
         raise RequiredArgumentMissingError(consts.No_Param_Error)
 
     if (https_proxy or http_proxy or no_proxy) and disable_proxy:
@@ -1237,6 +1238,8 @@ def update_connected_cluster(cmd, client, resource_group_name, cluster_name, htt
             telemetry.set_exception(exception=error_helm_get_values.decode("ascii"), fault_type=consts.Get_Helm_Values_Failed,
                                     summary='Error while doing helm get values azure-arc')
             raise CLIInternalError(str.format(consts.Update_Agent_Failure, error_helm_get_values.decode("ascii")))
+        
+    existing_values = get_all_helm_values(release_namespace, kube_config, kube_context, helm_client_location)
 
     cmd_helm_upgrade = [helm_client_location, "upgrade", "azure-arc", chart_path, "--namespace", release_namespace,
                         "-f", user_values_location, "--wait", "--output", "json"]
@@ -1260,6 +1263,16 @@ def update_connected_cluster(cmd, client, resource_group_name, cluster_name, htt
     if container_log_path is not None:
         cmd_helm_upgrade.extend(
             ["--set", "systemDefaultValues.fluent-bit.containerLogPath={}".format(container_log_path)])
+    if enable_oidc_issuer:
+        if existing_values.get('systemDefaultValues').get('azureArcAgents').get('autoUpdate') is False:
+            logger.warning("Please enable auto_upgrade to upgrade to latest agent version in order to enable the oidc issuer feature")
+        else:
+            cmd_helm_upgrade.extend(["--set", "global.enableOidcIssuer={}".format(True)])
+    else:
+        if existing_values.get('systemDefaultValues').get('azureArcAgents').get('autoUpdate') is False:
+            logger.warning("Please enable auto_upgrade to upgrade to latest agent version in order to explicitly disable the oidc issuer feature")
+        else:
+            cmd_helm_upgrade.extend(["--set", "global.enableOidcIssuer={}".format(False)])
     if kube_config:
         cmd_helm_upgrade.extend(["--kubeconfig", kube_config])
     if kube_context:

@@ -30,6 +30,10 @@ helps['connectedk8s connect'] = """
       text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --enable-private-link true --private-link-scope-resource-id pls/resource/arm/id
     - name: Onboard a connected kubernetes cluster with custom onboarding timeout.
       text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --onboarding-timeout 600
+    - name: Onboard a connected kubernetes cluster with oidc issuer creation for workload identity and the workload identity webhook enabled.
+      text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --enable-oidc-issuer --enable-workload-identity
+    - name: Onboard a connected kubernetes cluster with workload identity enabled and pass in a self hosted issuer url.
+      text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --enable-oidc-issuer --self-hosted-issuer aksissuerurl
 
 """
 
@@ -43,6 +47,10 @@ helps['connectedk8s update'] = """
       text: az connectedk8s update -g resourceGroupName -n connectedClusterName --disable-proxy
     - name: Disable auto-upgrade of agents
       text: az connectedk8s update -g resourceGroupName -n connectedClusterName --auto-upgrade false
+    - name: Onboard a connected kubernetes cluster with oidc issuer creation for workload identity and the workload identity webhook enabled.
+      text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --enable-oidc-issuer --enable-workload-identity
+    - name: Onboard a connected kubernetes cluster with workload identity enabled and pass in a self hosted issuer url.
+      text: az connectedk8s connect -g resourceGroupName -n connectedClusterName --enable-oidc-issuer --self-hosted-issuer aksissuerurl
 """
 
 helps['connectedk8s upgrade'] = """
