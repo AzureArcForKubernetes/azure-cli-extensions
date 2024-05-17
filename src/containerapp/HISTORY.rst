@@ -5,6 +5,37 @@ Release History
 upcoming
 ++++++
 
+0.3.51
+++++++
+* 'az containerapp up/create/update': Update Cloud Build code to use the simplified ARM calling pattern
+* 'az containerapp up/create/update': Wait longer time for logstream of Cloud Build to make sure the container start
+* 'az containerapp env java-component config-server-for-spring': Support create/update/show/delete Spring Cloud Config; deprecation of 'az containerapp env java-component spring-cloud-config'
+* 'az containerapp env java-component eureka-server-for-spring': Support create/update/show/delete Spring Cloud Eureka; deprecation of 'az containerapp env java-component spring-cloud-eureka'
+* 'az containerapp up': Fix InvalidResourceType error when cloud is not AzureCloud
+* 'az containerapp create/update': Support enable or disable Java metrics with --runtime and --enable-java-metrics
+* 'az containerapp env dotnet-component': Support create/show/list/delete for dotnet components
+* 'az containerapp env create/update': Support peer-to-peer traffic encryption with --enable-peer-to-peer-encryption
+* 'az containerapp update': Fix --scale-rule-tcp-concurrency for TCP scale rule
+* 'az containerapp compose create': Fix an issue where the environment's location is not resolved from --location
+* 'az containerapp up': Fix an issue about creating resource group automatically
+* 'az containerapp sessionpool': Support create/update/show/delete/list session pools
+* 'az containerapp update': Update container name to container app name for source to cloud builds
+* 'az containerapp session code-interpreter': Support execute/upload-file/list-files/show-file-content/show-file-metadata/delete-file for code interpreter sessions
+* 'az containerapp create/update': Support enable or disable Java agent with --runtime and --enable-java-agent
+* 'az containerapp java logger set': Support create/update java logger setting with --logger-name and --logger-level
+* 'az containerapp java logger delete': Support delete java logger setting with --logger-name and --all
+* 'az containerapp java logger show': Support display java logger setting with --logger-name and --all
+
+0.3.50
+++++++
+* 'az containerapp env telemetry data-dog show': Support show environment data dog configuration
+* 'az containerapp env telemetry app-insights show': Support show environment app insights configuration
+* 'az containerapp env telemetry otlp add': Support add environment otlp configuration with --otlp-name, --endpoint, --insecure, --headers, --enable-open-telemetry-traces, --enable-open-telemetry-logs and --enable-open-telemetry-metrics
+* 'az containerapp env telemetry otlp update': Support update environment otlp configuration with --otlp-name, --endpoint, --insecure, --headers, --enable-open-telemetry-traces, --enable-open-telemetry-logs and --enable-open-telemetry-metrics
+* 'az containerapp env telemetry otlp remove': Support remove environment otlp configuration with --otlp-name
+* 'az containerapp env telemetry otlp show': Support show environment otlp configuration with --otlp-name
+* 'az containerapp env telemetry otlp list': Support show environment otlp configurations
+
 0.3.49
 ++++++
 * 'az containerapp env telemetry data-dog set': Support update environment data dog configuration with --site, --key, --enable-open-telemetry-traces and --enable-open-telemetry-metrics

@@ -186,6 +186,11 @@ class TargetHandler:
         self.aad_username = "aad_" + connection_name
         self.connection_name = connection_name
         self.skip_prompt = skip_prompt
+        self.endpoint = ""
+        self.user_object_id = ""
+        self.identity_name = ""
+        self.identity_client_id = ""
+        self.identity_object_id = ""
 
     def enable_target_aad_auth(self):
         return
@@ -252,6 +257,7 @@ class MysqlFlexibleHandler(TargetHandler):
         target_segments = parse_resource_id(target_id)
         self.server = target_segments.get('name')
         self.dbname = target_segments.get('child_name_1')
+        self.admin_username = self.login_username
 
     def check_db_existence(self):
         try:
@@ -638,6 +644,7 @@ class PostgresFlexHandler(TargetHandler):
         self.host = self.db_server + self.endpoint
         self.dbname = target_segments.get('child_name_1')
         self.ip = ""
+        self.admin_username = self.login_username
 
     def check_db_existence(self):
         try:
