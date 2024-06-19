@@ -99,7 +99,7 @@ class EntraWorkloadIAM(DefaultExtension):
         join_token = config_settings.pop(CONFIG_SETTINGS_USER_JOIN_TOKEN, None)
         if join_token is not None:
             raise InvalidArgumentValueError(
-                "The join token must be provided with --config-protected-settings, not "
+                "'joinToken' must be provided with --config-protected-settings, not "
                 "--configuration-settings.")
 
         join_token = config_protected_settings.pop(CONFIG_SETTINGS_USER_JOIN_TOKEN, None)
@@ -117,7 +117,7 @@ class EntraWorkloadIAM(DefaultExtension):
         if join_token is None:
             if local_authority is None:
                 raise InvalidArgumentValueError(
-                    "Invalid configuration settings. Either a join token or a local authority name "
+                    "Invalid configuration settings. One of 'joinToken' or 'localAuthority' "
                     "must be provided.")
             join_token = self.get_join_token(trust_domain, local_authority)
         else:
@@ -132,8 +132,8 @@ class EntraWorkloadIAM(DefaultExtension):
         configuration_protected_settings[CONFIG_SETTINGS_HELM_JOIN_TOKEN] = join_token
 
         logger.debug("Configuration settings: %s" % str(configuration_settings))
-        logger.debug("Configuration protected settings value for Helm: %s" %
-                     str(configuration_protected_settings))
+        logger.debug("Configuration protected settings keys: %s" %
+                     str(configuration_protected_settings.keys()))
 
         create_identity = True
         extension = Extension(
