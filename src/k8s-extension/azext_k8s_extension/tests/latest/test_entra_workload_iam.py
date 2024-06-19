@@ -166,7 +166,7 @@ class TestEntraWorkloadIAM(unittest.TestCase):
                 plan_product=None)
 
         self.assertEqual(str(context.exception),
-            "The join token must be provided with --config-protected-settings, not "
+            "'joinToken' must be provided with --config-protected-settings, not "
             "--configuration-settings.")
 
     def test_workload_iam_create_with_join_token_and_no_local_authority_success(self):
@@ -294,7 +294,7 @@ class TestEntraWorkloadIAM(unittest.TestCase):
 
         str_settings = str(settings)
         self.assertEqual(str(context.exception),
-                f"Invalid configuration settings. Either a join token or a local authority name "
+                f"Invalid configuration settings. One of 'joinToken' or 'localAuthority' "
                 "must be provided.")
 
         # Missing trust domain
