@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long, broad-except, logging-format-interpolation, too-many-public-methods
 
 import uuid
 from copy import deepcopy
@@ -127,6 +128,7 @@ class SessionPoolPreviewDecorator(BaseResource):
     def get_argument_registry_user(self):
         return self.get_param("registry_user")
 
+    # pylint: disable=no-self-use
     def get_environment_client(self):
         return ManagedEnvironmentClient
 
@@ -171,7 +173,8 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
 
             container_def = self.set_up_container()
             ingress_def = self.set_up_ingress()
-            registry_def = self.set_up_registry_auth_configuration(secrets_def)
+            registry_def, updated_secret_def = self.set_up_registry_auth_configuration(secrets_def)
+            secrets_def = updated_secret_def
 
             customer_container_template["containers"] = [container_def]
             customer_container_template["ingress"] = ingress_def
@@ -218,7 +221,7 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
 
     def set_up_container(self):
         container_def = ContainerModel
-        container_def["name"] = self.get_argument_container_name() if self.get_argument_container_name() else self.get_argument_name()
+        container_def["name"] = self.get_argument_container_name() if self.get_argument_container_name() else self.get_argument_name().lower()
         container_def["image"] = self.get_argument_image() if self.get_argument_image() else HELLO_WORLD_IMAGE
         if self.get_argument_env_vars() is not None:
             container_def["env"] = parse_env_var_flags(self.get_argument_env_vars())
@@ -239,7 +242,7 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
         registry_def = None
         if self.get_argument_registry_server() is not None:
             registry_def = {}
-            registry_def["registryServer"] = self.get_argument_registry_server()
+            registry_def["server"] = self.get_argument_registry_server()
             registry_def["username"] = self.get_argument_registry_user()
 
             if secrets_def is None:
@@ -248,7 +251,7 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
                                                                                       self.get_argument_registry_user(),
                                                                                       self.get_argument_registry_server(),
                                                                                       self.get_argument_registry_pass())
-        return registry_def
+        return registry_def, secrets_def
 
     def set_up_ingress(self):
         if self.get_argument_target_port() is None:
@@ -263,8 +266,7 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
         managed_env_name = parsed_managed_env['name']
         managed_env_rg = parsed_managed_env['resource_group']
         try:
-            managed_env_info = self.get_environment_client().show(cmd=self.cmd, resource_group_name=managed_env_rg,
-                                                                  name=managed_env_name)
+            self.get_environment_client().show(cmd=self.cmd, resource_group_name=managed_env_rg, name=managed_env_name)
         except Exception as e:
             handle_non_404_status_code_exception(e)
 
@@ -302,8 +304,8 @@ class SessionPoolCreateDecorator(SessionPoolPreviewDecorator):
                     if error_code == "RoleAssignmentExists":
                         pass
                 else:
-                    raise Exception(e)
-            except:
+                    raise Exception(e)  # pylint: disable=broad-exception-raised
+            except:  # pylint: disable=bare-except
                 logger.warning("Could not add user as session pool creator role to the session pool, please follow the docs https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter?tabs=azure-cli#authentication to add the needed roll for authentication")
                 logger.warning(e)
 
@@ -415,17 +417,31 @@ class SessionPoolUpdateDecorator(SessionPoolPreviewDecorator):
 
     def set_up_registry_auth_configuration(self, secrets_def, customer_container_template):
         if self.get_argument_registry_server() is not None:
-            safe_set(customer_container_template, "registryCredentials", "registryServer", value=self.get_argument_registry_server())
+            safe_set(customer_container_template, "registryCredentials", "server", value=self.get_argument_registry_server())
         if self.get_argument_registry_user() is not None:
             safe_set(customer_container_template, "registryCredentials", "username", value=self.get_argument_registry_user())
         if secrets_def is None:
             secrets_def = []
         if self.get_argument_registry_pass() is not None:
+            original_secrets = self.existing_pool_def["properties"]["secrets"]
+            original_secrets_names = []
+            for secret in original_secrets:
+                original_secrets_names.append(secret["name"])
             safe_set(customer_container_template, "registryCredentials", "passwordSecretRef",
                      value=store_as_secret_and_return_secret_ref(secrets_def,
-                                                                 self.get_argument_registry_user(),
-                                                                 self.get_argument_registry_server(),
+                                                                 customer_container_template["registryCredentials"]["username"],
+                                                                 customer_container_template["registryCredentials"]["server"],
                                                                  self.get_argument_registry_pass()))
+            new_secret_names = []
+            for secret in secrets_def:
+                new_secret_names.append(secret["name"])
+            deleted_secrets = set(original_secrets_names).difference(new_secret_names)
+            if len(deleted_secrets) > 0:
+                logger.warning("the following secrets are going to be deleted: " + str(deleted_secrets) + " If this is not the intended behavior, please add the missing secrets into the --secrets flag.")  # pylint: disable=logging-not-lazy
+
+            # Update the secrets to the patch payload.
+            if len(secrets_def) > 0:
+                safe_set(self.session_pool_def, "properties", "secrets", value=secrets_def)
 
     def set_up_ingress(self, customer_container_template):
         if self.get_argument_target_port() is not None:
