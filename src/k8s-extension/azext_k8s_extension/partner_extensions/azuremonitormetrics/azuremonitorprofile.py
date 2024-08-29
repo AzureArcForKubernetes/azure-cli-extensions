@@ -65,7 +65,7 @@ def ensure_azure_monitor_profile_prerequisites(
         cluster_type
 ):
     cloud_name = cmd.cli_ctx.cloud.name
-    if cloud_name.lower() == "ussec" or cloud_name.lower() == "usdod":
+    if cloud_name.lower() == "ussec" or cloud_name.lower() == "usnat" or cloud_name.lower() == "usdod":
         raise AzCLIError(f"{cloud_name} does not support Azure Managed Prometheus yet.")
     # Do RP registrations if required
     rp_registrations(cmd, cluster_subscription)
