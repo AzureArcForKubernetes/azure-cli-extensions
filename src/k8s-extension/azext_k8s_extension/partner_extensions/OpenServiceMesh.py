@@ -52,8 +52,8 @@ class OpenServiceMesh(DefaultExtension):
         # NOTE-2: Return a valid Extension object, Instance name and flag for Identity
         create_identity = True
 
-        if cluster_type == "connectedClusters":
-            _validate_tested_distro(cmd, resource_group_name, cluster_name, version, release_train)
+        # if cluster_type == "connectedClusters":
+        #     _validate_tested_distro(cmd, resource_group_name, cluster_name, version, release_train)
 
         extension = Extension(
             extension_type=extension_type,
@@ -69,78 +69,78 @@ class OpenServiceMesh(DefaultExtension):
         return extension, name, create_identity
 
 
-def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version, extension_release_train):
+# def _validate_tested_distro(cmd, cluster_resource_group_name, cluster_name, extension_version, extension_release_train):
 
-    field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
-        'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
+#     field_unavailable_error = '\"testedDistros\" field unavailable for version {0} of microsoft.openservicemesh, ' \
+#         'cannot determine if this Kubernetes distribution has been properly tested'.format(extension_version)
 
-    logger.debug('Input version: %s', extension_version)
+#     logger.debug('Input version: %s', extension_version)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    resources = cf_resources(cmd.cli_ctx, subscription_id)
+#     subscription_id = get_subscription_id(cmd.cli_ctx)
+#     resources = cf_resources(cmd.cli_ctx, subscription_id)
 
-    cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes' \
-        '/connectedClusters/{2}'.format(subscription_id, cluster_resource_group_name, cluster_name)
+#     cluster_resource_id = '/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Kubernetes' \
+#         '/connectedClusters/{2}'.format(subscription_id, cluster_resource_group_name, cluster_name)
 
-    resource = resources.get_by_id(cluster_resource_id, '2021-10-01')
-    cluster_location = resource.location
-    cluster_distro = resource.properties['distribution'].lower()
+#     resource = resources.get_by_id(cluster_resource_id, '2021-10-01')
+#     cluster_location = resource.location
+#     cluster_distro = resource.properties['distribution'].lower()
 
-    if extension_version is None and extension_release_train != "staging":
-        if str(cluster_location) == "eastus2euap":
-            ring = "canary"
-        else:
-            ring = "batch1"
+#     if extension_version is None and extension_release_train != "staging":
+#         if str(cluster_location) == "eastus2euap":
+#             ring = "canary"
+#         else:
+#             ring = "batch1"
 
-        if extension_release_train is None:
-            extension_release_train = "stable"
+#         if extension_release_train is None:
+#             extension_release_train = "stable"
 
-        req_url = 'https://mcr.microsoft.com/v2/oss/openservicemesh/{0}/{1}/osm-arc/tags/list'\
-            .format(ring, extension_release_train)
-        req = requests.get(url=req_url)
-        req_json = json.loads(req.text)
-        tags = req_json['tags']
+#         req_url = 'https://mcr.microsoft.com/v2/oss/openservicemesh/{0}/{1}/osm-arc/tags/list'\
+#             .format(ring, extension_release_train)
+#         req = requests.get(url=req_url)
+#         req_json = json.loads(req.text)
+#         tags = req_json['tags']
 
-        extension_version = tags[len(tags) - 1]
+#         extension_version = tags[len(tags) - 1]
 
-    ext_str = str(extension_version)
+#     ext_str = str(extension_version)
 
-    # Don't parse version for test and CI tags
-    if "pr" in ext_str or "release" in ext_str or "beta" in ext_str:
-        return
+#     # Don't parse version for test and CI tags
+#     if "pr" in ext_str or "release" in ext_str or "beta" in ext_str:
+#         return
 
-    if version.parse(ext_str) <= version.parse("0.8.3"):
-        logger.warning(field_unavailable_error)
-        return
+#     if version.parse(ext_str) <= version.parse("0.8.3"):
+#         logger.warning(field_unavailable_error)
+#         return
 
-    if cluster_distro == "general":
-        logger.warning('Unable to determine if distro has been tested for microsoft.openservicemesh, '
-                       'kubernetes distro: \"general\"')
-        return
+#     if cluster_distro == "general":
+#         logger.warning('Unable to determine if distro has been tested for microsoft.openservicemesh, '
+#                        'kubernetes distro: \"general\"')
+#         return
 
-    tested_distros = _get_tested_distros(extension_version)
+#     tested_distros = _get_tested_distros(extension_version)
 
-    if tested_distros is None:
-        logger.warning(field_unavailable_error)
-    elif cluster_distro not in tested_distros.split():
-        logger.warning('Untested kubernetes distro for microsoft.openservicemesh, Kubernetes distro is %s',
-                       cluster_distro)
+#     if tested_distros is None:
+#         logger.warning(field_unavailable_error)
+#     elif cluster_distro not in tested_distros.split():
+#         logger.warning('Untested kubernetes distro for microsoft.openservicemesh, Kubernetes distro is %s',
+#                        cluster_distro)
 
 
-def _get_tested_distros(chart_version):
+# def _get_tested_distros(chart_version):
 
-    chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/' \
-        'v{0}/charts/osm-arc/values.yaml'.format(chart_version)
-    chart_request = requests.get(url=chart_url)
+#     chart_url = 'https://raw.githubusercontent.com/Azure/osm-azure/' \
+#         'v{0}/charts/osm-arc/values.yaml'.format(chart_version)
+#     chart_request = requests.get(url=chart_url)
 
-    if chart_request.status_code == 404:
-        raise InvalidArgumentValueError(
-            "Invalid version '{}' for microsoft.openservicemesh".format(chart_version)
-        )
+#     if chart_request.status_code == 404:
+#         raise InvalidArgumentValueError(
+#             "Invalid version '{}' for microsoft.openservicemesh".format(chart_version)
+#         )
 
-    values_yaml = yaml.load(chart_request.text, Loader=yaml.FullLoader)
+#     values_yaml = yaml.load(chart_request.text, Loader=yaml.FullLoader)
 
-    try:
-        return values_yaml['OpenServiceMesh']['testedDistros']
-    except KeyError:
-        return None
+#     try:
+#         return values_yaml['OpenServiceMesh']['testedDistros']
+#     except KeyError:
+#         return None
