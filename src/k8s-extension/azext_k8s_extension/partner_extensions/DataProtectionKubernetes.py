@@ -106,7 +106,7 @@ class DataProtectionKubernetes(DefaultExtension):
         configuration_settings[self.TENANT_ID] = tenant_id
 
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is None:
-            logger.warning("useAAD flag is not specified. Setting it to 'true'. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
+            logger.warning("useAAD flag is not specified. Setting it to 'true'. Please provide extension MSI Storage Blob Data Contributor role on the storage account.")
             configuration_settings[self.BACKUP_STORAGE_ACCOUNT_USE_AAD] = "true"
 
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
@@ -149,13 +149,14 @@ class DataProtectionKubernetes(DefaultExtension):
             self.__validate_and_map_config(configuration_settings, validate_bsl=bsl_specified)
             if bsl_specified:
                 self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
+        
         # this step is for brownfield migrating to AAD
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is not None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true":
-            logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role to the storage account.")
+            logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role on the storage account.")
 
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
-            # SA details provided in user inputs, but did not provide SA URI.
-            logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of provided storage account")
+            logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of provided storage account.")
+            # SA details provided in user input, but did not provide SA URI.
             if bsl_specified:
                 configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, configuration_settings)
                 logger.warning(f"storageAccountURI: {configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI]}")
@@ -189,14 +190,14 @@ class DataProtectionKubernetes(DefaultExtension):
         for key in input_configuration_settings:
             _key = key.lower()
             if _key in self.configuration_mapping:
-                configuration_settings[self.configuration_mapping[_key]] = configuration_settings.pop(key)
+                configuration_settings[self.configuration_mapping[_key]] = configuration_settings.pop(key).strip()
             else:
                 configuration_settings.pop(key)
                 logger.warning(f"Ignoring unrecognized configuration setting: {key}")
 
     def __validate_backup_storage_account(self, cli_ctx, resource_group_name, cluster_name, configuration_settings):
         """Validations performed on the backup storage account
-           - Existance of the storage account
+           - Existence of the storage account
            - Cluster and storage account are in the same location
         """
         storage_account = self.__get_storage_account(cli_ctx, configuration_settings)
