@@ -149,8 +149,8 @@ class DataProtectionKubernetes(DefaultExtension):
             self.__validate_and_map_config(configuration_settings, validate_bsl=bsl_specified)
             if bsl_specified:
                 self.__validate_backup_storage_account(cmd.cli_ctx, resource_group_name, cluster_name, configuration_settings)
-        
-        # this step is for brownfield migrating to AAD
+
+        # This step is for brownfield migrating to AAD
         if configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD) is not None and configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_USE_AAD).lower() == "true":
             logger.warning("useAAD flag is set to true. Please provide extension MSI Storage Blob Data Contributor role on the storage account.")
 
