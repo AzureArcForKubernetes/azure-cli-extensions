@@ -169,7 +169,7 @@ class DataProtectionKubernetes(DefaultExtension):
                 logger.warning(f"storageAccountURI: {configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI]}")
             # SA details not provided in user input, SA Uri not provided in user input, and also not populated in the original extension, we populate it.
             elif not bsl_specified and original_extension.configuration_settings.get(self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI) is None:
-                logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of the storage account provided during creation.")
+                logger.warning("storageAccountURI is not populated. Setting it to the storage account URI of the storage account provided during extension installation.")
                 configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI] = self.__get_storage_account_uri(cmd.cli_ctx, original_extension.configuration_settings)
                 logger.warning(f"storageAccountURI: {configuration_settings[self.BACKUP_STORAGE_ACCOUNT_STORAGE_ACCOUNT_URI]}")
 
