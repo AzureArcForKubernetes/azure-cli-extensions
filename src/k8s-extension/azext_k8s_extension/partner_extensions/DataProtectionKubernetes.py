@@ -9,7 +9,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 
 from .DefaultExtension import DefaultExtension
-from .._client_factory import cf_storage, cf_managed_clusters
+from .._client_factory import cf_managed_clusters
 from ..vendored_sdks.models import (Extension, PatchExtension, Scope, ScopeCluster)
 
 logger = get_logger(__name__)
