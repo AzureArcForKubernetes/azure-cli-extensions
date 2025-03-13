@@ -9,7 +9,11 @@ import os
 import re
 from setuptools import setup, find_packages
 
-VERSION = '0.5.2'
+# Inspired by https://github.com/Azure/azure-sdk-for-python/blob/master/azure-mgmt-cdn/setup.py#L45
+extension_path = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(extension_path, 'azext_alias', 'version.py'), 'r') as version_file:
+    VERSION = re.search(r'^VERSION\s*=\s*[\'"]([^\'"]*)[\'"]',
+                        version_file.read(), re.MULTILINE).group(1)
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
