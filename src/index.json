@@ -62860,51 +62860,6 @@
                 "sha256Digest": "14c18768c02ee9c370ac7eed0f23206eee7d344a10382a3083b17b5e1848cfcd"
             }
         ],
-        "logz": [
-            {
-                "downloadUrl": "https://azcliprod.blob.core.windows.net/cli-extensions/logz-0.1.0-py3-none-any.whl",
-                "filename": "logz-0.1.0-py3-none-any.whl",
-                "metadata": {
-                    "azext.isExperimental": true,
-                    "azext.minCliCoreVersion": "2.15.0",
-                    "classifiers": [
-                        "Development Status :: 4 - Beta",
-                        "Intended Audience :: Developers",
-                        "Intended Audience :: System Administrators",
-                        "Programming Language :: Python",
-                        "Programming Language :: Python :: 3",
-                        "Programming Language :: Python :: 3.6",
-                        "Programming Language :: Python :: 3.7",
-                        "Programming Language :: Python :: 3.8",
-                        "License :: OSI Approved :: MIT License"
-                    ],
-                    "extensions": {
-                        "python.details": {
-                            "contacts": [
-                                {
-                                    "email": "azpycli@microsoft.com",
-                                    "name": "Microsoft Corporation",
-                                    "role": "author"
-                                }
-                            ],
-                            "document_names": {
-                                "description": "DESCRIPTION.rst"
-                            },
-                            "project_urls": {
-                                "Home": "https://github.com/Azure/azure-cli-extensions/tree/main/src/logz"
-                            }
-                        }
-                    },
-                    "generator": "bdist_wheel (0.30.0)",
-                    "license": "MIT",
-                    "metadata_version": "2.0",
-                    "name": "logz",
-                    "summary": "Microsoft Azure Command-Line Tools MicrosoftLogz Extension",
-                    "version": "0.1.0"
-                },
-                "sha256Digest": "71a0d0ec3f728ff67c1cd7d183ff0f04da6daeda82907b843bbf5628b61bc11b"
-            }
-        ],
         "maintenance": [
             {
                 "downloadUrl": "https://mrpcliextensionrelease.blob.core.windows.net/cliextension/maintenance-1.0.1-py2.py3-none-any.whl",
@@ -92420,51 +92375,6 @@
                     "version": "2.0.1"
                 },
                 "sha256Digest": "3f070154f839464aa24b54990d87d2dba99d6da60ec3ef314a74ba22c268fec4"
-            }
-        ],
-        "swiftlet": [
-            {
-                "downloadUrl": "https://azcliprod.blob.core.windows.net/cli-extensions/swiftlet-0.1.0-py3-none-any.whl",
-                "filename": "swiftlet-0.1.0-py3-none-any.whl",
-                "metadata": {
-                    "azext.isExperimental": true,
-                    "azext.minCliCoreVersion": "2.3.1",
-                    "classifiers": [
-                        "Development Status :: 4 - Beta",
-                        "Intended Audience :: Developers",
-                        "Intended Audience :: System Administrators",
-                        "Programming Language :: Python",
-                        "Programming Language :: Python :: 3",
-                        "Programming Language :: Python :: 3.6",
-                        "Programming Language :: Python :: 3.7",
-                        "Programming Language :: Python :: 3.8",
-                        "License :: OSI Approved :: MIT License"
-                    ],
-                    "extensions": {
-                        "python.details": {
-                            "contacts": [
-                                {
-                                    "email": "azpycli@microsoft.com",
-                                    "name": "Microsoft Corporation",
-                                    "role": "author"
-                                }
-                            ],
-                            "document_names": {
-                                "description": "DESCRIPTION.rst"
-                            },
-                            "project_urls": {
-                                "Home": "https://github.com/Azure/azure-cli-extensions/tree/main/src/swiftlet"
-                            }
-                        }
-                    },
-                    "generator": "bdist_wheel (0.30.0)",
-                    "license": "MIT",
-                    "metadata_version": "2.0",
-                    "name": "swiftlet",
-                    "summary": "Microsoft Azure Command-Line Tools SwiftletManagementClient Extension",
-                    "version": "0.1.0"
-                },
-                "sha256Digest": "870aa3c8022cba0e3f0838dacf2b94236d88a844c675d3a04f487562f40380ba"
             }
         ],
         "terraform": [
