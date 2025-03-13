@@ -5,7 +5,6 @@
 # --------------------------------------------------------------------------
 # pylint: disable=line-too-long
 # pylint: disable=unused-import
-# WARNING: This test only works when run in the devbox.
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
