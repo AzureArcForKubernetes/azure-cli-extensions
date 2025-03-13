@@ -16,7 +16,7 @@ except ImportError:
 
 # TODO: Confirm this is the right version number you want and it matches your
 # HISTORY.rst entry.
-VERSION = '1.27.0'
+VERSION = '1.26.1'
 
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -33,9 +33,7 @@ CLASSIFIERS = [
 ]
 
 # TODO: Add any additional SDK dependencies here
-DEPENDENCIES = [
-    'jinja2'
-]
+DEPENDENCIES = []
 
 with open('README.md', 'r', encoding='utf-8') as f:
     README = f.read()
@@ -55,8 +53,5 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(),
     install_requires=DEPENDENCIES,
-    package_data={
-        'azext_spring': ['azext_metadata.json'],
-        'azext_spring.migration.converter': ['templates/*.j2']
-    },
+    package_data={'azext_spring': ['azext_metadata.json']},
 )
