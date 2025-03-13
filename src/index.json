@@ -61949,59 +61949,6 @@
                     "version": "1.6.0"
                 },
                 "sha256Digest": "0b26bd5db93acc7e579fb3a78a8a40a5397b2b689f52432ae8c4c8da9ef14adb"
-            },
-            {
-                "downloadUrl": "https://azcliprod.blob.core.windows.net/cli-extensions/load-1.7.0-py3-none-any.whl",
-                "filename": "load-1.7.0-py3-none-any.whl",
-                "metadata": {
-                    "azext.minCliCoreVersion": "2.66.0",
-                    "classifiers": [
-                        "Development Status :: 4 - Beta",
-                        "Intended Audience :: Developers",
-                        "Intended Audience :: System Administrators",
-                        "Programming Language :: Python",
-                        "Programming Language :: Python :: 3",
-                        "Programming Language :: Python :: 3.7",
-                        "Programming Language :: Python :: 3.8",
-                        "Programming Language :: Python :: 3.9",
-                        "License :: OSI Approved :: MIT License"
-                    ],
-                    "extensions": {
-                        "python.details": {
-                            "contacts": [
-                                {
-                                    "email": "azpycli@microsoft.com",
-                                    "name": "Microsoft Corporation",
-                                    "role": "author"
-                                }
-                            ],
-                            "document_names": {
-                                "description": "DESCRIPTION.rst"
-                            },
-                            "project_urls": {
-                                "Home": "https://github.com/Azure/azure-cli-extensions/tree/main/src/load"
-                            }
-                        }
-                    },
-                    "extras": [],
-                    "generator": "bdist_wheel (0.30.0)",
-                    "license": "MIT",
-                    "metadata_version": "2.0",
-                    "name": "load",
-                    "run_requires": [
-                        {
-                            "requires": [
-                                "azure-core",
-                                "azure-core",
-                                "pyyaml",
-                                "pyyaml"
-                            ]
-                        }
-                    ],
-                    "summary": "Microsoft Azure Command-Line Tools Load Testing Extension.",
-                    "version": "1.7.0"
-                },
-                "sha256Digest": "9588c2dfc98962192fa4984af126b1f01690f3f3c7685c6a75689460b5a91cd8"
             }
         ],
         "log-analytics": [
