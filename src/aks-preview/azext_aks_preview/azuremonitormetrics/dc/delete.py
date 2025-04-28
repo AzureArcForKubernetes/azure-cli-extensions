@@ -24,7 +24,7 @@ def get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, 
         from azure.cli.core.util import send_raw_request
         cluster_resource_id = (
             f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/"
-            f"Microsoft.ContainerService/managedClusters/{cluster_name}"
+            f"Microsoft.Kubernetes/connectedClusters/{cluster_name}"
         )
         armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
         association_url = (
