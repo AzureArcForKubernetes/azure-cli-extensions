@@ -39,5 +39,5 @@ def delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         cmd,
         cluster_subscription,
         cluster_resource_group_name,
-        truncate_rule_group_name("UXRecordingRulesRuleGroup - {0}".format(cluster_name))
+        "UXRecordingRulesRuleGroup - {0}".format(cluster_name)
     )

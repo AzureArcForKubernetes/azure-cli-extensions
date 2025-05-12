@@ -5,7 +5,6 @@
 import json
 from knack.util import CLIError
 from ..constants import ALERTS_API, RULES_API
-from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.common import truncate_rule_group_name
 
 
 # pylint: disable=line-too-long
@@ -71,7 +70,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
 
         enable_rules = not (is_windows_rule and not enable_windows_recording_rules)
 
-        rule_group_name = truncate_rule_group_name(f"{rule_template['name']}-{cluster_name}")
+        rule_group_name = f"{rule_template['name']}-{cluster_name}"
         rule_group_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{rule_group_name}"
         url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{rule_group_id}?api-version={RULES_API}"
 
