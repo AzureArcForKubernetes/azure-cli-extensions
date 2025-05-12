@@ -88,8 +88,11 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
         rule_name = rule_template["name"]
         is_windows_rule = "win" in rule_name.lower()
 
-        if is_windows_rule and not enable_windows_recording_rules:
-            continue
+        # Determine whether the rule group should be enabled:
+        # - If the rule is a Windows rule AND windows recording rules are NOT enabled → disable the rule group (enable_rules = False)
+        # - If the rule is a Windows rule AND windows recording rules are enabled → enable the rule group (enable_rules = True)
+        # - If the rule is NOT a Windows rule (i.e., a Linux or general rule) → always enable the rule group (enable_rules = True)
+        enable_rules = not (is_windows_rule and not enable_windows_recording_rules)
 
         rule_group_name = truncate_rule_group_name(f"{rule_name}-{cluster_name}")
         rule_group_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{rule_group_name}"
@@ -105,7 +108,7 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
             cluster_name,
             default_rules_template,
             url,
-            True,
+            enable_rules,
             index
         )
 
