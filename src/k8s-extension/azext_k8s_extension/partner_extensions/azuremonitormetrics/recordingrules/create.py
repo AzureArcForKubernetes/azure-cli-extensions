@@ -18,6 +18,7 @@ def get_recording_rules_template(cmd, azure_monitor_workspace_resource_id):
 
     filtered_templates = [
         template for template in data.get('value', [])
+        # pylint: disable=line-too-long
         if template.get("properties", {}).get("alertRuleType", "").lower() == "microsoft.alertsmanagement/prometheusrulegroups" and isinstance(template.get("properties", {}).get("rulesArmTemplate", {}).get("resources"), list) and all(
             isinstance(rule, dict) and "record" in rule and "expression" in rule
             for resource in template["properties"]["rulesArmTemplate"]["resources"]
