@@ -59,17 +59,10 @@ def put_rules(cmd, default_rule_group_id, default_rule_group_name, mac_region, a
 
 
 # pylint: disable=line-too-long
-def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region, raw_parameters):
+def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, mac_region):
     default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
 
-    enable_windows_recording_rules = raw_parameters.get("enable_windows_recording_rules", False)
-
     for index, rule_template in enumerate(default_rules_template):
-        rule_name = rule_template["name"]
-        is_windows_rule = "win" in rule_name.lower()
-
-        enable_rules = not (is_windows_rule and not enable_windows_recording_rules)
-
         rule_group_name = f"{rule_template['name']}-{cluster_name}"
         rule_group_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{rule_group_name}"
         url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{rule_group_id}?api-version={RULES_API}"
@@ -83,6 +76,6 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
             cluster_name,
             default_rules_template,
             url,
-            enable_rules,
+            True,
             index
         )
