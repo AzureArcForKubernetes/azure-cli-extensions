@@ -63,6 +63,13 @@ def create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster
     default_rules_template = get_recording_rules_template(cmd, azure_monitor_workspace_resource_id)
 
     for index, rule_template in enumerate(default_rules_template):
+        rule_name = rule_template["name"]
+        is_windows_rule = "win" in rule_name.lower()
+
+        # Skip any recording rules as ARC metrics extension doesn't have windows support
+        if is_windows_rule:
+            continue
+
         rule_group_name = f"{rule_template['name']}-{cluster_name}"
         rule_group_id = f"/subscriptions/{cluster_subscription}/resourceGroups/{cluster_resource_group_name}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{rule_group_name}"
         url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{rule_group_id}?api-version={RULES_API}"
